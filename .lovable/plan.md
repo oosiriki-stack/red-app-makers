@@ -1,68 +1,64 @@
 
 
-# Phase 2 — Polissage et Ameliorations
+# Phase 3 — Finalisation et Coherence
 
-L'ensemble des pages de la maquette (Dashboard, Mentions, Alertes, Concurrence, Assistant IA, Rapports, Parametres, Tarification, Login, Register, MFA, Install, 404) est en place avec le theme rouge et la configuration PWA.
-
-La phase suivante vise a ameliorer l'experience utilisateur et la qualite visuelle globale.
+Phase 2 a ajoute les animations sur le Dashboard et l'Assistant IA, la jauge radiale, la heatmap, les mentions recentes et les toasts. Cette phase finalise l'application en appliquant ces ameliorations a toutes les pages et en ajoutant les derniers details manquants.
 
 ---
 
-## 1. Animations et transitions (framer-motion)
+## 1. AnimatedPage sur toutes les pages restantes
 
-- Ajouter des animations d'entree sur les cartes du Dashboard (fade-in + slide-up echelonne)
-- Animer les transitions entre pages via un composant wrapper `AnimatedPage`
-- Ajouter des micro-interactions sur les boutons et les badges (hover scale)
-- Animer le compteur du score de reputation (animation de comptage progressif)
+Les pages suivantes n'ont pas encore le wrapper `AnimatedPage` :
+- Mentions, Alertes, Concurrence, Rapports, Parametres, Tarification, Install
 
-## 2. Ameliorations du Dashboard
+Chaque page sera wrappee avec `<AnimatedPage>` pour des transitions fluides.
 
-- Ajouter une heatmap geographique simplifiee (grille de regions avec intensite de couleur) comme prevu dans le plan initial
-- Ajouter une section "Dernieres mentions" avec les 3 mentions les plus recentes directement sur le dashboard
-- Ameliorer la jauge de score avec un composant circulaire anime (gauge radiale)
+## 2. Transitions de pages avec AnimatePresence
 
-## 3. Optimisation responsive mobile
+- Modifier `AppLayout.tsx` pour wrapper `<Outlet />` avec `AnimatePresence`
+- Utiliser `useLocation()` comme cle pour declencher les animations d'entree/sortie entre les routes
 
-- Adapter les grilles de cartes pour mobile (1 colonne)
-- Rendre les graphiques Recharts scrollables horizontalement sur petits ecrans
-- Adapter les filtres des mentions en mode empile sur mobile
-- Ameliorer la page Tarification en mode carousel horizontal sur mobile
-- Tester et ajuster le header (recherche masquee sur mobile avec bouton toggle)
+## 3. Indicateurs de chargement Skeleton
 
-## 4. Ameliorations de la page 404
+- Ajouter un composant `DashboardSkeleton` qui s'affiche brievement au chargement du Dashboard (simulation avec un delai de 800ms)
+- Utiliser le composant `Skeleton` de shadcn/ui deja present pour les cartes, graphiques et jauges
 
-- Personnaliser avec le branding @robase (logo, couleurs rouge, illustration)
-- Ajouter un message en francais et un bouton de retour stylise
+## 4. Navigation sidebar amelioree
 
-## 5. Details de finition
+- Renforcer l'indicateur actif dans la sidebar : ajouter une bordure laterale rouge (left border) sur l'element actif
+- Augmenter le contraste du fond actif
 
-- Ajouter un indicateur de chargement squelette (skeleton) sur les cartes
-- Ajouter des tooltips informatifs sur les statistiques du dashboard
-- Ajouter un toast de confirmation quand l'utilisateur clique "Approuver" dans l'assistant IA ou "Copier"
-- Ameliorer la navigation : indicateur actif plus visible dans la sidebar
+## 5. Micro-interactions supplementaires
+
+- Ajouter un effet `hover:scale` subtil sur les cartes du dashboard et les cartes d'influenceurs
+- Ajouter un effet de transition sur les badges de sentiment au survol
+
+## 6. Toast sur la page Rapports
+
+- Ajouter un toast de confirmation au clic sur "Telecharger le dernier" et les boutons de telechargement individuels
+
+## 7. Responsive mobile — corrections finales
+
+- Page Tarification : empilement vertical des cartes sur mobile (deja en `md:grid-cols-3`, verifier le rendu)
+- Page Concurrence : rendre le tableau scrollable horizontalement sur mobile
+- Page Rapports : adapter le layout des cards de configuration sur mobile
 
 ---
 
 ## Details techniques
 
-- **framer-motion** : deja installe, utilisation de `motion.div` avec `initial/animate/exit` et `AnimatePresence` pour les transitions
-- **Gauge radiale** : composant SVG custom avec animation CSS ou framer-motion
-- **Heatmap** : grille CSS simple avec des intensites de couleur basees sur les donnees fictives (pas de librairie de carte)
-- **Skeleton** : utilisation du composant `Skeleton` de shadcn/ui deja present
-- **Toasts** : utilisation de `sonner` deja configure
-
-Fichiers a creer :
-- `src/components/AnimatedPage.tsx` — wrapper d'animation pour les pages
-- `src/components/ReputationGauge.tsx` — jauge circulaire SVG
-- `src/components/GeoHeatmap.tsx` — heatmap geographique simplifiee
-- `src/components/RecentMentions.tsx` — widget dernieres mentions
-
 Fichiers a modifier :
-- `src/pages/Dashboard.tsx` — integration gauge, heatmap, mentions recentes
-- `src/pages/NotFound.tsx` — redesign avec branding
-- `src/App.tsx` — wrapper AnimatePresence pour transitions
-- Toutes les pages — wrapping avec `AnimatedPage`
-- `src/pages/AIAssistant.tsx` — ajout toasts sur actions
-- `src/components/layout/AppHeader.tsx` — responsive mobile
-- `src/index.css` — animations CSS additionnelles si necessaire
+- `src/pages/Mentions.tsx` — ajout AnimatedPage
+- `src/pages/Alerts.tsx` — ajout AnimatedPage
+- `src/pages/Competitors.tsx` — ajout AnimatedPage + table scrollable mobile
+- `src/pages/Reports.tsx` — ajout AnimatedPage + toasts telechargement
+- `src/pages/Settings.tsx` — ajout AnimatedPage
+- `src/pages/Pricing.tsx` — ajout AnimatedPage
+- `src/pages/Install.tsx` — ajout AnimatedPage
+- `src/components/layout/AppLayout.tsx` — AnimatePresence autour de Outlet
+- `src/components/NavLink.tsx` — renforcer le style actif avec bordure rouge
+- `src/pages/Dashboard.tsx` — ajout skeleton loading + hover scale sur cartes
+- `src/index.css` — classes utilitaires pour hover scale
+
+Aucun nouveau fichier a creer. Principalement du wrapping et du polish CSS.
 
