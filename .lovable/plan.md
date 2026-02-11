@@ -1,74 +1,68 @@
 
 
-# Plan de développement — @robase 🔴
+# Phase 2 — Polissage et Ameliorations
 
-Application de veille e-réputationnelle augmentée par IA — Interface complète avec données fictives, thème rouge, installable en PWA.
+L'ensemble des pages de la maquette (Dashboard, Mentions, Alertes, Concurrence, Assistant IA, Rapports, Parametres, Tarification, Login, Register, MFA, Install, 404) est en place avec le theme rouge et la configuration PWA.
+
+La phase suivante vise a ameliorer l'experience utilisateur et la qualite visuelle globale.
 
 ---
 
-## 1. Design System & Thème Rouge
-- Palette de couleurs rouge comme couleur primaire (nuances de rouge foncé/vif)
-- Code couleur sentiment : vert (positif), orange (neutre), rouge (négatif)
-- Mode sombre intégré
-- Typographie moderne et professionnelle
-- Logo "@robase" en texte stylisé
+## 1. Animations et transitions (framer-motion)
 
-## 2. Authentification (pages maquette)
-- Page de connexion avec email/mot de passe
-- Page d'inscription avec choix de rôle (Admin, Manager, Analyste, Client)
-- Écran d'authentification multifacteur (visuel)
+- Ajouter des animations d'entree sur les cartes du Dashboard (fade-in + slide-up echelonne)
+- Animer les transitions entre pages via un composant wrapper `AnimatedPage`
+- Ajouter des micro-interactions sur les boutons et les badges (hover scale)
+- Animer le compteur du score de reputation (animation de comptage progressif)
 
-## 3. Dashboard Global
-- Score d'e-réputation global avec jauge visuelle
-- Graphiques d'évolution des mentions (positif/neutre/négatif) avec Recharts
-- Statistiques clés : nombre de mentions, sentiment moyen, alertes actives
-- Heatmap géographique simplifiée
-- Widget de tendances et mots-clés
+## 2. Ameliorations du Dashboard
 
-## 4. Flux de Mentions Temps Réel
-- Liste scrollable de mentions fictives (Facebook, X, Instagram, TikTok, LinkedIn, blogs)
-- Filtres par source, sentiment, date
-- Badge de sentiment coloré sur chaque mention
-- Détail d'une mention au clic
+- Ajouter une heatmap geographique simplifiee (grille de regions avec intensite de couleur) comme prevu dans le plan initial
+- Ajouter une section "Dernieres mentions" avec les 3 mentions les plus recentes directement sur le dashboard
+- Ameliorer la jauge de score avec un composant circulaire anime (gauge radiale)
 
-## 5. Centre d'Alertes
-- Liste d'alertes intelligentes (pic de mentions, mention négative influente, risque de crise)
-- Niveaux de sévérité (critique, avertissement, info)
-- Notifications push visuelles
+## 3. Optimisation responsive mobile
 
-## 6. Analyse Concurrentielle & Radar d'Influence
-- Tableau comparatif dynamique avec concurrents fictifs
-- Part de voix digitale en graphique circulaire
-- Liste d'influenceurs avec score d'engagement
-- Graphiques d'évolution comparative
+- Adapter les grilles de cartes pour mobile (1 colonne)
+- Rendre les graphiques Recharts scrollables horizontalement sur petits ecrans
+- Adapter les filtres des mentions en mode empile sur mobile
+- Ameliorer la page Tarification en mode carousel horizontal sur mobile
+- Tester et ajuster le header (recherche masquee sur mobile avec bouton toggle)
 
-## 7. Assistant IA de Réponse
-- Interface de chat pour générer des réponses contextualisées (simulé)
-- Sélection du ton : institutionnel, commercial, empathique, juridique
-- Historique des réponses générées
-- Bouton de validation avant publication
+## 4. Ameliorations de la page 404
 
-## 8. Module Reporting
-- Prévisualisation d'un rapport type
-- Options de périodicité (quotidien, hebdomadaire, mensuel)
-- Personnalisation logo/couleurs (visuel)
-- Bouton de téléchargement PDF (simulé)
+- Personnaliser avec le branding @robase (logo, couleurs rouge, illustration)
+- Ajouter un message en francais et un bouton de retour stylise
 
-## 9. Navigation & Layout
-- Sidebar de navigation avec icônes pour tous les modules
-- Navigation en 3 niveaux maximum
-- Header avec recherche, notifications, profil utilisateur
-- Responsive : adapté mobile, tablette et desktop
+## 5. Details de finition
 
-## 10. Configuration PWA
-- Installation de vite-plugin-pwa
-- Manifest avec nom "@robase", icônes et thème rouge
-- Page d'installation dédiée `/install`
-- Support hors ligne basique
-- Meta tags optimisés pour mobile
+- Ajouter un indicateur de chargement squelette (skeleton) sur les cartes
+- Ajouter des tooltips informatifs sur les statistiques du dashboard
+- Ajouter un toast de confirmation quand l'utilisateur clique "Approuver" dans l'assistant IA ou "Copier"
+- Ameliorer la navigation : indicateur actif plus visible dans la sidebar
 
-## 11. Pages Secondaires
-- Page de profil utilisateur et paramètres
-- Page de tarification (Gratuit / Pro / Entreprise)
-- Page 404 personnalisée
+---
+
+## Details techniques
+
+- **framer-motion** : deja installe, utilisation de `motion.div` avec `initial/animate/exit` et `AnimatePresence` pour les transitions
+- **Gauge radiale** : composant SVG custom avec animation CSS ou framer-motion
+- **Heatmap** : grille CSS simple avec des intensites de couleur basees sur les donnees fictives (pas de librairie de carte)
+- **Skeleton** : utilisation du composant `Skeleton` de shadcn/ui deja present
+- **Toasts** : utilisation de `sonner` deja configure
+
+Fichiers a creer :
+- `src/components/AnimatedPage.tsx` — wrapper d'animation pour les pages
+- `src/components/ReputationGauge.tsx` — jauge circulaire SVG
+- `src/components/GeoHeatmap.tsx` — heatmap geographique simplifiee
+- `src/components/RecentMentions.tsx` — widget dernieres mentions
+
+Fichiers a modifier :
+- `src/pages/Dashboard.tsx` — integration gauge, heatmap, mentions recentes
+- `src/pages/NotFound.tsx` — redesign avec branding
+- `src/App.tsx` — wrapper AnimatePresence pour transitions
+- Toutes les pages — wrapping avec `AnimatedPage`
+- `src/pages/AIAssistant.tsx` — ajout toasts sur actions
+- `src/components/layout/AppHeader.tsx` — responsive mobile
+- `src/index.css` — animations CSS additionnelles si necessaire
 
