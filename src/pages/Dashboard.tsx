@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mentionsOverTime, stats, reputationScore, trendingKeywords } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
@@ -8,8 +9,42 @@ import { GeoHeatmap } from "@/components/GeoHeatmap";
 import { RecentMentions } from "@/components/RecentMentions";
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-8 w-48 mb-2" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 rounded-xl" />
+        ))}
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Skeleton className="h-80 md:col-span-2 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <DashboardSkeleton />;
+
   return (
     <AnimatedPage>
       <div className="space-y-6">
@@ -22,7 +57,7 @@ export default function Dashboard() {
         <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {/* Reputation Gauge */}
           <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
-            <Card className="border-primary/20 h-full">
+            <Card className="border-primary/20 h-full transition-transform duration-200 hover:scale-[1.02]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Score e-Réputation</CardTitle>
               </CardHeader>
@@ -36,7 +71,7 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <Card className="h-full">
+            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
               <CardHeader className="pb-2">
                 <UITooltip>
                   <TooltipTrigger asChild>
@@ -57,7 +92,7 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <Card className="h-full">
+            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
               <CardHeader className="pb-2">
                 <UITooltip>
                   <TooltipTrigger asChild>
@@ -76,7 +111,7 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <Card className="h-full">
+            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
               <CardHeader className="pb-2">
                 <UITooltip>
                   <TooltipTrigger asChild>
@@ -95,7 +130,7 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <Card className="h-full">
+            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
               <CardHeader className="pb-2">
                 <UITooltip>
                   <TooltipTrigger asChild>

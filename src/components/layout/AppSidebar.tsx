@@ -67,7 +67,7 @@ export function AppSidebar() {
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} end={item.url === "/"} activeClassName="bg-accent text-accent-foreground font-medium">
+                    <NavLink to={item.url} end={item.url === "/"} activeClassName="bg-accent text-accent-foreground font-medium border-l-[3px] border-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -85,7 +85,7 @@ export function AppSidebar() {
               {secondaryNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} activeClassName="bg-accent text-accent-foreground font-medium">
+                    <NavLink to={item.url} activeClassName="bg-accent text-accent-foreground font-medium border-l-[3px] border-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
