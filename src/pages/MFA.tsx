@@ -2,36 +2,42 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp";
-import { AtSign, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export default function MFA() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden auth-gradient-bg">
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+
+      <Card className="w-full max-w-md glass-card border-white/30 relative z-10">
         <CardHeader className="text-center">
-          <ShieldCheck className="h-12 w-12 text-primary mx-auto mb-2" />
-          <CardTitle className="text-xl">Vérification en deux étapes</CardTitle>
-          <p className="text-sm text-muted-foreground">Entrez le code envoyé sur votre appareil</p>
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-3">
+            <ShieldCheck className="h-7 w-7 text-white" />
+          </div>
+          <CardTitle className="text-xl text-white">Vérification en deux étapes</CardTitle>
+          <p className="text-sm text-white/70">Entrez le code envoyé sur votre appareil</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex justify-center">
             <InputOTP maxLength={6}>
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
+                <InputOTPSlot index={0} className="bg-white/10 border-white/20 text-white" />
+                <InputOTPSlot index={1} className="bg-white/10 border-white/20 text-white" />
+                <InputOTPSlot index={2} className="bg-white/10 border-white/20 text-white" />
               </InputOTPGroup>
-              <InputOTPSeparator />
+              <InputOTPSeparator className="text-white/40" />
               <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+                <InputOTPSlot index={3} className="bg-white/10 border-white/20 text-white" />
+                <InputOTPSlot index={4} className="bg-white/10 border-white/20 text-white" />
+                <InputOTPSlot index={5} className="bg-white/10 border-white/20 text-white" />
               </InputOTPGroup>
             </InputOTP>
           </div>
-          <Button className="w-full">Vérifier</Button>
-          <p className="text-sm text-center text-muted-foreground">
-            <Link to="/login" className="text-primary hover:underline">Retour à la connexion</Link>
+          <Button className="w-full bg-white text-primary hover:bg-white/90 font-semibold h-11">Vérifier</Button>
+          <p className="text-sm text-center text-white/70">
+            <Link to="/login" className="text-white hover:underline">Retour à la connexion</Link>
           </p>
         </CardContent>
       </Card>
