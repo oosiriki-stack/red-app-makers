@@ -1,62 +1,90 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AtSign } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Register() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName || !email || !password) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+    localStorage.setItem("arobase_user", JSON.stringify({ email, name: `${firstName} ${lastName}` }));
+    localStorage.setItem("arobase_logged_in", "true");
+    toast.success("Compte créé avec succès !");
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <AtSign className="w-6 h-6 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden auth-gradient-bg">
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+
+      <Card className="w-full max-w-md glass-card border-white/30 relative z-10">
+        <CardHeader className="text-center pb-2">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center glow-red-subtle">
+              <AtSign className="w-7 h-7 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">
-            <span className="text-gradient-red">@robase</span>
+          <CardTitle className="text-3xl font-light text-white">
+            @robase
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Créez votre compte</p>
+          <p className="text-sm text-white/70 mt-1">Créez votre compte</p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Prénom</Label>
-              <Input placeholder="Jean" />
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-white/80">Prénom</Label>
+                <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+              </div>
+              <div>
+                <Label className="text-white/80">Nom</Label>
+                <Input placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+              </div>
             </div>
             <div>
-              <Label>Nom</Label>
-              <Input placeholder="Dupont" />
+              <Label className="text-white/80">Email</Label>
+              <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
             </div>
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input type="email" placeholder="jean@entreprise.com" />
-          </div>
-          <div>
-            <Label>Mot de passe</Label>
-            <Input type="password" placeholder="••••••••" />
-          </div>
-          <div>
-            <Label>Rôle</Label>
-            <Select defaultValue="analyst">
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="analyst">Analyste</SelectItem>
-                <SelectItem value="client">Client</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button className="w-full">Créer mon compte</Button>
-          <p className="text-sm text-center text-muted-foreground">
-            Déjà un compte ?{" "}
-            <Link to="/login" className="text-primary hover:underline">Se connecter</Link>
-          </p>
+            <div>
+              <Label className="text-white/80">Mot de passe</Label>
+              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+            </div>
+            <div>
+              <Label className="text-white/80">Rôle</Label>
+              <Select defaultValue="analyst">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="analyst">Analyste</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full bg-white text-primary hover:bg-white/90 font-semibold text-base h-11">
+              Créer mon compte
+            </Button>
+            <p className="text-sm text-center text-white/70">
+              Déjà un compte ?{" "}
+              <Link to="/login" className="text-white hover:underline font-medium">Se connecter</Link>
+            </p>
+          </form>
         </CardContent>
       </Card>
     </div>

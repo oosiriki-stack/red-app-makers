@@ -18,18 +18,20 @@ export default function Reports() {
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Rapports</h1>
+            <h1 className="text-3xl font-light tracking-tight">Rapports</h1>
             <p className="text-muted-foreground">Génération et personnalisation de rapports</p>
           </div>
-          <Button><FileText className="h-4 w-4 mr-2" /> Nouveau rapport</Button>
+          <Button className="rounded-xl" onClick={() => toast.info("Ouverture du configurateur de rapport...")}><FileText className="h-4 w-4 mr-2" /> Nouveau rapport</Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="p-4 flex flex-col items-center gap-2">
-            <Calendar className="h-8 w-8 text-primary" />
+          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Calendar className="h-6 w-6 text-primary" />
+            </div>
             <span className="font-medium text-sm">Périodicité</span>
             <Select defaultValue="weekly">
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="daily">Quotidien</SelectItem>
                 <SelectItem value="weekly">Hebdomadaire</SelectItem>
@@ -37,29 +39,35 @@ export default function Reports() {
               </SelectContent>
             </Select>
           </Card>
-          <Card className="p-4 flex flex-col items-center gap-2">
-            <Palette className="h-8 w-8 text-primary" />
+          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Palette className="h-6 w-6 text-primary" />
+            </div>
             <span className="font-medium text-sm">Personnalisation</span>
             <p className="text-xs text-muted-foreground text-center">Logo, couleurs et mise en page configurables</p>
           </Card>
-          <Card className="p-4 flex flex-col items-center gap-2">
-            <Download className="h-8 w-8 text-primary" />
+          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Download className="h-6 w-6 text-primary" />
+            </div>
             <span className="font-medium text-sm">Export PDF</span>
-            <Button variant="outline" size="sm" onClick={() => toast.success("Téléchargement du dernier rapport lancé")}>Télécharger le dernier</Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toast.success("Téléchargement du dernier rapport lancé")}>Télécharger le dernier</Button>
           </Card>
         </div>
 
         <div className="space-y-3">
           {reports.map((r) => (
-            <Card key={r.id}>
-              <CardContent className="p-4 flex items-center gap-4">
-                <FileText className="h-8 w-8 text-primary shrink-0" />
+            <Card key={r.id} className="glass-card rounded-2xl card-hover">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">{r.title}</p>
                   <p className="text-xs text-muted-foreground">{r.date} · {r.pages} pages</p>
                 </div>
-                <Badge variant="outline">{r.type}</Badge>
-                <Button variant="outline" size="sm" onClick={() => toast.success(`Téléchargement de "${r.title}" lancé`)}><Download className="h-4 w-4" /></Button>
+                <Badge variant="outline" className="rounded-lg">{r.type}</Badge>
+                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toast.success(`Téléchargement de "${r.title}" lancé`)}><Download className="h-4 w-4" /></Button>
               </CardContent>
             </Card>
           ))}

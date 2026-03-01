@@ -18,12 +18,12 @@ export default function Competitors() {
     <AnimatedPage>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Analyse Concurrentielle</h1>
+          <h1 className="text-3xl font-light tracking-tight">Analyse Concurrentielle</h1>
           <p className="text-muted-foreground">Benchmarking et radar d'influence</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Card>
+          <Card className="glass-card rounded-2xl">
             <CardHeader><CardTitle className="text-base">Part de voix digitale</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -37,7 +37,7 @@ export default function Competitors() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="glass-card rounded-2xl">
             <CardHeader><CardTitle className="text-base">Tableau comparatif</CardTitle></CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
@@ -71,7 +71,7 @@ export default function Competitors() {
           </Card>
         </div>
 
-        <Card>
+        <Card className="glass-card rounded-2xl">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="h-4 w-4" /> Influenceurs clés
@@ -80,7 +80,7 @@ export default function Competitors() {
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {influencers.map((inf) => (
-                <Card key={inf.name} className="p-4 transition-transform duration-200 hover:scale-[1.02]">
+                <Card key={inf.name} className="glass-card p-4 hover-3d rounded-xl">
                   <div className="flex items-center gap-3">
                     <Avatar><AvatarFallback className="text-xs">{inf.name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
                     <div className="flex-1 min-w-0">

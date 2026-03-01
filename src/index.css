@@ -34,7 +34,7 @@
     --input: 0 0% 88%;
     --ring: 0 72% 51%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sentiment-positive: 142 71% 45%;
     --sentiment-neutral: 38 92% 50%;
@@ -110,4 +110,117 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .glass-card {
+    @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-xl shadow-black/5;
+  }
+
+  .glass-sidebar {
+    @apply bg-white/80 dark:bg-black/40 backdrop-blur-2xl;
+  }
+
+  .glass-header {
+    @apply bg-white/70 dark:bg-black/30 backdrop-blur-xl border-b border-white/20;
+  }
+
+  .glow-red {
+    box-shadow: 0 0 30px -5px hsl(0, 72%, 51%, 0.3), 0 0 60px -10px hsl(0, 72%, 51%, 0.15);
+  }
+
+  .glow-red-subtle {
+    box-shadow: 0 0 20px -5px hsl(0, 72%, 51%, 0.2);
+  }
+
+  .hover-3d {
+    transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
+    transform-style: preserve-3d;
+  }
+  .hover-3d:hover {
+    transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+    box-shadow: 0 20px 40px -15px hsl(0 0% 0% / 0.1);
+  }
+
+  .card-hover {
+    @apply transition-all duration-500 ease-out;
+  }
+  .card-hover:hover {
+    @apply shadow-2xl shadow-black/10 -translate-y-1;
+  }
+}
+
+/* Animated gradient background for auth pages */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.auth-gradient-bg {
+  background: linear-gradient(
+    -45deg,
+    hsl(0, 72%, 51%),
+    hsl(15, 80%, 55%),
+    hsl(350, 72%, 45%),
+    hsl(20, 90%, 50%)
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Floating orbs for auth pages */
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  animation: float-orb 8s ease-in-out infinite;
+}
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: hsl(0, 72%, 60%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+.orb-2 {
+  width: 200px;
+  height: 200px;
+  background: hsl(30, 80%, 55%);
+  bottom: -50px;
+  left: -50px;
+  animation-delay: -3s;
+}
+.orb-3 {
+  width: 150px;
+  height: 150px;
+  background: hsl(350, 72%, 50%);
+  top: 50%;
+  left: 50%;
+  animation-delay: -5s;
+}
+
+/* Pro card glow animation */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 30px -5px hsl(0, 72%, 51%, 0.3); }
+  50% { box-shadow: 0 0 50px -5px hsl(0, 72%, 51%, 0.5); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Notification pulse */
+@keyframes notification-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.notification-pulse {
+  animation: notification-pulse 2s ease-in-out infinite;
 }

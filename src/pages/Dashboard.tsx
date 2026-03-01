@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mentionsOverTime, stats, reputationScore, trendingKeywords } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
@@ -20,23 +21,27 @@ function DashboardSkeleton() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-xl" />
+          <Skeleton key={i} className="h-32 rounded-2xl" />
         ))}
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-80 md:col-span-2 rounded-xl" />
-        <Skeleton className="h-80 rounded-xl" />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-80 md:col-span-2 rounded-2xl" />
+        <Skeleton className="h-80 rounded-2xl" />
       </div>
     </div>
   );
 }
 
+const statCards = [
+  { key: "mentions", label: "Mentions", icon: MessageSquare, value: stats.totalMentions.toLocaleString(), sub: "+12% ce mois", link: "/mentions", positive: true },
+  { key: "sentiment", label: "Sentiment", icon: Heart, value: `${stats.sentimentAvg}%`, sub: "positif en moyenne", link: "/mentions", positive: true },
+  { key: "alerts", label: "Alertes", icon: Bell, value: stats.activeAlerts.toString(), sub: "2 critiques", link: "/alerts", positive: false },
+  { key: "response", label: "Taux réponse", icon: Zap, value: `${stats.responseRate}%`, sub: "objectif : 95%", link: "/ai-assistant", positive: true },
+];
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
@@ -49,15 +54,14 @@ export default function Dashboard() {
     <AnimatedPage>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-light tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Vue d'ensemble de votre e-réputation</p>
         </div>
 
-        {/* Score + Stats */}
         <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {/* Reputation Gauge */}
           <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
-            <Card className="border-primary/20 h-full transition-transform duration-200 hover:scale-[1.02]">
+            <Card className="glass-card hover-3d h-full rounded-2xl">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Score e-Réputation</CardTitle>
               </CardHeader>
@@ -70,88 +74,43 @@ export default function Dashboard() {
             </Card>
           </motion.div>
 
-          <motion.div variants={staggerItem}>
-            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
-              <CardHeader className="pb-2">
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
-                      <MessageSquare className="h-4 w-4" /> Mentions
-                    </CardTitle>
-                  </TooltipTrigger>
-                  <TooltipContent>Nombre total de mentions sur toutes les plateformes</TooltipContent>
-                </UITooltip>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalMentions.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <ArrowUp className="h-3 w-3 text-green-500" /> +12% ce mois
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={staggerItem}>
-            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
-              <CardHeader className="pb-2">
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
-                      <Heart className="h-4 w-4" /> Sentiment
-                    </CardTitle>
-                  </TooltipTrigger>
-                  <TooltipContent>Pourcentage moyen de sentiment positif</TooltipContent>
-                </UITooltip>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.sentimentAvg}%</div>
-                <p className="text-xs text-muted-foreground">positif en moyenne</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={staggerItem}>
-            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
-              <CardHeader className="pb-2">
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
-                      <Bell className="h-4 w-4" /> Alertes
-                    </CardTitle>
-                  </TooltipTrigger>
-                  <TooltipContent>Alertes actives nécessitant une attention</TooltipContent>
-                </UITooltip>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeAlerts}</div>
-                <p className="text-xs text-destructive flex items-center gap-1">2 critiques</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={staggerItem}>
-            <Card className="h-full transition-transform duration-200 hover:scale-[1.02]">
-              <CardHeader className="pb-2">
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
-                      <Zap className="h-4 w-4" /> Taux réponse
-                    </CardTitle>
-                  </TooltipTrigger>
-                  <TooltipContent>Pourcentage de mentions ayant reçu une réponse</TooltipContent>
-                </UITooltip>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.responseRate}%</div>
-                <p className="text-xs text-muted-foreground">objectif : 95%</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+          {statCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div key={stat.key} variants={staggerItem}>
+                <Card
+                  className="glass-card hover-3d h-full rounded-2xl cursor-pointer"
+                  onClick={() => navigate(stat.link)}
+                >
+                  <CardHeader className="pb-2">
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
+                          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Icon className="h-4 w-4 text-primary" />
+                          </div>
+                          {stat.label}
+                        </CardTitle>
+                      </TooltipTrigger>
+                      <TooltipContent>{stat.label} sur toutes les plateformes</TooltipContent>
+                    </UITooltip>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <p className={`text-xs flex items-center gap-1 ${stat.positive ? "text-muted-foreground" : "text-destructive"}`}>
+                      {stat.positive && <ArrowUp className="h-3 w-3 text-green-500" />}
+                      {stat.sub}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </StaggerContainer>
 
         {/* Charts */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-2 glass-card rounded-2xl">
             <CardHeader>
               <CardTitle className="text-base">Évolution des mentions</CardTitle>
             </CardHeader>
@@ -164,9 +123,9 @@ export default function Dashboard() {
                       <XAxis dataKey="date" className="text-xs" />
                       <YAxis className="text-xs" />
                       <Tooltip />
-                      <Area type="monotone" dataKey="positive" stackId="1" stroke="hsl(142, 71%, 45%)" fill="hsl(142, 71%, 45%)" fillOpacity={0.3} />
-                      <Area type="monotone" dataKey="neutral" stackId="1" stroke="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" fillOpacity={0.3} />
-                      <Area type="monotone" dataKey="negative" stackId="1" stroke="hsl(0, 84%, 60%)" fill="hsl(0, 84%, 60%)" fillOpacity={0.3} />
+                      <Area type="monotone" dataKey="positive" stackId="1" stroke="hsl(142, 71%, 45%)" fill="hsl(142, 71%, 45%)" fillOpacity={0.2} />
+                      <Area type="monotone" dataKey="neutral" stackId="1" stroke="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" fillOpacity={0.2} />
+                      <Area type="monotone" dataKey="negative" stackId="1" stroke="hsl(0, 84%, 60%)" fill="hsl(0, 84%, 60%)" fillOpacity={0.2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -174,7 +133,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="glass-card rounded-2xl">
             <CardHeader>
               <CardTitle className="text-base">Tendances & Mots-clés</CardTitle>
             </CardHeader>

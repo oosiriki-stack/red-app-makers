@@ -25,16 +25,24 @@ export function ReputationGauge({ score, size = 160 }: ReputationGaugeProps) {
     return "hsl(0, 84%, 60%)";
   };
 
+  const glowColor = score >= 70 ? "rgba(34, 197, 94, 0.3)" : score >= 40 ? "rgba(245, 158, 11, 0.3)" : "rgba(239, 68, 68, 0.3)";
+
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+      {/* Glow effect */}
+      <div
+        className="absolute inset-0 rounded-full blur-xl opacity-50"
+        style={{ background: `radial-gradient(circle, ${glowColor}, transparent 70%)` }}
+      />
+      <svg width={size} height={size} className="-rotate-90 relative z-10">
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
           stroke="hsl(var(--muted))"
-          strokeWidth="10"
+          strokeWidth="8"
+          opacity={0.3}
         />
         <motion.circle
           cx={size / 2}
@@ -42,13 +50,13 @@ export function ReputationGauge({ score, size = 160 }: ReputationGaugeProps) {
           r={radius}
           fill="none"
           stroke={getColor(score)}
-          strokeWidth="10"
+          strokeWidth="8"
           strokeLinecap="round"
           strokeDasharray={circumference}
           style={{ strokeDashoffset }}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
         <motion.span className="text-3xl font-bold">{displayScore}</motion.span>
         <span className="text-xs text-muted-foreground">/100</span>
       </div>

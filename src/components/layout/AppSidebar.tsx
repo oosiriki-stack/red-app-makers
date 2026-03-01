@@ -45,10 +45,10 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+    <Sidebar collapsible="icon" className="glass-sidebar border-r border-white/10">
+      <SidebarHeader className="p-5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-red-subtle">
             <AtSign className="w-5 h-5 text-primary-foreground" />
           </div>
           {!collapsed && (
@@ -61,13 +61,13 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/60 px-5">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} end={item.url === "/"} activeClassName="bg-accent text-accent-foreground font-medium border-l-[3px] border-primary">
+                    <NavLink to={item.url} end={item.url === "/"} activeClassName="bg-primary/10 text-primary font-medium border-l-[3px] border-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -79,13 +79,13 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Autres</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/60 px-5">Autres</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {secondaryNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} activeClassName="bg-accent text-accent-foreground font-medium border-l-[3px] border-primary">
+                    <NavLink to={item.url} activeClassName="bg-primary/10 text-primary font-medium border-l-[3px] border-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -97,9 +97,9 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-5">
         {!collapsed && (
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground/50 text-center">
             @robase v1.0 — Veille IA
           </p>
         )}
