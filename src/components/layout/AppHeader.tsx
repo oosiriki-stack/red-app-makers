@@ -12,12 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { alerts } from "@/data/mockData";
 
 export function AppHeader() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem("arobase_dark");
+    return saved === "true";
+  });
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [userName, setUserName] = useState("AD");
   const navigate = useNavigate();
+
+  // Restore dark mode on mount
+  useEffect(() => {
+    if (dark) document.documentElement.classList.add("dark");
+  }, []);
+
+  // Compute unread alerts count
+  const readIds: number[] = JSON.parse(localStorage.getItem("arobase_read_alerts") || "[]");
+  const unreadCount = alerts.filter(a => !a.read && !readIds.includes(a.id)).length;
 
   useEffect(() => {
     const stored = localStorage.getItem("arobase_user");
@@ -33,8 +47,10 @@ export function AppHeader() {
   }, []);
 
   const toggleDark = () => {
-    setDark(!dark);
+    const next = !dark;
+    setDark(next);
     document.documentElement.classList.toggle("dark");
+    localStorage.setItem("arobase_dark", String(next));
   };
 
   const handleLogout = () => {
@@ -43,17 +59,31 @@ export function AppHeader() {
     navigate("/login");
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/mentions?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm("");
+      setSearchOpen(false);
+    }
+  };
+
   return (
     <header className="h-14 border-b border-white/10 flex items-center gap-3 px-4 glass-header">
       <SidebarTrigger />
 
       {/* Desktop search */}
-      <div className="flex-1 max-w-md hidden sm:block">
+      <form onSubmit={handleSearch} className="flex-1 max-w-md hidden sm:block">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Rechercher des mentions..." className="pl-9 h-9 bg-muted/50 border-0 rounded-xl" />
+          <Input
+            placeholder="Rechercher des mentions..."
+            className="pl-9 h-9 bg-muted/50 border-0 rounded-xl"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      </div>
+      </form>
 
       {/* Mobile search toggle */}
       <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setSearchOpen(!searchOpen)}>
@@ -67,9 +97,11 @@ export function AppHeader() {
 
         <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
           <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] notification-pulse">
-            5
-          </Badge>
+          {unreadCount > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] notification-pulse">
+              {unreadCount}
+            </Badge>
+          )}
         </Button>
 
         <DropdownMenu>
@@ -90,12 +122,18 @@ export function AppHeader() {
 
       {/* Mobile search bar */}
       {searchOpen && (
-        <div className="absolute top-14 left-0 right-0 p-3 glass-header sm:hidden z-50">
+        <form onSubmit={handleSearch} className="absolute top-14 left-0 right-0 p-3 glass-header sm:hidden z-50">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Rechercher..." className="pl-9 h-9 bg-muted/50 border-0 rounded-xl" autoFocus />
+            <Input
+              placeholder="Rechercher..."
+              className="pl-9 h-9 bg-muted/50 border-0 rounded-xl"
+              autoFocus
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        </div>
+        </form>
       )}
     </header>
   );

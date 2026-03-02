@@ -24,6 +24,7 @@ export default function Settings() {
         const user = JSON.parse(stored);
         if (user.name) setName(user.name);
         if (user.email) setEmail(user.email);
+        if (user.company) setCompany(user.company);
       } catch {}
     }
     const notifs = localStorage.getItem("arobase_notifs");
@@ -38,7 +39,7 @@ export default function Settings() {
   }, []);
 
   const handleSave = () => {
-    localStorage.setItem("arobase_user", JSON.stringify({ name, email }));
+    localStorage.setItem("arobase_user", JSON.stringify({ name, email, company }));
     localStorage.setItem("arobase_notifs", JSON.stringify({ critical: notifCritical, daily: notifDaily, influencer: notifInfluencer }));
     toast.success("Paramètres sauvegardés avec succès");
   };

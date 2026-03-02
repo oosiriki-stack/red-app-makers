@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,13 +18,22 @@ const sentimentConfig = {
 };
 
 export default function Mentions() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryFromUrl = searchParams.get("q") || "";
   const [sourceFilter, setSourceFilter] = useState("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
   const [selected, setSelected] = useState<typeof mentions[0] | null>(null);
 
+  useEffect(() => {
+    if (queryFromUrl) {
+      toast.info(`Recherche : "${queryFromUrl}"`);
+    }
+  }, [queryFromUrl]);
+
   const filtered = mentions.filter((m) => {
     if (sourceFilter !== "all" && m.source !== sourceFilter) return false;
     if (sentimentFilter !== "all" && m.sentiment !== sentimentFilter) return false;
+    if (queryFromUrl && !m.content.toLowerCase().includes(queryFromUrl.toLowerCase()) && !m.author.toLowerCase().includes(queryFromUrl.toLowerCase())) return false;
     return true;
   });
 
@@ -34,6 +44,9 @@ export default function Mentions() {
           <h1 className="text-3xl font-light tracking-tight">Flux de Mentions</h1>
           <p className="text-muted-foreground">
             Suivi en temps réel — <strong>{filtered.length}</strong> résultat{filtered.length > 1 ? "s" : ""}
+            {queryFromUrl && (
+              <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>
+            )}
           </p>
         </div>
 
@@ -62,6 +75,9 @@ export default function Mentions() {
         </div>
 
         <div className="space-y-3">
+          {filtered.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">Aucun résultat trouvé.</p>
+          )}
           {filtered.map((mention) => {
             const sc = sentimentConfig[mention.sentiment];
             return (

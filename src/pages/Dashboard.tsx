@@ -41,10 +41,21 @@ const statCards = [
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const [greeting, setGreeting] = useState("Dashboard");
   const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
+    const stored = localStorage.getItem("arobase_user");
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        if (user.name) {
+          const firstName = user.name.split(" ")[0];
+          setGreeting(`Bonjour, ${firstName}`);
+        }
+      } catch {}
+    }
     return () => clearTimeout(timer);
   }, []);
 
@@ -54,7 +65,7 @@ export default function Dashboard() {
     <AnimatedPage>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-light tracking-tight">{greeting}</h1>
           <p className="text-muted-foreground">Vue d'ensemble de votre e-réputation</p>
         </div>
 
