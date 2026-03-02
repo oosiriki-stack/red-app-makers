@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,18 @@ const severityConfig = {
 };
 
 export default function Alerts() {
-  const [readIds, setReadIds] = useState<Set<number>>(new Set());
+  const [readIds, setReadIds] = useState<Set<number>>(() => {
+    const stored = localStorage.getItem("arobase_read_alerts");
+    if (stored) {
+      try { return new Set(JSON.parse(stored)); } catch {}
+    }
+    return new Set();
+  });
+
+  // Persist to localStorage on change
+  useEffect(() => {
+    localStorage.setItem("arobase_read_alerts", JSON.stringify([...readIds]));
+  }, [readIds]);
 
   const markAllRead = () => {
     setReadIds(new Set(alertsData.map((a) => a.id)));

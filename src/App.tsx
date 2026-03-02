@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { AuthGuard } from "@/components/AuthGuard";
 import Dashboard from "@/pages/Dashboard";
 import Mentions from "@/pages/Mentions";
 import Alerts from "@/pages/Alerts";
@@ -30,7 +31,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/mfa" element={<MFA />} />
-          <Route element={<AppLayout />}>
+          <Route element={<AuthGuard />}>
+            <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/mentions" element={<Mentions />} />
             <Route path="/alerts" element={<Alerts />} />
@@ -40,6 +42,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/install" element={<Install />} />
+            </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

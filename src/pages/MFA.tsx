@@ -1,10 +1,25 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp";
 import { ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 export default function MFA() {
+  const [code, setCode] = useState("");
+  const navigate = useNavigate();
+
+  const handleVerify = () => {
+    if (code === "123456") {
+      localStorage.setItem("arobase_mfa_verified", "true");
+      toast.success("Vérification réussie !");
+      navigate("/");
+    } else {
+      toast.error("Code invalide. Essayez 123456.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden auth-gradient-bg">
       <div className="orb orb-1" />
@@ -21,7 +36,7 @@ export default function MFA() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex justify-center">
-            <InputOTP maxLength={6}>
+            <InputOTP maxLength={6} value={code} onChange={setCode}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} className="bg-white/10 border-white/20 text-white" />
                 <InputOTPSlot index={1} className="bg-white/10 border-white/20 text-white" />
@@ -35,7 +50,7 @@ export default function MFA() {
               </InputOTPGroup>
             </InputOTP>
           </div>
-          <Button className="w-full bg-white text-primary hover:bg-white/90 font-semibold h-11">Vérifier</Button>
+          <Button onClick={handleVerify} className="w-full bg-white text-primary hover:bg-white/90 font-semibold h-11">Vérifier</Button>
           <p className="text-sm text-center text-white/70">
             <Link to="/login" className="text-white hover:underline">Retour à la connexion</Link>
           </p>
