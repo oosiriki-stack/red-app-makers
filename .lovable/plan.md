@@ -1,143 +1,96 @@
 
 
-# Phase 4 — Design Apple, Paiement et Activation
+# Phase Finale — Activation Complete et Fonctionnalite de tous les Modules
 
-Refonte visuelle style Apple (glassmorphism, espacement genereux, typographie epuree), mise a jour de la tarification avec paiement Wave, et activation fonctionnelle de l'application.
+Cette phase rend l'application entierement fonctionnelle en comblant les derniers manques : protection des routes, recherche, notifications dynamiques, rapports interactifs, et coherence globale.
 
 ---
 
-## 1. Design System Apple-Style
+## 1. Protection des Routes (Auth Guard)
 
-Appliquer un style minimaliste inspire d'Apple tout en conservant la palette rouge :
+Actuellement, toutes les pages sont accessibles sans connexion. Ajouter un composant `AuthGuard` qui :
+- Verifie `localStorage.getItem("arobase_logged_in")` au chargement
+- Redirige vers `/login` si non connecte
+- Wrappe le `AppLayout` dans `App.tsx`
 
-- **Glassmorphism** : cartes avec `backdrop-blur-xl`, fond semi-transparent (`bg-white/70 dark:bg-white/5`), bordures subtiles (`border-white/20`)
-- **Ombres douces** : `shadow-xl shadow-black/5` au lieu des bordures dures
-- **Espacement genereux** : augmenter le padding des cartes et sections
-- **Typographie** : titres plus grands et plus legers (font-light pour les grands titres)
-- **Coins arrondis** : augmenter `--radius` a `1rem`
-- **Transitions fluides** : `transition-all duration-500 ease-out` sur les cartes au hover
+**Fichier cree** : `src/components/AuthGuard.tsx`
+**Fichier modifie** : `src/App.tsx` — wrapping des routes protegees
 
-**Fichiers modifies** :
-- `src/index.css` : nouvelles classes utilitaires `.glass-card`, `.glass-sidebar`, augmenter le radius, ajouter des ombres
-- `tailwind.config.ts` : ajout d'ombres et de blur custom
+## 2. Recherche Fonctionnelle dans le Header
 
-## 2. Refonte des Composants Visuels
+La barre de recherche est actuellement decorative. La rendre fonctionnelle :
+- Etat local pour le terme de recherche
+- Au submit (Enter), naviguer vers `/mentions` avec un parametre de recherche
+- La page Mentions lit le parametre et pre-filtre les resultats
+- Toast de feedback si aucun resultat
 
-### Sidebar (AppSidebar.tsx)
-- Fond avec glassmorphism (blur + semi-transparent)
-- Icones plus grandes, espacement accru
-- Logo avec un effet de glow subtil rouge
+**Fichiers modifies** : `src/components/layout/AppHeader.tsx`, `src/pages/Mentions.tsx`
 
-### Header (AppHeader.tsx)
-- Barre de recherche avec fond glass et coins arrondis plus larges
-- Avatar avec ring animee
-- Notifications avec animation de pulse
+## 3. Notifications Dynamiques
 
-### Cards globales
-- Toutes les cartes passent en style glass (fond semi-transparent + blur)
-- Hover avec elevation et leger scale
-- Bordures avec gradient subtil
+Le badge de notifications affiche "5" en dur. Le rendre dynamique :
+- Compter les alertes non lues depuis `mockData` (celles avec `read: false`)
+- Stocker les IDs lus dans localStorage (`arobase_read_alerts`)
+- Le header lit ce compteur et l'affiche
+- Quand toutes les alertes sont marquees comme lues, le badge disparait
 
-### Dashboard (Dashboard.tsx)
-- Jauge de reputation avec effet de glow
-- Cartes stats avec icones colorees en fond circulaire translucide
-- Graphiques avec courbes plus douces et couleurs attenuees
+**Fichiers modifies** : `src/components/layout/AppHeader.tsx`, `src/pages/Alerts.tsx`
 
-### Toutes les pages
-- Appliquer le style glass aux cartes de Mentions, Alertes, Concurrence, Rapports, Settings, Install
+## 4. Page Rapports — Dialog "Nouveau Rapport"
 
-## 3. Page Tarification — Paiement Wave
+Le bouton "Nouveau rapport" affiche un simple toast. Le remplacer par un vrai dialog :
+- Dialog avec formulaire : titre, periodicite (select), format (PDF/Excel), sections a inclure (checkboxes)
+- Bouton "Generer" qui ajoute le rapport a la liste locale et affiche un toast de succes
+- Les rapports generes apparaissent en haut de la liste
 
-Refonte complete de `Pricing.tsx` :
+**Fichier modifie** : `src/pages/Reports.tsx`
 
-- **3 plans en francais** :
-  - **Starter** : 15 000 FCFA/mois — fonctionnalites de base
-  - **Pro** (populaire) : 45 000 FCFA/mois — toutes les fonctionnalites
-  - **Entreprise** : Sur devis — support prioritaire, API, SSO
+## 5. Page MFA — Verification Fonctionnelle
 
-- **Promotion annuelle** : banniere en haut avec badge "Economisez 46%" pour l'offre annuelle a 5 000 FCFA (au lieu du prix mensuel cumule)
-- **Bouton de paiement** : lien direct vers `https://pay.wave.com/m/M_ci_mZX836uJEiGE/c/ci/` pour le plan annuel
-- **Pas d'essai gratuit** : les boutons CTA sont "S'abonner" ou "Payer maintenant"
-- **Design Apple** : cartes glass, grande carte Pro mise en avant avec glow, toggle mensuel/annuel
+Le formulaire MFA est purement visuel. Ajouter :
+- Accepter le code "123456" comme valide (simulation)
+- Afficher un toast d'erreur pour tout autre code
+- Rediriger vers `/` apres verification reussie
+- Stocker `arobase_mfa_verified` dans localStorage
 
-## 4. Activation Fonctionnelle
+**Fichier modifie** : `src/pages/MFA.tsx`
 
-Rendre les interactions reellement fonctionnelles avec l'etat local :
+## 6. Persistance Complete des Settings
 
-### Login / Register (Login.tsx, Register.tsx)
-- Les formulaires redirigent vers `/` apres soumission (simulation d'auth avec localStorage)
-- Stockage du nom d'utilisateur dans localStorage
-- Header affiche le nom de l'utilisateur connecte
+- Sauvegarder le nom de l'entreprise dans localStorage
+- Au rechargement, restaurer toutes les valeurs depuis le storage
+- La deconnexion efface uniquement les donnees de session, pas les parametres
 
-### Dashboard
-- Les stats sont cliquables et redirigent vers les pages correspondantes (Mentions, Alertes, etc.)
+**Fichier modifie** : `src/pages/Settings.tsx`
 
-### Mentions (Mentions.tsx)
-- Filtres fonctionnels (deja en place)
-- Ajout d'un compteur de resultats filtre
-- Bouton "Voir sur [source]" ouvre un lien (simulee avec toast)
+## 7. Dashboard — Personnalisation Dynamique
 
-### Alertes (Alerts.tsx)
-- Bouton "Tout marquer comme lu" fonctionne (etat local)
-- Bouton "Voir" sur chaque alerte ouvre un detail/toast
-- Badge "Nouveau" disparait apres clic
+- Afficher le prenom de l'utilisateur dans le titre ("Bonjour, Jean")
+- Rendre les notifications du header coherentes avec la page Alertes
 
-### Assistant IA (AIAssistant.tsx)
-- Le bouton "Generer" produit une reponse simulee apres un delai de 1.5s avec un loader
-- La reponse generee s'ajoute a l'historique local
-- Copier et Approuver fonctionnent deja (toasts)
+**Fichier modifie** : `src/pages/Dashboard.tsx`
 
-### Rapports (Reports.tsx)
-- "Nouveau rapport" ouvre un dialog de configuration
-- Les telechargements affichent un toast (deja en place)
+## 8. Mode Sombre Persistant
 
-### Settings (Settings.tsx)
-- "Sauvegarder" met a jour localStorage et affiche un toast de confirmation
-- Les switches de notifications persistent dans localStorage
+Le toggle dark mode ne persiste pas au rechargement :
+- Sauvegarder le choix dans localStorage (`arobase_dark`)
+- Restaurer au chargement dans AppHeader
 
-### Header (AppHeader.tsx)
-- Le badge de notifications affiche le nombre d'alertes non lues
-- Clic sur la cloche redirige vers `/alerts`
-- "Se deconnecter" dans le dropdown efface localStorage et redirige vers `/login`
-- "Mon profil" redirige vers `/settings`
-
-### Pricing (Pricing.tsx)
-- Le bouton de paiement annuel ouvre le lien Wave dans un nouvel onglet
-- Les autres boutons affichent un toast "Contactez-nous"
-
-## 5. Effets Visuels Avances
-
-- **Gradient anime** sur le fond de la page de login/register (gradient rouge/orange qui se deplace lentement)
-- **Particules/orbes flottantes** subtiles sur la page de login (CSS only avec des pseudo-elements animes)
-- **Glow effect** sur la carte Pro de la tarification
-- **Hover 3D** subtil sur les cartes (perspective + rotateX/Y au hover via CSS)
-- **Smooth counter animation** amelioree sur les stats du dashboard
+**Fichier modifie** : `src/components/layout/AppHeader.tsx`
 
 ---
 
 ## Details techniques
 
-**Fichiers modifies** :
 | Fichier | Modifications |
 |---|---|
-| `src/index.css` | Classes glass, gradient anime, glow, hover 3D, radius augmente |
-| `tailwind.config.ts` | Ombres custom, blur, animations |
-| `src/components/layout/AppSidebar.tsx` | Style glass, glow logo |
-| `src/components/layout/AppHeader.tsx` | Glass, navigation fonctionnelle, deconnexion |
-| `src/components/layout/AppLayout.tsx` | Fond avec gradient subtil |
-| `src/pages/Dashboard.tsx` | Cartes glass, stats cliquables, hover 3D |
-| `src/pages/Pricing.tsx` | Refonte complete : plans FCFA, promo annuelle 5000, lien Wave, toggle |
-| `src/pages/Login.tsx` | Auth localStorage, gradient anime en fond, redirection |
-| `src/pages/Register.tsx` | Auth localStorage, gradient anime en fond, redirection |
-| `src/pages/Mentions.tsx` | Compteur resultats, cartes glass |
-| `src/pages/Alerts.tsx` | Marquer comme lu fonctionnel, badge dynamique |
-| `src/pages/AIAssistant.tsx` | Generation simulee avec loader, historique local |
-| `src/pages/Reports.tsx` | Dialog nouveau rapport |
-| `src/pages/Settings.tsx` | Sauvegarde localStorage, toasts |
-| `src/pages/Install.tsx` | Cartes glass |
-| `src/pages/MFA.tsx` | Style glass |
-| `src/pages/NotFound.tsx` | Style glass |
-| `src/components/ReputationGauge.tsx` | Glow effect |
-
-**Aucun nouveau fichier a creer.**
+| `src/components/AuthGuard.tsx` | **NOUVEAU** — Composant de protection des routes |
+| `src/App.tsx` | Wrapping avec AuthGuard |
+| `src/components/layout/AppHeader.tsx` | Recherche fonctionnelle, notifications dynamiques, dark mode persistant |
+| `src/pages/Mentions.tsx` | Lecture du parametre de recherche URL |
+| `src/pages/Alerts.tsx` | Persistance des alertes lues dans localStorage |
+| `src/pages/Reports.tsx` | Dialog "Nouveau rapport" complet avec formulaire |
+| `src/pages/MFA.tsx` | Verification du code et redirection |
+| `src/pages/Settings.tsx` | Persistance entreprise dans localStorage |
+| `src/pages/Dashboard.tsx` | Titre personalise avec prenom utilisateur |
 
