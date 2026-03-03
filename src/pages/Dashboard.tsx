@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mentionsOverTime, stats, reputationScore, trendingKeywords } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { mentionsOverTime, stats, reputationScore, trendingKeywords, getTrackingBrand, getActivePlatforms } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { TrendingUp, TrendingDown, Minus, MessageSquare, Heart, Bell, Zap, ArrowUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, MessageSquare, Heart, Bell, Zap, ArrowUp, Radio } from "lucide-react";
 import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/AnimatedPage";
 import { ReputationGauge } from "@/components/ReputationGauge";
 import { GeoHeatmap } from "@/components/GeoHeatmap";
@@ -11,6 +12,8 @@ import { RecentMentions } from "@/components/RecentMentions";
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 function DashboardSkeleton() {
   return (
@@ -42,7 +45,12 @@ const statCards = [
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("Dashboard");
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const navigate = useNavigate();
+
+  const brand = getTrackingBrand();
+  const activePlatforms = getActivePlatforms();
+  const hasTracking = !!localStorage.getItem("arobase_tracking");
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
@@ -56,6 +64,9 @@ export default function Dashboard() {
         }
       } catch {}
     }
+    if (!localStorage.getItem("arobase_tracking")) {
+      setShowOnboarding(true);
+    }
     return () => clearTimeout(timer);
   }, []);
 
@@ -66,7 +77,19 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-light tracking-tight">{greeting}</h1>
-          <p className="text-muted-foreground">Vue d'ensemble de votre e-réputation</p>
+          <p className="text-muted-foreground">
+            {hasTracking
+              ? `Surveillance de ${brand} — ${activePlatforms.length} plateforme${activePlatforms.length > 1 ? "s" : ""} active${activePlatforms.length > 1 ? "s" : ""}`
+              : "Vue d'ensemble de votre e-réputation"}
+          </p>
+          {hasTracking && (
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <Radio className="h-3 w-3 text-green-500 animate-pulse" />
+              {activePlatforms.map((p) => (
+                <Badge key={p} variant="secondary" className="text-xs rounded-lg">{p}</Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -89,10 +112,7 @@ export default function Dashboard() {
             const Icon = stat.icon;
             return (
               <motion.div key={stat.key} variants={staggerItem}>
-                <Card
-                  className="glass-card hover-3d h-full rounded-2xl cursor-pointer"
-                  onClick={() => navigate(stat.link)}
-                >
+                <Card className="glass-card hover-3d h-full rounded-2xl cursor-pointer" onClick={() => navigate(stat.link)}>
                   <CardHeader className="pb-2">
                     <UITooltip>
                       <TooltipTrigger asChild>
@@ -172,6 +192,28 @@ export default function Dashboard() {
           <RecentMentions />
         </div>
       </div>
+
+      {/* Onboarding Dialog */}
+      <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+        <DialogContent className="glass-card rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Bienvenue sur @robase 👋</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Pour commencer à surveiller votre e-réputation, configurez le nom de votre marque et les plateformes à tracker.
+            </p>
+            <div className="flex gap-2">
+              <Button className="flex-1 rounded-xl" onClick={() => { setShowOnboarding(false); navigate("/settings?tab=surveillance"); }}>
+                Configurer maintenant
+              </Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => setShowOnboarding(false)}>
+                Plus tard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AnimatedPage>
   );
 }

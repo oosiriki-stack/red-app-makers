@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { competitors, voiceShare, influencers } from "@/data/mockData";
+import { getCompetitors, getVoiceShare, influencers } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,6 +14,9 @@ const sentimentBadge = {
 };
 
 export default function Competitors() {
+  const competitors = getCompetitors();
+  const voiceShare = getVoiceShare();
+
   return (
     <AnimatedPage>
       <div className="space-y-6">
