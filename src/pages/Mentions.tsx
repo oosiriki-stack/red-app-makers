@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { mentions } from "@/data/mockData";
+import { mentions, getActivePlatforms } from "@/data/mockData";
 import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
@@ -30,7 +30,10 @@ export default function Mentions() {
     }
   }, [queryFromUrl]);
 
+  const activePlatforms = getActivePlatforms();
+  
   const filtered = mentions.filter((m) => {
+    if (!activePlatforms.includes(m.source)) return false;
     if (sourceFilter !== "all" && m.source !== sourceFilter) return false;
     if (sentimentFilter !== "all" && m.sentiment !== sentimentFilter) return false;
     if (queryFromUrl && !m.content.toLowerCase().includes(queryFromUrl.toLowerCase()) && !m.author.toLowerCase().includes(queryFromUrl.toLowerCase())) return false;
@@ -55,12 +58,9 @@ export default function Mentions() {
             <SelectTrigger className="w-40 rounded-xl"><SelectValue placeholder="Source" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes les sources</SelectItem>
-              <SelectItem value="X">X (Twitter)</SelectItem>
-              <SelectItem value="Facebook">Facebook</SelectItem>
-              <SelectItem value="Instagram">Instagram</SelectItem>
-              <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-              <SelectItem value="TikTok">TikTok</SelectItem>
-              <SelectItem value="Blog">Blog</SelectItem>
+              {activePlatforms.map((p) => (
+                <SelectItem key={p} value={p}>{p}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={sentimentFilter} onValueChange={setSentimentFilter}>

@@ -99,9 +99,29 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-5">
         {!collapsed && (
-          <p className="text-xs text-muted-foreground/50 text-center">
-            @robase v1.0 — Veille IA
-          </p>
+          <div className="text-center space-y-1">
+            {(() => {
+              try {
+                const raw = localStorage.getItem("arobase_tracking");
+                if (raw) {
+                  const t = JSON.parse(raw);
+                  const count = Object.values(t.platforms || {}).filter(Boolean).length;
+                  if (t.brand && count > 0) {
+                    return (
+                      <p className="text-xs text-green-500 flex items-center justify-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Tracking actif · {count} source{count > 1 ? "s" : ""}
+                      </p>
+                    );
+                  }
+                }
+              } catch {}
+              return null;
+            })()}
+            <p className="text-xs text-muted-foreground/50">
+              @robase v1.0 — Veille IA
+            </p>
+          </div>
         )}
       </SidebarFooter>
     </Sidebar>

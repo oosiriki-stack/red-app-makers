@@ -1,5 +1,28 @@
 // Mock data for @robase e-reputation platform
 
+export function getTrackingBrand(): string {
+  try {
+    const raw = localStorage.getItem("arobase_tracking");
+    if (raw) {
+      const t = JSON.parse(raw);
+      if (t.brand) return t.brand;
+    }
+  } catch {}
+  return "Votre Marque";
+}
+
+export function getActivePlatforms(): string[] {
+  const map: Record<string, string> = { x: "X", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn", tiktok: "TikTok", blog: "Blog", google: "Google" };
+  try {
+    const raw = localStorage.getItem("arobase_tracking");
+    if (raw) {
+      const t = JSON.parse(raw);
+      return Object.entries(t.platforms || {}).filter(([, v]) => v).map(([k]) => map[k] || k);
+    }
+  } catch {}
+  return Object.values(map);
+}
+
 export const mentionsOverTime = [
   { date: "Jan", positive: 120, neutral: 80, negative: 30 },
   { date: "Fév", positive: 150, neutral: 90, negative: 25 },
@@ -38,19 +61,29 @@ export const alerts = [
   { id: 5, type: "warning" as const, title: "Concurrent en progression", description: "ConcurrentB gagne 12% de part de voix ce mois", time: "Il y a 6h", read: true },
 ];
 
-export const competitors = [
-  { name: "Votre Marque", mentions: 2847, sentiment: 78, share: 35, trend: "+5%" },
-  { name: "ConcurrentA", mentions: 2100, sentiment: 65, share: 26, trend: "+2%" },
-  { name: "ConcurrentB", mentions: 1890, sentiment: 72, share: 23, trend: "+12%" },
-  { name: "ConcurrentC", mentions: 1200, sentiment: 58, share: 16, trend: "-3%" },
-];
+export function getCompetitors() {
+  const brand = getTrackingBrand();
+  return [
+    { name: brand, mentions: 2847, sentiment: 78, share: 35, trend: "+5%" },
+    { name: "ConcurrentA", mentions: 2100, sentiment: 65, share: 26, trend: "+2%" },
+    { name: "ConcurrentB", mentions: 1890, sentiment: 72, share: 23, trend: "+12%" },
+    { name: "ConcurrentC", mentions: 1200, sentiment: 58, share: 16, trend: "-3%" },
+  ];
+}
 
-export const voiceShare = [
-  { name: "Votre Marque", value: 35, fill: "hsl(0, 72%, 51%)" },
-  { name: "ConcurrentA", value: 26, fill: "hsl(0, 0%, 60%)" },
-  { name: "ConcurrentB", value: 23, fill: "hsl(0, 40%, 70%)" },
-  { name: "ConcurrentC", value: 16, fill: "hsl(0, 0%, 80%)" },
-];
+export function getVoiceShare() {
+  const brand = getTrackingBrand();
+  return [
+    { name: brand, value: 35, fill: "hsl(0, 72%, 51%)" },
+    { name: "ConcurrentA", value: 26, fill: "hsl(0, 0%, 60%)" },
+    { name: "ConcurrentB", value: 23, fill: "hsl(0, 40%, 70%)" },
+    { name: "ConcurrentC", value: 16, fill: "hsl(0, 0%, 80%)" },
+  ];
+}
+
+// Keep static exports for backward compat
+export const competitors = getCompetitors();
+export const voiceShare = getVoiceShare();
 
 export const influencers = [
   { name: "Marie Influenceuse", platform: "Instagram", followers: "520K", engagement: 4.8, sentiment: "positive" as const },
