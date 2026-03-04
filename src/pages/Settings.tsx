@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
-import { useSearchParams } from "react-router-dom";
-import { X, Plus } from "lucide-react";
+import { X, Plus, CreditCard } from "lucide-react";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -45,16 +45,18 @@ function loadTracking(): TrackingConfig {
 
 export default function Settings() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const defaultTab = searchParams.get("tab") || "profile";
 
   const [name, setName] = useState("Admin Demo");
   const [email, setEmail] = useState("admin@arobase.ai");
   const [company, setCompany] = useState("Ma Marque");
+  const [registeredAt, setRegisteredAt] = useState<string | null>(null);
+  const [activePlan, setActivePlan] = useState("Gratuit");
   const [notifCritical, setNotifCritical] = useState(true);
   const [notifDaily, setNotifDaily] = useState(true);
   const [notifInfluencer, setNotifInfluencer] = useState(false);
 
-  // Surveillance state
   const [tracking, setTracking] = useState<TrackingConfig>(loadTracking);
   const [newKeyword, setNewKeyword] = useState("");
 
@@ -66,8 +68,11 @@ export default function Settings() {
         if (user.name) setName(user.name);
         if (user.email) setEmail(user.email);
         if (user.company) setCompany(user.company);
+        if (user.registeredAt) setRegisteredAt(user.registeredAt);
       } catch {}
     }
+    const plan = localStorage.getItem("arobase_plan");
+    if (plan) setActivePlan(plan);
     const notifs = localStorage.getItem("arobase_notifs");
     if (notifs) {
       try {
@@ -80,25 +85,19 @@ export default function Settings() {
   }, []);
 
   const handleSaveProfile = () => {
-    localStorage.setItem("arobase_user", JSON.stringify({ name, email, company }));
+    localStorage.setItem("arobase_user", JSON.stringify({ name, email, company, registeredAt: registeredAt || new Date().toISOString() }));
     localStorage.setItem("arobase_notifs", JSON.stringify({ critical: notifCritical, daily: notifDaily, influencer: notifInfluencer }));
     toast.success("Profil sauvegardé");
   };
 
   const handleSaveTracking = () => {
-    if (!tracking.brand.trim()) {
-      toast.error("Veuillez entrer le nom de la marque à surveiller");
-      return;
-    }
+    if (!tracking.brand.trim()) { toast.error("Veuillez entrer le nom de la marque à surveiller"); return; }
     localStorage.setItem("arobase_tracking", JSON.stringify(tracking));
     toast.success(`Surveillance activée pour "${tracking.brand}"`);
   };
 
   const togglePlatform = (key: string) => {
-    setTracking(prev => ({
-      ...prev,
-      platforms: { ...prev.platforms, [key]: !prev.platforms[key] },
-    }));
+    setTracking(prev => ({ ...prev, platforms: { ...prev.platforms, [key]: !prev.platforms[key] } }));
   };
 
   const addKeyword = () => {
@@ -146,6 +145,23 @@ export default function Settings() {
                   </div>
                 </div>
                 <Separator />
+
+                {/* Registration date & plan */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Inscrit le</span>
+                  <span>{registeredAt ? new Date(registeredAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Plan actif</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="rounded-lg">{activePlan}</Badge>
+                    <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
+                      <CreditCard className="h-3 w-3 mr-1" /> Changer de plan
+                    </Button>
+                  </div>
+                </div>
+                <Separator />
+
                 <div className="grid gap-3">
                   <div><Label>Nom</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" /></div>
                   <div><Label>Email</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="rounded-xl" /></div>
@@ -172,17 +188,10 @@ export default function Settings() {
               <CardContent className="space-y-6">
                 <div>
                   <Label>Nom de la marque / entreprise à surveiller</Label>
-                  <Input
-                    placeholder="Ex: Nike, Apple, Ma Startup..."
-                    value={tracking.brand}
-                    onChange={(e) => setTracking(prev => ({ ...prev, brand: e.target.value }))}
-                    className="rounded-xl mt-1"
-                  />
+                  <Input placeholder="Ex: Nike, Apple, Ma Startup..." value={tracking.brand} onChange={(e) => setTracking(prev => ({ ...prev, brand: e.target.value }))} className="rounded-xl mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">Ce nom sera utilisé dans tout le dashboard et les rapports.</p>
                 </div>
-
                 <Separator />
-
                 <div>
                   <Label className="mb-3 block">Plateformes à tracker</Label>
                   <div className="space-y-3">
@@ -192,46 +201,30 @@ export default function Settings() {
                           <div className={`w-3 h-3 rounded-full ${p.color}`} />
                           <span className="text-sm">{p.label}</span>
                         </div>
-                        <Switch
-                          checked={tracking.platforms[p.key] ?? false}
-                          onCheckedChange={() => togglePlatform(p.key)}
-                        />
+                        <Switch checked={tracking.platforms[p.key] ?? false} onCheckedChange={() => togglePlatform(p.key)} />
                       </div>
                     ))}
                   </div>
                 </div>
-
                 <Separator />
-
                 <div>
                   <Label className="mb-2 block">Mots-clés supplémentaires</Label>
                   <p className="text-xs text-muted-foreground mb-3">Ajoutez des termes spécifiques à surveiller en plus du nom de la marque.</p>
                   <div className="flex gap-2">
-                    <Input
-                      placeholder="Ajouter un mot-clé..."
-                      value={newKeyword}
-                      onChange={(e) => setNewKeyword(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
-                      className="rounded-xl"
-                    />
-                    <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={addKeyword}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                    <Input placeholder="Ajouter un mot-clé..." value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())} className="rounded-xl" />
+                    <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={addKeyword}><Plus className="h-4 w-4" /></Button>
                   </div>
                   {tracking.keywords.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {tracking.keywords.map((kw) => (
                         <Badge key={kw} variant="secondary" className="rounded-lg gap-1 pr-1">
                           {kw}
-                          <button onClick={() => removeKeyword(kw)} className="ml-1 hover:text-destructive">
-                            <X className="h-3 w-3" />
-                          </button>
+                          <button onClick={() => removeKeyword(kw)} className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
                         </Badge>
                       ))}
                     </div>
                   )}
                 </div>
-
                 <Button onClick={handleSaveTracking} className="w-full rounded-xl">
                   {tracking.brand ? "Mettre à jour la surveillance" : "Activer la surveillance"}
                 </Button>
@@ -245,24 +238,15 @@ export default function Settings() {
               <CardHeader><CardTitle className="text-base">Notifications</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Alertes critiques</p>
-                    <p className="text-xs text-muted-foreground">Notifications push pour les crises</p>
-                  </div>
+                  <div><p className="text-sm font-medium">Alertes critiques</p><p className="text-xs text-muted-foreground">Notifications push pour les crises</p></div>
                   <Switch checked={notifCritical} onCheckedChange={setNotifCritical} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Rapport quotidien</p>
-                    <p className="text-xs text-muted-foreground">Résumé par email chaque matin</p>
-                  </div>
+                  <div><p className="text-sm font-medium">Rapport quotidien</p><p className="text-xs text-muted-foreground">Résumé par email chaque matin</p></div>
                   <Switch checked={notifDaily} onCheckedChange={setNotifDaily} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Mentions influenceurs</p>
-                    <p className="text-xs text-muted-foreground">Alerte quand un influenceur vous mentionne</p>
-                  </div>
+                  <div><p className="text-sm font-medium">Mentions influenceurs</p><p className="text-xs text-muted-foreground">Alerte quand un influenceur vous mentionne</p></div>
                   <Switch checked={notifInfluencer} onCheckedChange={setNotifInfluencer} />
                 </div>
                 <Button onClick={handleSaveProfile} className="rounded-xl">Sauvegarder</Button>

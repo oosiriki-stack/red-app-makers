@@ -14,7 +14,7 @@ export function RecentMentions() {
   const recent = mentions.slice(0, 3);
 
   return (
-    <Card>
+    <Card className="glass-card rounded-2xl">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <MessageSquare className="h-4 w-4" /> Dernières mentions

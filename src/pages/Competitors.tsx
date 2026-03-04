@@ -1,17 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getCompetitors, getVoiceShare, influencers } from "@/data/mockData";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { TrendingUp, TrendingDown, Users } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, Download } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
+import { toast } from "sonner";
 
 const sentimentBadge = {
   positive: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   neutral: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
   negative: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
+
+function exportCompetitorsCSV(data: ReturnType<typeof getCompetitors>) {
+  const header = "Marque,Mentions,Sentiment,Part de voix,Tendance\n";
+  const rows = data.map(c => `"${c.name}",${c.mentions},${c.sentiment}%,${c.share}%,"${c.trend}"`).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "concurrents.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Competitors() {
   const competitors = getCompetitors();
@@ -20,9 +32,14 @@ export default function Competitors() {
   return (
     <AnimatedPage>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-light tracking-tight">Analyse Concurrentielle</h1>
-          <p className="text-muted-foreground">Benchmarking et radar d'influence</p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-3xl font-light tracking-tight">Analyse Concurrentielle</h1>
+            <p className="text-muted-foreground">Benchmarking et radar d'influence</p>
+          </div>
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { exportCompetitorsCSV(competitors); toast.success("Export CSV téléchargé"); }}>
+            <Download className="h-4 w-4 mr-1" /> Export CSV
+          </Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
