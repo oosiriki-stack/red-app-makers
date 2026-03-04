@@ -25,7 +25,7 @@ function getOpacity(mentions: number) {
 
 export function GeoHeatmap() {
   return (
-    <Card>
+    <Card className="glass-card rounded-2xl">
       <CardHeader>
         <CardTitle className="text-base">Répartition géographique</CardTitle>
       </CardHeader>

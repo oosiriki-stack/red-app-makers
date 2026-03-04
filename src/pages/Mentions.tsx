@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { mentions, getActivePlatforms } from "@/data/mockData";
-import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
@@ -17,12 +17,24 @@ const sentimentConfig = {
   negative: { label: "Négatif", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", icon: ThumbsDown },
 };
 
+function downloadCSV(data: typeof mentions, filename: string) {
+  const header = "ID,Source,Auteur,Contenu,Sentiment,Date,Engagement\n";
+  const rows = data.map(m => `${m.id},"${m.source}","${m.author}","${m.content.replace(/"/g, '""')}","${m.sentiment}","${m.date}",${m.engagement}`).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function Mentions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryFromUrl = searchParams.get("q") || "";
   const [sourceFilter, setSourceFilter] = useState("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
   const [selected, setSelected] = useState<typeof mentions[0] | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [extraMentions, setExtraMentions] = useState<typeof mentions>([]);
 
   useEffect(() => {
     if (queryFromUrl) {
@@ -31,8 +43,9 @@ export default function Mentions() {
   }, [queryFromUrl]);
 
   const activePlatforms = getActivePlatforms();
+  const allMentions = [...extraMentions, ...mentions];
   
-  const filtered = mentions.filter((m) => {
+  const filtered = allMentions.filter((m) => {
     if (!activePlatforms.includes(m.source)) return false;
     if (sourceFilter !== "all" && m.source !== sourceFilter) return false;
     if (sentimentFilter !== "all" && m.sentiment !== sentimentFilter) return false;
@@ -40,17 +53,49 @@ export default function Mentions() {
     return true;
   });
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      const sources = activePlatforms.length > 0 ? activePlatforms : ["X"];
+      const sentiments = ["positive", "neutral", "negative"] as const;
+      const newMention = {
+        id: Date.now(),
+        source: sources[Math.floor(Math.random() * sources.length)],
+        author: "Nouveau Utilisateur",
+        avatar: "NU",
+        content: "Nouvelle mention détectée en temps réel — simulation d'actualisation.",
+        sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
+        date: "À l'instant",
+        engagement: Math.floor(Math.random() * 500),
+      };
+      setExtraMentions(prev => [newMention, ...prev]);
+      setRefreshing(false);
+      toast.success("Flux actualisé — 1 nouvelle mention");
+    }, 1000);
+  };
+
   return (
     <AnimatedPage>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-light tracking-tight">Flux de Mentions</h1>
-          <p className="text-muted-foreground">
-            Suivi en temps réel — <strong>{filtered.length}</strong> résultat{filtered.length > 1 ? "s" : ""}
-            {queryFromUrl && (
-              <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>
-            )}
-          </p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-3xl font-light tracking-tight">Flux de Mentions</h1>
+            <p className="text-muted-foreground">
+              Suivi en temps réel — <strong>{filtered.length}</strong> résultat{filtered.length > 1 ? "s" : ""}
+              {queryFromUrl && (
+                <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>
+              )}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
+              {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+              Actualiser
+            </Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { downloadCSV(filtered, "mentions.csv"); toast.success("Export CSV téléchargé"); }}>
+              <Download className="h-4 w-4 mr-1" /> CSV
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-3 flex-wrap">

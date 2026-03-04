@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { FileText, Download, Calendar, Palette, Plus } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
+import { stats, mentions, getCompetitors, getTrackingBrand } from "@/data/mockData";
 
 const defaultReports = [
   { id: 1, title: "Rapport hebdomadaire — Semaine 6", date: "10 Fév 2026", type: "Hebdomadaire", pages: 12 },
@@ -18,6 +19,41 @@ const defaultReports = [
 ];
 
 const sections = ["Mentions", "Sentiment", "Concurrence", "Alertes", "Tendances"];
+
+function generateReportContent(title: string, selectedSections: string[]) {
+  const brand = getTrackingBrand();
+  const competitors = getCompetitors();
+  let content = `RAPPORT — ${title}\nMarque : ${brand}\nDate : ${new Date().toLocaleDateString("fr-FR")}\n${"=".repeat(50)}\n\n`;
+
+  if (selectedSections.includes("Mentions")) {
+    content += `## MENTIONS\nTotal : ${stats.totalMentions}\nDernières mentions :\n`;
+    mentions.slice(0, 5).forEach(m => { content += `- [${m.source}] ${m.author} : "${m.content}" (${m.sentiment})\n`; });
+    content += "\n";
+  }
+  if (selectedSections.includes("Sentiment")) {
+    content += `## SENTIMENT\nScore moyen : ${stats.sentimentAvg}%\nPositif : ${mentions.filter(m => m.sentiment === "positive").length} | Neutre : ${mentions.filter(m => m.sentiment === "neutral").length} | Négatif : ${mentions.filter(m => m.sentiment === "negative").length}\n\n`;
+  }
+  if (selectedSections.includes("Concurrence")) {
+    content += `## CONCURRENCE\n`;
+    competitors.forEach(c => { content += `- ${c.name} : ${c.mentions} mentions, sentiment ${c.sentiment}%, tendance ${c.trend}\n`; });
+    content += "\n";
+  }
+  if (selectedSections.includes("Alertes")) {
+    content += `## ALERTES\nAlertes actives : ${stats.activeAlerts}\n\n`;
+  }
+  if (selectedSections.includes("Tendances")) {
+    content += `## TENDANCES\nTaux de réponse : ${stats.responseRate}%\n\n`;
+  }
+  return content;
+}
+
+function downloadTextFile(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Reports() {
   const [reports, setReports] = useState(defaultReports);
@@ -42,9 +78,17 @@ export default function Reports() {
       pages: Math.floor(Math.random() * 20) + 5,
     };
     setReports(prev => [newReport, ...prev]);
+    const content = generateReportContent(newReport.title, selectedSections);
+    downloadTextFile(content, `${newReport.title.replace(/\s+/g, "_")}.txt`);
     setDialogOpen(false);
     setTitle("");
-    toast.success(`Rapport "${newReport.title}" généré en ${format.toUpperCase()}`);
+    toast.success(`Rapport "${newReport.title}" généré et téléchargé`);
+  };
+
+  const handleDownloadReport = (report: typeof defaultReports[0]) => {
+    const content = generateReportContent(report.title, sections);
+    downloadTextFile(content, `${report.title.replace(/\s+/g, "_")}.txt`);
+    toast.success(`"${report.title}" téléchargé`);
   };
 
   return (
@@ -86,8 +130,8 @@ export default function Reports() {
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
               <Download className="h-6 w-6 text-primary" />
             </div>
-            <span className="font-medium text-sm">Export PDF</span>
-            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toast.success("Téléchargement du dernier rapport lancé")}>Télécharger le dernier</Button>
+            <span className="font-medium text-sm">Export</span>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => handleDownloadReport(reports[0])}>Télécharger le dernier</Button>
           </Card>
         </div>
 
@@ -103,14 +147,13 @@ export default function Reports() {
                   <p className="text-xs text-muted-foreground">{r.date} · {r.pages} pages</p>
                 </div>
                 <Badge variant="outline" className="rounded-lg">{r.type}</Badge>
-                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toast.success(`Téléchargement de "${r.title}" lancé`)}><Download className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => handleDownloadReport(r)}><Download className="h-4 w-4" /></Button>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
 
-      {/* New Report Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="glass-card rounded-2xl">
           <DialogHeader>

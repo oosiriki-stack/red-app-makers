@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { mentionsOverTime, stats, reputationScore, trendingKeywords, getTrackingBrand, getActivePlatforms } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { TrendingUp, TrendingDown, Minus, MessageSquare, Heart, Bell, Zap, ArrowUp, Radio } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, MessageSquare, Heart, Bell, Zap, ArrowUp, Radio, RefreshCw, Loader2 } from "lucide-react";
 import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/AnimatedPage";
 import { ReputationGauge } from "@/components/ReputationGauge";
 import { GeoHeatmap } from "@/components/GeoHeatmap";
@@ -13,19 +14,14 @@ import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/componen
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div>
-        <Skeleton className="h-8 w-48 mb-2" />
-        <Skeleton className="h-4 w-64" />
-      </div>
+      <div><Skeleton className="h-8 w-48 mb-2" /><Skeleton className="h-4 w-64" /></div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-2xl" />
-        ))}
+        {Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} className="h-32 rounded-2xl" />))}
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Skeleton className="h-80 md:col-span-2 rounded-2xl" />
@@ -46,6 +42,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("Dashboard");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
 
   const brand = getTrackingBrand();
@@ -58,56 +55,55 @@ export default function Dashboard() {
     if (stored) {
       try {
         const user = JSON.parse(stored);
-        if (user.name) {
-          const firstName = user.name.split(" ")[0];
-          setGreeting(`Bonjour, ${firstName}`);
-        }
+        if (user.name) setGreeting(`Bonjour, ${user.name.split(" ")[0]}`);
       } catch {}
     }
-    if (!localStorage.getItem("arobase_tracking")) {
-      setShowOnboarding(true);
-    }
+    if (!localStorage.getItem("arobase_tracking")) setShowOnboarding(true);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+      toast.success("Données actualisées");
+    }, 1000);
+  };
 
   if (loading) return <DashboardSkeleton />;
 
   return (
     <AnimatedPage>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-light tracking-tight">{greeting}</h1>
-          <p className="text-muted-foreground">
-            {hasTracking
-              ? `Surveillance de ${brand} — ${activePlatforms.length} plateforme${activePlatforms.length > 1 ? "s" : ""} active${activePlatforms.length > 1 ? "s" : ""}`
-              : "Vue d'ensemble de votre e-réputation"}
-          </p>
-          {hasTracking && (
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Radio className="h-3 w-3 text-green-500 animate-pulse" />
-              {activePlatforms.map((p) => (
-                <Badge key={p} variant="secondary" className="text-xs rounded-lg">{p}</Badge>
-              ))}
-            </div>
-          )}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-3xl font-light tracking-tight">{greeting}</h1>
+            <p className="text-muted-foreground">
+              {hasTracking ? `Surveillance de ${brand} — ${activePlatforms.length} plateforme${activePlatforms.length > 1 ? "s" : ""} active${activePlatforms.length > 1 ? "s" : ""}` : "Vue d'ensemble de votre e-réputation"}
+            </p>
+            {hasTracking && (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <Radio className="h-3 w-3 text-green-500 animate-pulse" />
+                {activePlatforms.map((p) => (<Badge key={p} variant="secondary" className="text-xs rounded-lg">{p}</Badge>))}
+              </div>
+            )}
+          </div>
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
+            {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+            Actualiser
+          </Button>
         </div>
 
         <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-          {/* Reputation Gauge */}
           <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Score e-Réputation</CardTitle>
-              </CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Score e-Réputation</CardTitle></CardHeader>
               <CardContent className="flex flex-col items-center">
                 <ReputationGauge score={reputationScore} size={140} />
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  <ArrowUp className="h-3 w-3 text-green-500" /> +3 vs mois dernier
-                </p>
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><ArrowUp className="h-3 w-3 text-green-500" /> +3 vs mois dernier</p>
               </CardContent>
             </Card>
           </motion.div>
-
           {statCards.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -117,9 +113,7 @@ export default function Dashboard() {
                     <UITooltip>
                       <TooltipTrigger asChild>
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2 cursor-help">
-                          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Icon className="h-4 w-4 text-primary" />
-                          </div>
+                          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center"><Icon className="h-4 w-4 text-primary" /></div>
                           {stat.label}
                         </CardTitle>
                       </TooltipTrigger>
@@ -129,8 +123,7 @@ export default function Dashboard() {
                   <CardContent>
                     <div className="text-2xl font-bold">{stat.value}</div>
                     <p className={`text-xs flex items-center gap-1 ${stat.positive ? "text-muted-foreground" : "text-destructive"}`}>
-                      {stat.positive && <ArrowUp className="h-3 w-3 text-green-500" />}
-                      {stat.sub}
+                      {stat.positive && <ArrowUp className="h-3 w-3 text-green-500" />}{stat.sub}
                     </p>
                   </CardContent>
                 </Card>
@@ -139,21 +132,16 @@ export default function Dashboard() {
           })}
         </StaggerContainer>
 
-        {/* Charts */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="md:col-span-2 glass-card rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Évolution des mentions</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base">Évolution des mentions</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto -mx-2 px-2">
                 <div className="min-w-[500px]">
                   <ResponsiveContainer width="100%" height={280}>
                     <AreaChart data={mentionsOverTime}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                      <XAxis dataKey="date" className="text-xs" />
-                      <YAxis className="text-xs" />
-                      <Tooltip />
+                      <XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip />
                       <Area type="monotone" dataKey="positive" stackId="1" stroke="hsl(142, 71%, 45%)" fill="hsl(142, 71%, 45%)" fillOpacity={0.2} />
                       <Area type="monotone" dataKey="neutral" stackId="1" stroke="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" fillOpacity={0.2} />
                       <Area type="monotone" dataKey="negative" stackId="1" stroke="hsl(0, 84%, 60%)" fill="hsl(0, 84%, 60%)" fillOpacity={0.2} />
@@ -163,11 +151,8 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="glass-card rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Tendances & Mots-clés</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-base">Tendances & Mots-clés</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {trendingKeywords.map((kw) => (
@@ -186,30 +171,20 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Heatmap + Recent Mentions */}
         <div className="grid gap-4 md:grid-cols-2">
           <GeoHeatmap />
           <RecentMentions />
         </div>
       </div>
 
-      {/* Onboarding Dialog */}
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
         <DialogContent className="glass-card rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Bienvenue sur @robase 👋</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Bienvenue sur @robase 👋</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Pour commencer à surveiller votre e-réputation, configurez le nom de votre marque et les plateformes à tracker.
-            </p>
+            <p className="text-sm text-muted-foreground">Pour commencer à surveiller votre e-réputation, configurez le nom de votre marque et les plateformes à tracker.</p>
             <div className="flex gap-2">
-              <Button className="flex-1 rounded-xl" onClick={() => { setShowOnboarding(false); navigate("/settings?tab=surveillance"); }}>
-                Configurer maintenant
-              </Button>
-              <Button variant="outline" className="rounded-xl" onClick={() => setShowOnboarding(false)}>
-                Plus tard
-              </Button>
+              <Button className="flex-1 rounded-xl" onClick={() => { setShowOnboarding(false); navigate("/settings?tab=surveillance"); }}>Configurer maintenant</Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => setShowOnboarding(false)}>Plus tard</Button>
             </div>
           </div>
         </DialogContent>
