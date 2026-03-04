@@ -1,60 +1,83 @@
+# Phase 5 — Polissage Final et Fonctionnalites Manquantes, change la couleurs de la police de connexion qui est blanche mets la en noir pour que cela soit visible
 
-
-# Phase Finale+ — Entreprise Surveillee, Trackers Actifs et Finalisation
-
-## Objectif
-Ajouter un onglet "Surveillance" dans les parametres pour configurer le nom de l'entreprise a surveiller, activer/desactiver les trackers par plateforme, et rendre ces donnees dynamiques dans toute l'application.
+Toutes les phases precedentes sont implementees. Cette derniere phase comble les lacunes restantes pour une application veritablement complete et utilisable.
 
 ---
 
-## 1. Onglet Surveillance dans Settings
+## 1. Export de Donnees Fonctionnel
 
-Transformer `Settings.tsx` en page a onglets (Tabs) avec 3 sections :
-- **Profil** : formulaire existant (nom, email, entreprise)
-- **Surveillance** : nouveau — nom de la marque a surveiller, liste de plateformes avec switches on/off (X, Facebook, Instagram, LinkedIn, TikTok, Blog, Google), mots-cles supplementaires a tracker (champ texte avec tags)
-- **Notifications** : section existante
+Les boutons "Telecharger" dans Rapports ne font qu'afficher un toast. Les rendre fonctionnels :
 
-Les donnees de surveillance sont persistees dans `localStorage` (`arobase_tracking`).
+- **Export CSV** des mentions filtrees (bouton dans la page Mentions)
+- **Export CSV** du tableau concurrentiel (bouton dans Competitors)
+- **Generation de contenu telechargeable** dans Rapports (fichier texte avec les donnees du rapport)
 
-## 2. Donnees Dynamiques — Nom de l'Entreprise
+Utiliser `Blob` + `URL.createObjectURL` + `<a download>` pour generer les fichiers cote client.
 
-Le nom de la marque surveillee (`arobase_tracking.brand`) est utilise dynamiquement dans :
-- `Dashboard.tsx` : sous-titre "Vue d'ensemble de [Marque]" au lieu du texte statique
-- `mockData.ts` : remplacer "Votre Marque" dans `competitors` et `voiceShare` par lecture du nom stocke
-- `Competitors.tsx` : afficher le nom dynamique
-- `RecentMentions.tsx` et `GeoHeatmap.tsx` : pas de changement necessaire (donnees mock)
+**Fichiers modifies** : `Mentions.tsx`, `Competitors.tsx`, `Reports.tsx`
 
-## 3. Trackers Actifs — Indicateur Visuel
+## 2. Composants Glass Manquants
 
-- Dans le **Dashboard**, ajouter une petite barre sous le titre montrant les plateformes actives avec des badges colores (ex: "X ✓", "Instagram ✓", "Blog ✗")
-- Dans la **sidebar**, ajouter un indicateur vert "Tracking actif" a cote du logo quand au moins une plateforme est activee
-- Sur la page **Mentions**, filtrer automatiquement les sources en fonction des plateformes activees dans les settings
+`GeoHeatmap.tsx` et `RecentMentions.tsx` n'utilisent pas encore le style `glass-card` et `rounded-2xl`. Les mettre a jour pour la coherence visuelle.
 
-## 4. Finalisation de l'Application
+**Fichiers modifies** : `GeoHeatmap.tsx`, `RecentMentions.tsx`
 
-### Mentions
-- Relier les filtres de source aux plateformes activees dans les trackers
-- N'afficher dans le select que les sources activees
+## 3. Simulation de Rafraichissement en Temps Reel
 
-### Dashboard
-- Afficher le nombre de plateformes actives dans une stat card supplementaire ou dans le sous-titre
-- Le greeting inclut le nom de la marque : "Bonjour Jean — Surveillance de [Marque]"
+Ajouter un bouton "Actualiser" dans le Dashboard et les Mentions qui :
 
-### Onboarding initial
-- Au premier acces (pas de `arobase_tracking` dans localStorage), afficher un dialog de bienvenue invitant l'utilisateur a configurer sa marque avant d'utiliser l'app. Bouton "Configurer" redirige vers `/settings` sur l'onglet Surveillance.
+- Affiche un spinner pendant 1s
+- Simule l'ajout d'une nouvelle mention aleatoire dans la liste
+- Met a jour le compteur de mentions dans les stats
+
+**Fichiers modifies** : `Dashboard.tsx`, `Mentions.tsx`
+
+## 4. Page Profil Complete
+
+Le lien "Mon profil" dans le dropdown du header redirige vers Settings. Ajouter plus de profondeur :
+
+- Afficher la date d'inscription (simulee, stockee dans localStorage a l'inscription)
+- Afficher le plan actif (stocke dans localStorage)
+- Bouton "Changer de plan" qui redirige vers `/pricing`
+
+**Fichier modifie** : `Settings.tsx`
+
+## 5. Amelioration de la Page Alertes
+
+- Ajouter un **filtre par severite** (critique/warning/info) avec des boutons toggle
+- Afficher un compteur par type d'alerte en haut de la page
+
+**Fichier modifie** : `Alerts.tsx`
+
+## 6. Footer Global et Version
+
+Ajouter un petit footer dans `AppLayout.tsx` affichant "© 2026 @robase — v1.0" en bas de la zone de contenu.
+
+**Fichier modifie** : `AppLayout.tsx`
+
+## 7. Mot de Passe Oublie
+
+Ajouter un lien "Mot de passe oublie ?" sur la page Login qui ouvre un dialog avec un champ email et un bouton "Envoyer le lien" (simulation avec toast).
+
+**Fichier modifie** : `Login.tsx`
 
 ---
 
 ## Details techniques
 
-| Fichier | Modifications |
-|---|---|
-| `src/pages/Settings.tsx` | Refonte avec Tabs (Profil / Surveillance / Notifications), formulaire marque + plateformes + mots-cles |
-| `src/pages/Dashboard.tsx` | Lecture `arobase_tracking`, affichage dynamique du nom de marque et plateformes actives |
-| `src/pages/Mentions.tsx` | Filtrage des sources basee sur les trackers actifs |
-| `src/components/layout/AppSidebar.tsx` | Indicateur "Tracking actif" dans le footer |
-| `src/data/mockData.ts` | Fonction helper pour remplacer "Votre Marque" dynamiquement |
-| `src/pages/Competitors.tsx` | Nom dynamique de la marque |
 
-**Aucun nouveau fichier a creer** — uniquement des modifications de fichiers existants.
+| Fichier                               | Modifications                                     |
+| ------------------------------------- | ------------------------------------------------- |
+| `src/pages/Mentions.tsx`              | Bouton export CSV, bouton actualiser              |
+| `src/pages/Competitors.tsx`           | Bouton export CSV du tableau                      |
+| `src/pages/Reports.tsx`               | Telechargement reel de fichier texte              |
+| `src/components/GeoHeatmap.tsx`       | Style glass-card rounded-2xl                      |
+| `src/components/RecentMentions.tsx`   | Style glass-card rounded-2xl                      |
+| `src/pages/Dashboard.tsx`             | Bouton actualiser avec spinner                    |
+| `src/pages/Settings.tsx`              | Date inscription, plan actif, bouton changer plan |
+| `src/pages/Alerts.tsx`                | Filtre par severite, compteurs                    |
+| `src/components/layout/AppLayout.tsx` | Footer global                                     |
+| `src/pages/Login.tsx`                 | Dialog mot de passe oublie                        |
 
+
+**Aucun nouveau fichier a creer.**
