@@ -94,7 +94,7 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <StaggerContainer className="grid gap-4 grid-cols-2 lg:grid-cols-5">
           <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Score e-Réputation</CardTitle></CardHeader>

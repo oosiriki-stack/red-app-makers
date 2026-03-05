@@ -86,7 +86,7 @@ export default function Pricing() {
 
         {/* Annual promo banner */}
         {annual && (
-          <div className="glass-card rounded-2xl p-4 text-center max-w-2xl mx-auto glow-red-subtle">
+          <div className="glass-card rounded-2xl p-4 text-center max-w-2xl mx-auto glow-gold-subtle">
             <div className="flex items-center justify-center gap-2 flex-wrap">
               <Badge className="bg-primary text-primary-foreground text-sm px-3 py-1">
                 🔥 Économisez 46%
@@ -130,7 +130,7 @@ export default function Pricing() {
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-orange-500" />
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-amber-400" />
                 )}
                 {plan.popular && (
                   <Badge className="absolute -top-0 right-4 top-4 bg-primary text-primary-foreground">

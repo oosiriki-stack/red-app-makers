@@ -9,9 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
-import { X, Plus, CreditCard } from "lucide-react";
+import { X, Plus, CreditCard, Type } from "lucide-react";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -43,6 +44,9 @@ function loadTracking(): TrackingConfig {
   return defaultTracking;
 }
 
+const FONT_LEVELS = ["small", "normal", "large"] as const;
+const FONT_LABELS: Record<string, string> = { small: "Petit", normal: "Normal", large: "Grand" };
+
 export default function Settings() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -59,6 +63,11 @@ export default function Settings() {
 
   const [tracking, setTracking] = useState<TrackingConfig>(loadTracking);
   const [newKeyword, setNewKeyword] = useState("");
+
+  const [fontLevel, setFontLevel] = useState(() => {
+    const saved = localStorage.getItem("arobase_font_size");
+    return FONT_LEVELS.indexOf(saved as any) >= 0 ? FONT_LEVELS.indexOf(saved as any) : 1;
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("arobase_user");
@@ -83,6 +92,15 @@ export default function Settings() {
       } catch {}
     }
   }, []);
+
+  const handleFontChange = (value: number[]) => {
+    const idx = value[0];
+    setFontLevel(idx);
+    const level = FONT_LEVELS[idx];
+    FONT_LEVELS.forEach(l => document.documentElement.classList.remove(`font-${l}`));
+    document.documentElement.classList.add(`font-${level}`);
+    localStorage.setItem("arobase_font_size", level);
+  };
 
   const handleSaveProfile = () => {
     localStorage.setItem("arobase_user", JSON.stringify({ name, email, company, registeredAt: registeredAt || new Date().toISOString() }));
@@ -128,6 +146,7 @@ export default function Settings() {
             <TabsTrigger value="profile" className="flex-1 rounded-lg">Profil</TabsTrigger>
             <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
             <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
+            <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
           </TabsList>
 
           {/* ── Profil ── */}
@@ -146,7 +165,6 @@ export default function Settings() {
                 </div>
                 <Separator />
 
-                {/* Registration date & plan */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Inscrit le</span>
                   <span>{registeredAt ? new Date(registeredAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</span>
@@ -250,6 +268,35 @@ export default function Settings() {
                   <Switch checked={notifInfluencer} onCheckedChange={setNotifInfluencer} />
                 </div>
                 <Button onClick={handleSaveProfile} className="rounded-xl">Sauvegarder</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Accessibilité ── */}
+          <TabsContent value="accessibilite">
+            <Card className="glass-card rounded-2xl">
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Type className="h-4 w-4" /> Taille de la police</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-sm text-muted-foreground">Ajustez la taille du texte dans toute l'application.</p>
+                <div className="space-y-4">
+                  <Slider
+                    value={[fontLevel]}
+                    onValueChange={handleFontChange}
+                    min={0}
+                    max={2}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    {FONT_LEVELS.map((l, i) => (
+                      <span key={l} className={fontLevel === i ? "text-primary font-medium" : ""}>{FONT_LABELS[l]}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <p className="text-sm font-medium mb-1">Aperçu</p>
+                  <p className="text-muted-foreground">Ceci est un texte d'exemple pour visualiser la taille de police sélectionnée.</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
