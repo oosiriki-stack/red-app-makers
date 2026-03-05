@@ -1,83 +1,72 @@
-# Phase 5 — Polissage Final et Fonctionnalites Manquantes, change la couleurs de la police de connexion qui est blanche mets la en noir pour que cela soit visible
 
-Toutes les phases precedentes sont implementees. Cette derniere phase comble les lacunes restantes pour une application veritablement complete et utilisable.
+
+# Phase 6 — Refonte Visuelle Jaune Apple + Mobile-First + Taille de Police Ajustable
+
+## Objectif
+Transformer le theme de l'application du rouge au jaune/or, appliquer un design Apple encore plus epure, optimiser l'experience mobile, et ajouter un controle de taille de police dans les parametres.
 
 ---
 
-## 1. Export de Donnees Fonctionnel
+## 1. Refonte Couleur : Rouge → Jaune/Or
 
-Les boutons "Telecharger" dans Rapports ne font qu'afficher un toast. Les rendre fonctionnels :
+Modifier `src/index.css` pour remplacer toutes les references `primary` (rouge `0 72%`) par un jaune/or Apple (`45 93% 47%` — similaire au jaune systeme Apple). Mettre a jour :
+- Les variables CSS light et dark (--primary, --ring, --accent, --sidebar-primary, etc.)
+- Les gradients (.text-gradient-red → .text-gradient-gold, .auth-gradient-bg, .glow-red → .glow-gold)
+- Les orbs sur les pages auth
 
-- **Export CSV** des mentions filtrees (bouton dans la page Mentions)
-- **Export CSV** du tableau concurrentiel (bouton dans Competitors)
-- **Generation de contenu telechargeable** dans Rapports (fichier texte avec les donnees du rapport)
+## 2. Design Apple Renforce
 
-Utiliser `Blob` + `URL.createObjectURL` + `<a download>` pour generer les fichiers cote client.
+- **Sidebar** : fond plus epure, espacement plus genereux, police plus fine
+- **Header** : hauteur augmentee a `h-16`, espacement respire, icones plus legeres
+- **Cards** : ombres encore plus subtiles, bordures quasi invisibles, padding augmente
+- **Boutons** : coins plus arrondis (rounded-2xl partout), poids de police `medium`
+- Ajuster `tailwind.config.ts` : `--radius: 1.25rem`
 
-**Fichiers modifies** : `Mentions.tsx`, `Competitors.tsx`, `Reports.tsx`
+## 3. Vue Mobile Optimisee
 
-## 2. Composants Glass Manquants
+- **AppLayout** : padding reduit sur mobile (`p-3` au lieu de `p-4`)
+- **Dashboard** : grille stat cards en `grid-cols-2` sur mobile au lieu de 1
+- **Sidebar** : overlay mobile avec animation slide-in (deja supporte par shadcn mais verifier le comportement)
+- **Header** : avatar et icones plus compacts sur mobile
+- **Toutes les pages** : max-width responsive, textes tronques si besoin
 
-`GeoHeatmap.tsx` et `RecentMentions.tsx` n'utilisent pas encore le style `glass-card` et `rounded-2xl`. Les mettre a jour pour la coherence visuelle.
+## 4. Controle de Taille de Police
 
-**Fichiers modifies** : `GeoHeatmap.tsx`, `RecentMentions.tsx`
+Ajouter dans `Settings.tsx` (onglet Profil ou nouveau onglet Accessibilite) :
+- Un slider (3 niveaux : Petit / Normal / Grand) qui modifie une classe CSS sur `<html>`
+- Persistance dans localStorage (`arobase_font_size`)
+- Application dans `App.tsx` ou `main.tsx` au chargement
+- Niveaux : `text-sm` (14px base), normal (16px), `text-lg` (18px base)
 
-## 3. Simulation de Rafraichissement en Temps Reel
+## 5. Coherence Couleur dans les Pages
 
-Ajouter un bouton "Actualiser" dans le Dashboard et les Mentions qui :
+Mettre a jour les references explicites au rouge dans :
+- `AppSidebar.tsx` : `.glow-red-subtle` → `.glow-gold-subtle`
+- `Login.tsx`, `Register.tsx` : gradient auth, couleurs des orbs
+- `Pricing.tsx` : gradient barre populaire, badges
+- `Dashboard.tsx` : badges plateformes
+- `ReputationGauge.tsx` : couleur de l'arc du gauge
 
-- Affiche un spinner pendant 1s
-- Simule l'ajout d'une nouvelle mention aleatoire dans la liste
-- Met a jour le compteur de mentions dans les stats
+## 6. Note sur les API Reseaux Sociaux
 
-**Fichiers modifies** : `Dashboard.tsx`, `Mentions.tsx`
-
-## 4. Page Profil Complete
-
-Le lien "Mon profil" dans le dropdown du header redirige vers Settings. Ajouter plus de profondeur :
-
-- Afficher la date d'inscription (simulee, stockee dans localStorage a l'inscription)
-- Afficher le plan actif (stocke dans localStorage)
-- Bouton "Changer de plan" qui redirige vers `/pricing`
-
-**Fichier modifie** : `Settings.tsx`
-
-## 5. Amelioration de la Page Alertes
-
-- Ajouter un **filtre par severite** (critique/warning/info) avec des boutons toggle
-- Afficher un compteur par type d'alerte en haut de la page
-
-**Fichier modifie** : `Alerts.tsx`
-
-## 6. Footer Global et Version
-
-Ajouter un petit footer dans `AppLayout.tsx` affichant "© 2026 @robase — v1.0" en bas de la zone de contenu.
-
-**Fichier modifie** : `AppLayout.tsx`
-
-## 7. Mot de Passe Oublie
-
-Ajouter un lien "Mot de passe oublie ?" sur la page Login qui ouvre un dialog avec un champ email et un bouton "Envoyer le lien" (simulation avec toast).
-
-**Fichier modifie** : `Login.tsx`
+Les API reelles des reseaux sociaux (X, Facebook, Instagram, etc.) necessitent des cles API et un backend. L'app fonctionne actuellement avec des donnees simulees. Pour activer de vraies API, il faudrait connecter Supabase/Cloud et configurer des edge functions avec les cles appropriees. Cette phase prepare l'architecture mais garde la simulation active.
 
 ---
 
 ## Details techniques
 
+| Fichier | Modifications |
+|---|---|
+| `src/index.css` | Refonte complete des variables couleur (rouge → jaune/or), nouveaux gradients, glow gold |
+| `tailwind.config.ts` | Radius augmente |
+| `src/components/layout/AppSidebar.tsx` | Classes glow gold, espacement Apple |
+| `src/components/layout/AppHeader.tsx` | Hauteur 16, espacement mobile |
+| `src/components/layout/AppLayout.tsx` | Padding mobile reduit |
+| `src/pages/Login.tsx` | Gradient jaune, orbs dores |
+| `src/pages/Register.tsx` | Idem Login |
+| `src/pages/Settings.tsx` | Slider taille de police + persistance |
+| `src/pages/Dashboard.tsx` | Badges couleur or |
+| `src/pages/Pricing.tsx` | Gradient et badges or |
+| `src/components/ReputationGauge.tsx` | Arc couleur or |
+| `src/main.tsx` | Restauration taille de police au chargement |
 
-| Fichier                               | Modifications                                     |
-| ------------------------------------- | ------------------------------------------------- |
-| `src/pages/Mentions.tsx`              | Bouton export CSV, bouton actualiser              |
-| `src/pages/Competitors.tsx`           | Bouton export CSV du tableau                      |
-| `src/pages/Reports.tsx`               | Telechargement reel de fichier texte              |
-| `src/components/GeoHeatmap.tsx`       | Style glass-card rounded-2xl                      |
-| `src/components/RecentMentions.tsx`   | Style glass-card rounded-2xl                      |
-| `src/pages/Dashboard.tsx`             | Bouton actualiser avec spinner                    |
-| `src/pages/Settings.tsx`              | Date inscription, plan actif, bouton changer plan |
-| `src/pages/Alerts.tsx`                | Filtre par severite, compteurs                    |
-| `src/components/layout/AppLayout.tsx` | Footer global                                     |
-| `src/pages/Login.tsx`                 | Dialog mot de passe oublie                        |
-
-
-**Aucun nouveau fichier a creer.**
