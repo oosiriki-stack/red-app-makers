@@ -69,7 +69,7 @@ export function AppHeader() {
   };
 
   return (
-    <header className="h-14 border-b border-white/10 flex items-center gap-3 px-4 glass-header">
+    <header className="h-16 border-b border-white/10 flex items-center gap-3 px-4 md:px-6 glass-header">
       <SidebarTrigger />
 
       {/* Desktop search */}

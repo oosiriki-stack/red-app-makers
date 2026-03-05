@@ -48,7 +48,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="glass-sidebar border-r border-white/10">
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-red-subtle">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-gold-subtle">
             <AtSign className="w-5 h-5 text-primary-foreground" />
           </div>
           {!collapsed && (

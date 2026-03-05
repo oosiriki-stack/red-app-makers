@@ -43,7 +43,7 @@ export default function Login() {
       <Card className="w-full max-w-md glass-card border-white/30 relative z-10">
         <CardHeader className="text-center pb-2">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center glow-red-subtle">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center glow-gold-subtle">
               <AtSign className="w-7 h-7 text-foreground" />
             </div>
           </div>
