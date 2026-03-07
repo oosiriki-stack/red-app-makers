@@ -48,6 +48,7 @@ export default function Dashboard() {
 
   const brand = getTrackingBrand();
   const activePlatforms = getActivePlatforms();
+  useNotifications();
   const hasTracking = !!localStorage.getItem("arobase_tracking");
 
   useEffect(() => {

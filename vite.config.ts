@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
         name: "@robase — Veille e-Réputation IA",
         short_name: "@robase",
         description: "Plateforme de veille e-réputationnelle augmentée par IA",
-        theme_color: "#DC2626",
+        theme_color: "#E5A100",
         background_color: "#FAFAFA",
         display: "standalone",
         start_url: "/",
