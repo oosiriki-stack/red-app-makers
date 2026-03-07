@@ -49,12 +49,12 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white/80">Prénom</Label>
-                <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+                <Label className="text-foreground/80">Prénom</Label>
+                <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               </div>
               <div>
-                <Label className="text-white/80">Nom</Label>
-                <Input placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+                <Label className="text-foreground/80">Nom</Label>
+                <Input placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               </div>
             </div>
             <div>
