@@ -19,7 +19,7 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="text-6xl font-bold text-gradient-red mb-2">404</div>
+        <div className="text-6xl font-bold text-gradient-gold mb-2">404</div>
         <h1 className="text-xl font-bold mb-1">@robase</h1>
         <p className="text-muted-foreground mb-6">
           Cette page n'existe pas ou a été déplacée. Retournez au tableau de bord pour continuer.

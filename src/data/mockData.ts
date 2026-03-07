@@ -74,10 +74,10 @@ export function getCompetitors() {
 export function getVoiceShare() {
   const brand = getTrackingBrand();
   return [
-    { name: brand, value: 35, fill: "hsl(0, 72%, 51%)" },
-    { name: "ConcurrentA", value: 26, fill: "hsl(0, 0%, 60%)" },
-    { name: "ConcurrentB", value: 23, fill: "hsl(0, 40%, 70%)" },
-    { name: "ConcurrentC", value: 16, fill: "hsl(0, 0%, 80%)" },
+    { name: brand, value: 35, fill: "hsl(45, 93%, 47%)" },
+    { name: "ConcurrentA", value: 26, fill: "hsl(38, 80%, 60%)" },
+    { name: "ConcurrentB", value: 23, fill: "hsl(30, 70%, 70%)" },
+    { name: "ConcurrentC", value: 16, fill: "hsl(45, 30%, 80%)" },
   ];
 }
 

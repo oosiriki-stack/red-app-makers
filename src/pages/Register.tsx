@@ -33,42 +33,42 @@ export default function Register() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <Card className="w-full max-w-md glass-card border-white/30 relative z-10">
+      <Card className="w-full max-w-md glass-card border-border/30 relative z-10">
         <CardHeader className="text-center pb-2">
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center glow-gold-subtle">
-              <AtSign className="w-7 h-7 text-white" />
+              <AtSign className="w-7 h-7 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-light text-white">
+          <CardTitle className="text-3xl font-light text-foreground">
             @robase
           </CardTitle>
-          <p className="text-sm text-white/70 mt-1">Créez votre compte</p>
+          <p className="text-sm text-muted-foreground mt-1">Créez votre compte</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-white/80">Prénom</Label>
-                <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+                <Label className="text-foreground/80">Prénom</Label>
+                <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               </div>
               <div>
-                <Label className="text-white/80">Nom</Label>
-                <Input placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+                <Label className="text-foreground/80">Nom</Label>
+                <Input placeholder="Dupont" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               </div>
             </div>
             <div>
-              <Label className="text-white/80">Email</Label>
-              <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+              <Label className="text-foreground/80">Email</Label>
+              <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <div>
-              <Label className="text-white/80">Mot de passe</Label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+              <Label className="text-foreground/80">Mot de passe</Label>
+              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <div>
-              <Label className="text-white/80">Rôle</Label>
+              <Label className="text-foreground/80">Rôle</Label>
               <Select defaultValue="analyst">
-                <SelectTrigger className="bg-white/10 border-white/20 text-white"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-background/50 border-border text-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
@@ -80,9 +80,9 @@ export default function Register() {
             <Button type="submit" className="w-full bg-white text-primary hover:bg-white/90 font-semibold text-base h-11">
               Créer mon compte
             </Button>
-            <p className="text-sm text-center text-white/70">
+            <p className="text-sm text-center text-muted-foreground">
               Déjà un compte ?{" "}
-              <Link to="/login" className="text-white hover:underline font-medium">Se connecter</Link>
+              <Link to="/login" className="text-foreground hover:underline font-medium">Se connecter</Link>
             </p>
           </form>
         </CardContent>
