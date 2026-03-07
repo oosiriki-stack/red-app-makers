@@ -72,7 +72,7 @@ export default function Pricing() {
     } else if (plan.name === "Entreprise") {
       toast.info("Contactez-nous à contact@arobase.ai pour un devis personnalisé");
     } else {
-      toast.info("Pour souscrire, choisissez l'offre annuelle Pro à 5 000 FCFA via Wave");
+      toast.info("Pour souscrire, choisissez l'offre Pro via Wave");
     }
   };
 
