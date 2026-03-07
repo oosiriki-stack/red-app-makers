@@ -66,9 +66,9 @@ export default function Register() {
               <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <div>
-              <Label className="text-white/80">Rôle</Label>
+              <Label className="text-foreground/80">Rôle</Label>
               <Select defaultValue="analyst">
-                <SelectTrigger className="bg-white/10 border-white/20 text-white"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-background/50 border-border text-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
