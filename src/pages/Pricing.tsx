@@ -28,8 +28,8 @@ const plans = [
   {
     name: "Pro",
     icon: Sparkles,
-    monthlyPrice: "45 000",
-    yearlyPrice: "5 000",
+    monthlyPrice: "25 000",
+    yearlyPrice: "250 000",
     period: "FCFA",
     features: [
       "Mentions illimitées",
