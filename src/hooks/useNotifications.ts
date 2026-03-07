@@ -24,7 +24,7 @@ export function useNotifications() {
       const randomMention = mentions[Math.floor(Math.random() * mentions.length)];
       if (Notification.permission === "granted") {
         new Notification("@robase — Nouvelle mention", {
-          body: `${randomMention.author} sur ${randomMention.platform}: "${randomMention.content.slice(0, 80)}..."`,
+          body: `${randomMention.author} sur ${randomMention.source}: "${randomMention.content.slice(0, 80)}..."`,
           icon: "/favicon.svg",
           tag: `mention-${randomMention.id}`,
         });
