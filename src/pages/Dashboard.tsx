@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from "@/hooks/useNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export default function Dashboard() {
 
   const brand = getTrackingBrand();
   const activePlatforms = getActivePlatforms();
+  useNotifications();
   const hasTracking = !!localStorage.getItem("arobase_tracking");
 
   useEffect(() => {

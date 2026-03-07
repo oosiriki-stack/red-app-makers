@@ -28,8 +28,8 @@ const plans = [
   {
     name: "Pro",
     icon: Sparkles,
-    monthlyPrice: "45 000",
-    yearlyPrice: "5 000",
+    monthlyPrice: "25 000",
+    yearlyPrice: "250 000",
     period: "FCFA",
     features: [
       "Mentions illimitées",
@@ -72,7 +72,7 @@ export default function Pricing() {
     } else if (plan.name === "Entreprise") {
       toast.info("Contactez-nous à contact@arobase.ai pour un devis personnalisé");
     } else {
-      toast.info("Pour souscrire, choisissez l'offre annuelle Pro à 5 000 FCFA via Wave");
+      toast.info("Pour souscrire, choisissez l'offre Pro via Wave");
     }
   };
 
@@ -92,7 +92,7 @@ export default function Pricing() {
                 🔥 Économisez 46%
               </Badge>
               <span className="text-sm font-medium">
-                Offre annuelle Pro à <strong className="text-primary">5 000 FCFA</strong> seulement !
+                Offre annuelle Pro à <strong className="text-primary">250 000 FCFA</strong> !
               </span>
             </div>
           </div>
