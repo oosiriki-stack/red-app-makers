@@ -92,7 +92,7 @@ export default function Pricing() {
                 🔥 Économisez 46%
               </Badge>
               <span className="text-sm font-medium">
-                Offre annuelle Pro à <strong className="text-primary">5 000 FCFA</strong> seulement !
+                Offre annuelle Pro à <strong className="text-primary">250 000 FCFA</strong> !
               </span>
             </div>
           </div>
