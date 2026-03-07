@@ -80,9 +80,9 @@ export default function Register() {
             <Button type="submit" className="w-full bg-white text-primary hover:bg-white/90 font-semibold text-base h-11">
               Créer mon compte
             </Button>
-            <p className="text-sm text-center text-white/70">
+            <p className="text-sm text-center text-muted-foreground">
               Déjà un compte ?{" "}
-              <Link to="/login" className="text-white hover:underline font-medium">Se connecter</Link>
+              <Link to="/login" className="text-foreground hover:underline font-medium">Se connecter</Link>
             </p>
           </form>
         </CardContent>
