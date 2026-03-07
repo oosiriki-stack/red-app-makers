@@ -58,8 +58,8 @@ export default function Register() {
               </div>
             </div>
             <div>
-              <Label className="text-white/80">Email</Label>
-              <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/40" />
+              <Label className="text-foreground/80">Email</Label>
+              <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <div>
               <Label className="text-white/80">Mot de passe</Label>
