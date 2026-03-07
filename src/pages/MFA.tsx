@@ -51,8 +51,8 @@ export default function MFA() {
             </InputOTP>
           </div>
           <Button onClick={handleVerify} className="w-full bg-white text-primary hover:bg-white/90 font-semibold h-11">Vérifier</Button>
-          <p className="text-sm text-center text-white/70">
-            <Link to="/login" className="text-white hover:underline">Retour à la connexion</Link>
+          <p className="text-sm text-center text-muted-foreground">
+            <Link to="/login" className="text-foreground hover:underline">Retour à la connexion</Link>
           </p>
         </CardContent>
       </Card>
