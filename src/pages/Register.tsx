@@ -40,10 +40,10 @@ export default function Register() {
               <AtSign className="w-7 h-7 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-light text-white">
+          <CardTitle className="text-3xl font-light text-foreground">
             @robase
           </CardTitle>
-          <p className="text-sm text-white/70 mt-1">Créez votre compte</p>
+          <p className="text-sm text-muted-foreground mt-1">Créez votre compte</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
