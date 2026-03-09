@@ -14,13 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentions: {
+        Row: {
+          author: string
+          avatar: string | null
+          content: string
+          created_at: string
+          engagement: number | null
+          id: string
+          mention_date: string
+          sentiment: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          author?: string
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          engagement?: number | null
+          id?: string
+          mention_date?: string
+          sentiment?: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          author?: string
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          engagement?: number | null
+          id?: string
+          mention_date?: string
+          sentiment?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monitoring_settings: {
+        Row: {
+          brand: string
+          created_at: string
+          id: string
+          platforms: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string
+          created_at?: string
+          id?: string
+          platforms?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          id?: string
+          platforms?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string
+          id: string
+          name?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          plan: string
+          start_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan?: string
+          start_date?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan?: string
+          start_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_owns_resource: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
