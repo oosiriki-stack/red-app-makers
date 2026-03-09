@@ -16,7 +16,7 @@ import Pricing from "@/pages/Pricing";
 import Install from "@/pages/Install";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
-import MFA from "@/pages/MFA";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,18 +30,18 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/mfa" element={<MFA />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<AuthGuard />}>
             <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/mentions" element={<Mentions />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/competitors" element={<Competitors />} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/install" element={<Install />} />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/mentions" element={<Mentions />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/competitors" element={<Competitors />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/install" element={<Install />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

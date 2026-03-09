@@ -12,39 +12,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { alerts } from "@/data/mockData";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AppHeader() {
-  const [dark, setDark] = useState(() => {
-    const saved = localStorage.getItem("arobase_dark");
-    return saved === "true";
-  });
+  const [dark, setDark] = useState(() => localStorage.getItem("arobase_dark") === "true");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [userName, setUserName] = useState("AD");
+  const [initials, setInitials] = useState("U");
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  // Restore dark mode on mount
   useEffect(() => {
     if (dark) document.documentElement.classList.add("dark");
   }, []);
 
-  // Compute unread alerts count
-  const readIds: number[] = JSON.parse(localStorage.getItem("arobase_read_alerts") || "[]");
-  const unreadCount = alerts.filter(a => !a.read && !readIds.includes(a.id)).length;
-
+  // Load profile initials
   useEffect(() => {
-    const stored = localStorage.getItem("arobase_user");
-    if (stored) {
-      try {
-        const user = JSON.parse(stored);
-        const initials = user.name
-          ? user.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
-          : "AD";
-        setUserName(initials);
-      } catch {}
-    }
-  }, []);
+    if (!user) return;
+    supabase.from("profiles").select("name").eq("id", user.id).single().then(({ data }) => {
+      if (data?.name) {
+        const parts = data.name.split(" ").filter(Boolean);
+        setInitials(parts.map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U");
+      }
+    });
+  }, [user]);
+
+  // Load unread alerts count
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false).then(({ count }) => {
+      setUnreadCount(count ?? 0);
+    });
+  }, [user]);
 
   const toggleDark = () => {
     const next = !dark;
@@ -53,9 +54,8 @@ export function AppHeader() {
     localStorage.setItem("arobase_dark", String(next));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("arobase_user");
-    localStorage.removeItem("arobase_logged_in");
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
@@ -72,20 +72,13 @@ export function AppHeader() {
     <header className="h-16 border-b border-white/10 flex items-center gap-3 px-4 md:px-6 glass-header">
       <SidebarTrigger />
 
-      {/* Desktop search */}
       <form onSubmit={handleSearch} className="flex-1 max-w-md hidden sm:block">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher des mentions..."
-            className="pl-9 h-9 bg-muted/50 border-0 rounded-xl"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <Input placeholder="Rechercher des mentions..." className="pl-9 h-9 bg-muted/50 border-0 rounded-xl" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
       </form>
 
-      {/* Mobile search toggle */}
       <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setSearchOpen(!searchOpen)}>
         <Search className="h-4 w-4" />
       </Button>
@@ -108,7 +101,7 @@ export function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-xl">
               <Avatar className="h-7 w-7 ring-2 ring-primary/20">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{userName}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -120,18 +113,11 @@ export function AppHeader() {
         </DropdownMenu>
       </div>
 
-      {/* Mobile search bar */}
       {searchOpen && (
         <form onSubmit={handleSearch} className="absolute top-14 left-0 right-0 p-3 glass-header sm:hidden z-50">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              className="pl-9 h-9 bg-muted/50 border-0 rounded-xl"
-              autoFocus
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Input placeholder="Rechercher..." className="pl-9 h-9 bg-muted/50 border-0 rounded-xl" autoFocus value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </form>
       )}
