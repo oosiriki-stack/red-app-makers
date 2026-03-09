@@ -7,60 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { FileText, Download, Calendar, Palette, Plus } from "lucide-react";
+import { FileText, Download, Plus } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
-import { stats, mentions, getCompetitors, getTrackingBrand } from "@/data/mockData";
-
-const defaultReports = [
-  { id: 1, title: "Rapport hebdomadaire — Semaine 6", date: "10 Fév 2026", type: "Hebdomadaire", pages: 12 },
-  { id: 2, title: "Rapport mensuel — Janvier 2026", date: "01 Fév 2026", type: "Mensuel", pages: 28 },
-  { id: 3, title: "Rapport quotidien — 9 Fév", date: "09 Fév 2026", type: "Quotidien", pages: 5 },
-];
 
 const sections = ["Mentions", "Sentiment", "Concurrence", "Alertes", "Tendances"];
 
-function generateReportContent(title: string, selectedSections: string[]) {
-  const brand = getTrackingBrand();
-  const competitors = getCompetitors();
-  let content = `RAPPORT — ${title}\nMarque : ${brand}\nDate : ${new Date().toLocaleDateString("fr-FR")}\n${"=".repeat(50)}\n\n`;
-
-  if (selectedSections.includes("Mentions")) {
-    content += `## MENTIONS\nTotal : ${stats.totalMentions}\nDernières mentions :\n`;
-    mentions.slice(0, 5).forEach(m => { content += `- [${m.source}] ${m.author} : "${m.content}" (${m.sentiment})\n`; });
-    content += "\n";
-  }
-  if (selectedSections.includes("Sentiment")) {
-    content += `## SENTIMENT\nScore moyen : ${stats.sentimentAvg}%\nPositif : ${mentions.filter(m => m.sentiment === "positive").length} | Neutre : ${mentions.filter(m => m.sentiment === "neutral").length} | Négatif : ${mentions.filter(m => m.sentiment === "negative").length}\n\n`;
-  }
-  if (selectedSections.includes("Concurrence")) {
-    content += `## CONCURRENCE\n`;
-    competitors.forEach(c => { content += `- ${c.name} : ${c.mentions} mentions, sentiment ${c.sentiment}%, tendance ${c.trend}\n`; });
-    content += "\n";
-  }
-  if (selectedSections.includes("Alertes")) {
-    content += `## ALERTES\nAlertes actives : ${stats.activeAlerts}\n\n`;
-  }
-  if (selectedSections.includes("Tendances")) {
-    content += `## TENDANCES\nTaux de réponse : ${stats.responseRate}%\n\n`;
-  }
-  return content;
-}
-
-function downloadTextFile(content: string, filename: string) {
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
 export default function Reports() {
-  const [reports, setReports] = useState(defaultReports);
+  const [reports, setReports] = useState<{ id: number; title: string; date: string; type: string }[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [period, setPeriod] = useState("weekly");
-  const [format, setFormat] = useState("pdf");
   const [selectedSections, setSelectedSections] = useState<string[]>(["Mentions", "Sentiment"]);
 
   const toggleSection = (s: string) => {
@@ -75,20 +32,11 @@ export default function Reports() {
       title: title.trim(),
       date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
       type: periodLabel,
-      pages: Math.floor(Math.random() * 20) + 5,
     };
     setReports(prev => [newReport, ...prev]);
-    const content = generateReportContent(newReport.title, selectedSections);
-    downloadTextFile(content, `${newReport.title.replace(/\s+/g, "_")}.txt`);
     setDialogOpen(false);
     setTitle("");
-    toast.success(`Rapport "${newReport.title}" généré et téléchargé`);
-  };
-
-  const handleDownloadReport = (report: typeof defaultReports[0]) => {
-    const content = generateReportContent(report.title, sections);
-    downloadTextFile(content, `${report.title.replace(/\s+/g, "_")}.txt`);
-    toast.success(`"${report.title}" téléchargé`);
+    toast.success(`Rapport "${newReport.title}" créé`);
   };
 
   return (
@@ -104,36 +52,11 @@ export default function Reports() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-primary" />
-            </div>
-            <span className="font-medium text-sm">Périodicité</span>
-            <Select defaultValue="weekly">
-              <SelectTrigger className="w-full rounded-xl"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">Quotidien</SelectItem>
-                <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                <SelectItem value="monthly">Mensuel</SelectItem>
-              </SelectContent>
-            </Select>
+        {reports.length === 0 && (
+          <Card className="glass-card rounded-2xl p-8 text-center">
+            <p className="text-muted-foreground">Aucun rapport généré. Créez votre premier rapport.</p>
           </Card>
-          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Palette className="h-6 w-6 text-primary" />
-            </div>
-            <span className="font-medium text-sm">Personnalisation</span>
-            <p className="text-xs text-muted-foreground text-center">Logo, couleurs et mise en page configurables</p>
-          </Card>
-          <Card className="glass-card rounded-2xl p-5 flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Download className="h-6 w-6 text-primary" />
-            </div>
-            <span className="font-medium text-sm">Export</span>
-            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => handleDownloadReport(reports[0])}>Télécharger le dernier</Button>
-          </Card>
-        </div>
+        )}
 
         <div className="space-y-3">
           {reports.map((r) => (
@@ -144,10 +67,9 @@ export default function Reports() {
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-sm">{r.title}</p>
-                  <p className="text-xs text-muted-foreground">{r.date} · {r.pages} pages</p>
+                  <p className="text-xs text-muted-foreground">{r.date}</p>
                 </div>
                 <Badge variant="outline" className="rounded-lg">{r.type}</Badge>
-                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => handleDownloadReport(r)}><Download className="h-4 w-4" /></Button>
               </CardContent>
             </Card>
           ))}
@@ -156,9 +78,7 @@ export default function Reports() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="glass-card rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Nouveau rapport</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Nouveau rapport</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>
               <Label>Titre du rapport</Label>
@@ -172,16 +92,6 @@ export default function Reports() {
                   <SelectItem value="daily">Quotidien</SelectItem>
                   <SelectItem value="weekly">Hebdomadaire</SelectItem>
                   <SelectItem value="monthly">Mensuel</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Format</Label>
-              <Select value={format} onValueChange={setFormat}>
-                <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="excel">Excel</SelectItem>
                 </SelectContent>
               </Select>
             </div>
