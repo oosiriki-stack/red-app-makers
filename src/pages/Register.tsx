@@ -4,27 +4,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AtSign } from "lucide-react";
+import { AtSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName || !email || !password) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
-    localStorage.setItem("arobase_user", JSON.stringify({ email, name: `${firstName} ${lastName}` }));
-    localStorage.setItem("arobase_logged_in", "true");
-    toast.success("Compte créé avec succès !");
-    navigate("/");
+    if (password.length < 6) {
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+    setLoading(true);
+    const fullName = `${firstName} ${lastName}`.trim();
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name: fullName },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Compte créé ! Vérifiez votre email pour confirmer votre inscription.");
+    navigate("/login");
   };
 
   return (
@@ -40,16 +58,14 @@ export default function Register() {
               <AtSign className="w-7 h-7 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-light text-foreground">
-            @robase
-          </CardTitle>
+          <CardTitle className="text-3xl font-light text-foreground">@robase</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">Créez votre compte</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-foreground/80">Prénom</Label>
+                <Label className="text-foreground/80">Prénom *</Label>
                 <Input placeholder="Jean" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               </div>
               <div>
@@ -58,26 +74,16 @@ export default function Register() {
               </div>
             </div>
             <div>
-              <Label className="text-foreground/80">Email</Label>
+              <Label className="text-foreground/80">Email *</Label>
               <Input type="email" placeholder="jean@entreprise.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <div>
-              <Label className="text-foreground/80">Mot de passe</Label>
+              <Label className="text-foreground/80">Mot de passe *</Label>
               <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
+              <p className="text-xs text-muted-foreground mt-1">Minimum 6 caractères</p>
             </div>
-            <div>
-              <Label className="text-foreground/80">Rôle</Label>
-              <Select defaultValue="analyst">
-                <SelectTrigger className="bg-background/50 border-border text-foreground"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="analyst">Analyste</SelectItem>
-                  <SelectItem value="client">Client</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" className="w-full bg-white text-primary hover:bg-white/90 font-semibold text-base h-11">
+            <Button type="submit" className="w-full font-semibold text-base h-11" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Créer mon compte
             </Button>
             <p className="text-sm text-center text-muted-foreground">

@@ -42,7 +42,7 @@ export function GeoHeatmap() {
                   <div
                     className="aspect-square rounded-md cursor-pointer transition-transform hover:scale-110 flex items-center justify-center"
                     style={{
-                      backgroundColor: `hsl(0, 72%, 51%)`,
+                      backgroundColor: `hsl(45, 93%, 47%)`,
                       opacity: getOpacity(region.mentions),
                     }}
                   >

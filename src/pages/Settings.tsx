@@ -12,7 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -24,26 +26,6 @@ const platforms = [
   { key: "google", label: "Google (Avis)", color: "bg-yellow-500" },
 ];
 
-interface TrackingConfig {
-  brand: string;
-  platforms: Record<string, boolean>;
-  keywords: string[];
-}
-
-const defaultTracking: TrackingConfig = {
-  brand: "",
-  platforms: { x: true, facebook: true, instagram: true, linkedin: true, tiktok: false, blog: false, google: false },
-  keywords: [],
-};
-
-function loadTracking(): TrackingConfig {
-  try {
-    const raw = localStorage.getItem("arobase_tracking");
-    if (raw) return { ...defaultTracking, ...JSON.parse(raw) };
-  } catch {}
-  return defaultTracking;
-}
-
 const FONT_LEVELS = ["small", "normal", "large"] as const;
 const FONT_LABELS: Record<string, string> = { small: "Petit", normal: "Normal", large: "Grand" };
 
@@ -51,47 +33,88 @@ export default function Settings() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultTab = searchParams.get("tab") || "profile";
+  const { user } = useAuth();
 
-  const [name, setName] = useState("Admin Demo");
-  const [email, setEmail] = useState("admin@arobase.ai");
-  const [company, setCompany] = useState("Ma Marque");
-  const [registeredAt, setRegisteredAt] = useState<string | null>(null);
-  const [activePlan, setActivePlan] = useState("Gratuit");
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [subscription, setSubscription] = useState<string | null>(null);
+
+  // Monitoring
+  const [brand, setBrand] = useState("");
+  const [platformStates, setPlatformStates] = useState<Record<string, boolean>>({});
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [newKeyword, setNewKeyword] = useState("");
+  const [savingMonitoring, setSavingMonitoring] = useState(false);
+
+  // Notifications
   const [notifCritical, setNotifCritical] = useState(true);
   const [notifDaily, setNotifDaily] = useState(true);
   const [notifInfluencer, setNotifInfluencer] = useState(false);
 
-  const [tracking, setTracking] = useState<TrackingConfig>(loadTracking);
-  const [newKeyword, setNewKeyword] = useState("");
-
+  // Font
   const [fontLevel, setFontLevel] = useState(() => {
     const saved = localStorage.getItem("arobase_font_size");
     return FONT_LEVELS.indexOf(saved as any) >= 0 ? FONT_LEVELS.indexOf(saved as any) : 1;
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem("arobase_user");
-    if (stored) {
-      try {
-        const user = JSON.parse(stored);
-        if (user.name) setName(user.name);
-        if (user.email) setEmail(user.email);
-        if (user.company) setCompany(user.company);
-        if (user.registeredAt) setRegisteredAt(user.registeredAt);
-      } catch {}
-    }
-    const plan = localStorage.getItem("arobase_plan");
-    if (plan) setActivePlan(plan);
-    const notifs = localStorage.getItem("arobase_notifs");
-    if (notifs) {
-      try {
-        const n = JSON.parse(notifs);
-        setNotifCritical(n.critical ?? true);
-        setNotifDaily(n.daily ?? true);
-        setNotifInfluencer(n.influencer ?? false);
-      } catch {}
-    }
-  }, []);
+    if (!user) return;
+    // Load profile
+    supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
+      if (data) {
+        setName(data.name || "");
+        setCompany(data.company || "");
+      }
+    });
+    // Load monitoring
+    supabase.from("monitoring_settings").select("*").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) {
+        setBrand(data.brand || "");
+        setPlatformStates((data.platforms as Record<string, boolean>) || {});
+      }
+    });
+    // Load subscription
+    supabase.from("subscriptions").select("plan").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) setSubscription(data.plan);
+    });
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ name, company }).eq("id", user.id);
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else toast.success("Profil sauvegardé");
+  };
+
+  const handleSaveMonitoring = async () => {
+    if (!user) return;
+    if (!brand.trim()) { toast.error("Veuillez entrer le nom de la marque"); return; }
+    setSavingMonitoring(true);
+    const { error } = await supabase.from("monitoring_settings").upsert({
+      user_id: user.id,
+      brand,
+      platforms: platformStates,
+    }, { onConflict: "user_id" });
+    setSavingMonitoring(false);
+    if (error) toast.error(error.message);
+    else toast.success(`Surveillance activée pour "${brand}"`);
+  };
+
+  const togglePlatform = (key: string) => {
+    setPlatformStates(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const addKeyword = () => {
+    const kw = newKeyword.trim();
+    if (!kw || keywords.includes(kw)) return;
+    setKeywords(prev => [...prev, kw]);
+    setNewKeyword("");
+  };
+
+  const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
 
   const handleFontChange = (value: number[]) => {
     const idx = value[0];
@@ -102,36 +125,8 @@ export default function Settings() {
     localStorage.setItem("arobase_font_size", level);
   };
 
-  const handleSaveProfile = () => {
-    localStorage.setItem("arobase_user", JSON.stringify({ name, email, company, registeredAt: registeredAt || new Date().toISOString() }));
-    localStorage.setItem("arobase_notifs", JSON.stringify({ critical: notifCritical, daily: notifDaily, influencer: notifInfluencer }));
-    toast.success("Profil sauvegardé");
-  };
-
-  const handleSaveTracking = () => {
-    if (!tracking.brand.trim()) { toast.error("Veuillez entrer le nom de la marque à surveiller"); return; }
-    localStorage.setItem("arobase_tracking", JSON.stringify(tracking));
-    toast.success(`Surveillance activée pour "${tracking.brand}"`);
-  };
-
-  const togglePlatform = (key: string) => {
-    setTracking(prev => ({ ...prev, platforms: { ...prev.platforms, [key]: !prev.platforms[key] } }));
-  };
-
-  const addKeyword = () => {
-    const kw = newKeyword.trim();
-    if (!kw) return;
-    if (tracking.keywords.includes(kw)) { toast.error("Mot-clé déjà ajouté"); return; }
-    setTracking(prev => ({ ...prev, keywords: [...prev.keywords, kw] }));
-    setNewKeyword("");
-  };
-
-  const removeKeyword = (kw: string) => {
-    setTracking(prev => ({ ...prev, keywords: prev.keywords.filter(k => k !== kw) }));
-  };
-
-  const activePlatformCount = Object.values(tracking.platforms).filter(Boolean).length;
-  const initials = name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+  const activePlatformCount = Object.values(platformStates).filter(Boolean).length;
+  const initials = name ? name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U";
 
   return (
     <AnimatedPage>
@@ -149,7 +144,6 @@ export default function Settings() {
             <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
           </TabsList>
 
-          {/* ── Profil ── */}
           <TabsContent value="profile">
             <Card className="glass-card rounded-2xl">
               <CardHeader><CardTitle className="text-base">Profil</CardTitle></CardHeader>
@@ -159,55 +153,45 @@ export default function Settings() {
                     <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{name}</p>
-                    <p className="text-sm text-muted-foreground">{email}</p>
+                    <p className="font-medium">{name || "Utilisateur"}</p>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
                   </div>
                 </div>
                 <Separator />
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Inscrit le</span>
-                  <span>{registeredAt ? new Date(registeredAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</span>
-                </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Plan actif</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="rounded-lg">{activePlan}</Badge>
+                    <Badge variant="outline" className="rounded-lg capitalize">{subscription || "Aucun"}</Badge>
                     <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
-                      <CreditCard className="h-3 w-3 mr-1" /> Changer de plan
+                      <CreditCard className="h-3 w-3 mr-1" /> Changer
                     </Button>
                   </div>
                 </div>
                 <Separator />
-
                 <div className="grid gap-3">
                   <div><Label>Nom</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" /></div>
-                  <div><Label>Email</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="rounded-xl" /></div>
                   <div><Label>Entreprise</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} className="rounded-xl" /></div>
                 </div>
-                <Button onClick={handleSaveProfile} className="rounded-xl">Sauvegarder</Button>
+                <Button onClick={handleSaveProfile} className="rounded-xl" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Sauvegarder
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ── Surveillance ── */}
           <TabsContent value="surveillance">
             <Card className="glass-card rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center justify-between">
                   Marque surveillée
-                  {tracking.brand && (
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {activePlatformCount} plateforme{activePlatformCount > 1 ? "s" : ""} active{activePlatformCount > 1 ? "s" : ""}
-                    </Badge>
-                  )}
+                  {brand && <Badge variant="outline" className="text-xs font-normal">{activePlatformCount} plateforme{activePlatformCount > 1 ? "s" : ""}</Badge>}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
                   <Label>Nom de la marque / entreprise à surveiller</Label>
-                  <Input placeholder="Ex: Nike, Apple, Ma Startup..." value={tracking.brand} onChange={(e) => setTracking(prev => ({ ...prev, brand: e.target.value }))} className="rounded-xl mt-1" />
-                  <p className="text-xs text-muted-foreground mt-1">Ce nom sera utilisé dans tout le dashboard et les rapports.</p>
+                  <Input placeholder="Ex: Nike, Apple, Ma Startup..." value={brand} onChange={(e) => setBrand(e.target.value)} className="rounded-xl mt-1" />
                 </div>
                 <Separator />
                 <div>
@@ -219,7 +203,7 @@ export default function Settings() {
                           <div className={`w-3 h-3 rounded-full ${p.color}`} />
                           <span className="text-sm">{p.label}</span>
                         </div>
-                        <Switch checked={tracking.platforms[p.key] ?? false} onCheckedChange={() => togglePlatform(p.key)} />
+                        <Switch checked={platformStates[p.key] ?? false} onCheckedChange={() => togglePlatform(p.key)} />
                       </div>
                     ))}
                   </div>
@@ -227,14 +211,13 @@ export default function Settings() {
                 <Separator />
                 <div>
                   <Label className="mb-2 block">Mots-clés supplémentaires</Label>
-                  <p className="text-xs text-muted-foreground mb-3">Ajoutez des termes spécifiques à surveiller en plus du nom de la marque.</p>
                   <div className="flex gap-2">
                     <Input placeholder="Ajouter un mot-clé..." value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())} className="rounded-xl" />
                     <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={addKeyword}><Plus className="h-4 w-4" /></Button>
                   </div>
-                  {tracking.keywords.length > 0 && (
+                  {keywords.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {tracking.keywords.map((kw) => (
+                      {keywords.map((kw) => (
                         <Badge key={kw} variant="secondary" className="rounded-lg gap-1 pr-1">
                           {kw}
                           <button onClick={() => removeKeyword(kw)} className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
@@ -243,14 +226,14 @@ export default function Settings() {
                     </div>
                   )}
                 </div>
-                <Button onClick={handleSaveTracking} className="w-full rounded-xl">
-                  {tracking.brand ? "Mettre à jour la surveillance" : "Activer la surveillance"}
+                <Button onClick={handleSaveMonitoring} className="w-full rounded-xl" disabled={savingMonitoring}>
+                  {savingMonitoring ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  {brand ? "Mettre à jour la surveillance" : "Activer la surveillance"}
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ── Notifications ── */}
           <TabsContent value="notifications">
             <Card className="glass-card rounded-2xl">
               <CardHeader><CardTitle className="text-base">Notifications</CardTitle></CardHeader>
@@ -267,30 +250,19 @@ export default function Settings() {
                   <div><p className="text-sm font-medium">Mentions influenceurs</p><p className="text-xs text-muted-foreground">Alerte quand un influenceur vous mentionne</p></div>
                   <Switch checked={notifInfluencer} onCheckedChange={setNotifInfluencer} />
                 </div>
-                <Button onClick={handleSaveProfile} className="rounded-xl">Sauvegarder</Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ── Accessibilité ── */}
           <TabsContent value="accessibilite">
             <Card className="glass-card rounded-2xl">
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><Type className="h-4 w-4" /> Taille de la police</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-sm text-muted-foreground">Ajustez la taille du texte dans toute l'application.</p>
                 <div className="space-y-4">
-                  <Slider
-                    value={[fontLevel]}
-                    onValueChange={handleFontChange}
-                    min={0}
-                    max={2}
-                    step={1}
-                    className="w-full"
-                  />
+                  <Slider value={[fontLevel]} onValueChange={handleFontChange} min={0} max={2} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    {FONT_LEVELS.map((l, i) => (
-                      <span key={l} className={fontLevel === i ? "text-primary font-medium" : ""}>{FONT_LABELS[l]}</span>
-                    ))}
+                    {FONT_LEVELS.map((l, i) => (<span key={l} className={fontLevel === i ? "text-primary font-medium" : ""}>{FONT_LABELS[l]}</span>))}
                   </div>
                 </div>
                 <div className="p-4 rounded-xl bg-muted/50">
