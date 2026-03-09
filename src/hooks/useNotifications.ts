@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { mentions } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useNotifications() {
   const permissionGranted = useRef(false);
@@ -16,21 +16,21 @@ export function useNotifications() {
     }
   }, []);
 
+  // Listen for new mentions via Supabase realtime
   useEffect(() => {
-    if (!permissionGranted.current && Notification.permission !== "granted") return;
+    const channel = supabase.channel("mentions-notifications")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "mentions" }, (payload) => {
+        if (Notification.permission === "granted") {
+          const mention = payload.new as any;
+          new Notification("@robase — Nouvelle mention", {
+            body: `${mention.author} sur ${mention.source}: "${(mention.content || "").slice(0, 80)}..."`,
+            icon: "/favicon.svg",
+            tag: `mention-${mention.id}`,
+          });
+        }
+      })
+      .subscribe();
 
-    // Simulate new mention notifications every 30s
-    const interval = setInterval(() => {
-      const randomMention = mentions[Math.floor(Math.random() * mentions.length)];
-      if (Notification.permission === "granted") {
-        new Notification("@robase — Nouvelle mention", {
-          body: `${randomMention.author} sur ${randomMention.source}: "${randomMention.content.slice(0, 80)}..."`,
-          icon: "/favicon.svg",
-          tag: `mention-${randomMention.id}`,
-        });
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
+    return () => { supabase.removeChannel(channel); };
   }, []);
 }
