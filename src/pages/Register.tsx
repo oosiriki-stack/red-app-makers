@@ -41,8 +41,8 @@ export default function Register() {
       toast.error(error.message);
       return;
     }
-    toast.success("Compte créé ! Vérifiez votre email pour confirmer votre inscription.");
-    navigate("/login");
+    toast.success("Compte créé avec succès !");
+    navigate("/");
   };
 
   return (
