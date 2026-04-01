@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainNav = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Mentions", url: "/mentions", icon: MessageSquare },
   { title: "Alertes", url: "/alerts", icon: Bell },
   { title: "Concurrence", url: "/competitors", icon: BarChart3 },
@@ -67,7 +67,7 @@ export function AppSidebar() {
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink to={item.url} end={item.url === "/"} activeClassName="bg-primary/10 text-primary font-medium border-l-[3px] border-primary">
+                    <NavLink to={item.url} end={item.url === "/dashboard"} activeClassName="bg-primary/10 text-primary font-medium border-l-[3px] border-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>

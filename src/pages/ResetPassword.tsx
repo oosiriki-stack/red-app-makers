@@ -41,7 +41,7 @@ export default function ResetPassword() {
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Mot de passe mis à jour !");
-    navigate("/");
+    navigate("/dashboard");
   };
 
   if (!ready) return null;

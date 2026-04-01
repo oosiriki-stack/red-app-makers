@@ -14,7 +14,7 @@ export default function MFA() {
     if (code === "123456") {
       localStorage.setItem("arobase_mfa_verified", "true");
       toast.success("Vérification réussie !");
-      navigate("/");
+      navigate("/dashboard");
     } else {
       toast.error("Code invalide. Essayez 123456.");
     }

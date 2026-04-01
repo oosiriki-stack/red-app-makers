@@ -42,7 +42,7 @@ export default function Register() {
       return;
     }
     toast.success("Compte créé avec succès !");
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
