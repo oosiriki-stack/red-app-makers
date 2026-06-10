@@ -61,7 +61,7 @@ export default function Login() {
               <AtSign className="w-7 h-7 text-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-light text-foreground">@robase</CardTitle>
+          <CardTitle className="text-3xl font-light text-foreground">Focus</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">Connectez-vous à votre espace</p>
         </CardHeader>
         <CardContent>

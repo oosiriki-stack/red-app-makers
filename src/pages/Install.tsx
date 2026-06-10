@@ -17,7 +17,7 @@ export default function Install() {
     <AnimatedPage>
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-light tracking-tight">Installer @robase</h1>
+          <h1 className="text-3xl font-light tracking-tight">Installer Focus</h1>
           <p className="text-muted-foreground">Accédez à l'application directement depuis votre appareil</p>
         </div>
 

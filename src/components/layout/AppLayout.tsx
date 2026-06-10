@@ -27,7 +27,7 @@ export function AppLayout() {
             </AnimatePresence>
           </main>
           <footer className="px-4 py-3 text-center text-xs text-muted-foreground border-t border-border/40">
-            © 2026 @robase — v1.0
+            © 2026 Focus — v2.0
           </footer>
         </div>
       </div>
