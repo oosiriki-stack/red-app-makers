@@ -71,7 +71,7 @@ export default function Pricing() {
 
   const handleSubscribe = async (plan: typeof plans[0]) => {
     if (plan.planKey === "enterprise") {
-      toast.info("Contactez-nous à contact@arobase.ai pour un devis personnalisé");
+      toast.info("Contactez-nous à contact@focus-app.com pour un devis personnalisé");
       return;
     }
 

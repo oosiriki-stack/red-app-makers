@@ -58,7 +58,7 @@ export default function Register() {
               <AtSign className="w-7 h-7 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-light text-foreground">@robase</CardTitle>
+          <CardTitle className="text-3xl font-light text-foreground">Focus</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">Créez votre compte</p>
         </CardHeader>
         <CardContent>

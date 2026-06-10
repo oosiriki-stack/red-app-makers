@@ -22,7 +22,7 @@ export function useNotifications() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mentions" }, (payload) => {
         if (Notification.permission === "granted") {
           const mention = payload.new as any;
-          new Notification("@robase — Nouvelle mention", {
+          new Notification("Focus — Nouvelle mention", {
             body: `${mention.author} sur ${mention.source}: "${(mention.content || "").slice(0, 80)}..."`,
             icon: "/favicon.svg",
             tag: `mention-${mention.id}`,

@@ -152,7 +152,7 @@ export default function Dashboard() {
 
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
         <DialogContent className="glass-card rounded-2xl">
-          <DialogHeader><DialogTitle>Bienvenue sur @robase 👋</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Bienvenue sur Focus 👋</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Pour commencer à surveiller votre e-réputation, configurez le nom de votre marque et les plateformes à tracker.</p>
             <div className="flex gap-2">

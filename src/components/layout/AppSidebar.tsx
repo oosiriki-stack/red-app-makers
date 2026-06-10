@@ -8,7 +8,7 @@ import {
   Settings,
   Download,
   CreditCard,
-  AtSign,
+  Target,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -49,11 +49,11 @@ export function AppSidebar() {
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-gold-subtle">
-            <AtSign className="w-5 h-5 text-primary-foreground" />
+            <Target className="w-5 h-5 text-primary-foreground" />
           </div>
           {!collapsed && (
             <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              <span className="text-gradient-red">@robase</span>
+              <span className="text-gradient-red">Focus</span>
             </span>
           )}
         </div>
@@ -119,7 +119,7 @@ export function AppSidebar() {
               return null;
             })()}
             <p className="text-xs text-muted-foreground/50">
-              @robase v1.0 — Veille IA
+              Focus v2.0 — Social Listening IA
             </p>
           </div>
         )}

@@ -19,11 +19,11 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "favicon.ico"],
       manifest: {
-        name: "@robase — Veille e-Réputation IA",
-        short_name: "@robase",
-        description: "Plateforme de veille e-réputationnelle augmentée par IA",
-        theme_color: "#E5A100",
-        background_color: "#FAFAFA",
+        name: "Focus — Social Listening & e-Réputation IA",
+        short_name: "Focus",
+        description: "Plateforme IA de social listening et de gestion d'e-réputation",
+        theme_color: "#FF7900",
+        background_color: "#FFFFFF",
         display: "standalone",
         start_url: "/",
         icons: [
