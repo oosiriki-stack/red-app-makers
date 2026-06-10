@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 10% 10%;
 
-    --primary: 45 93% 47%;
+    --primary: 25 100% 50%;
     --primary-foreground: 0 0% 10%;
 
     --secondary: 40 10% 94%;
@@ -24,15 +24,15 @@
     --muted: 40 10% 94%;
     --muted-foreground: 220 5% 45%;
 
-    --accent: 45 30% 95%;
-    --accent-foreground: 45 80% 35%;
+    --accent: 25 100% 95%;
+    --accent-foreground: 25 90% 40%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 40 5% 90%;
     --input: 40 5% 88%;
-    --ring: 45 93% 47%;
+    --ring: 25 100% 50%;
 
     --radius: 1.25rem;
 
@@ -42,12 +42,12 @@
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 10% 25%;
-    --sidebar-primary: 45 93% 47%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 45 30% 95%;
-    --sidebar-accent-foreground: 45 80% 35%;
+    --sidebar-primary: 25 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 100% 95%;
+    --sidebar-accent-foreground: 25 90% 40%;
     --sidebar-border: 40 5% 92%;
-    --sidebar-ring: 45 93% 47%;
+    --sidebar-ring: 25 100% 50%;
   }
 
   .dark {
@@ -60,8 +60,8 @@
     --popover: 220 10% 8%;
     --popover-foreground: 40 10% 95%;
 
-    --primary: 45 93% 47%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 25 100% 55%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 220 8% 14%;
     --secondary-foreground: 40 10% 90%;
@@ -69,24 +69,24 @@
     --muted: 220 8% 14%;
     --muted-foreground: 220 5% 55%;
 
-    --accent: 45 20% 12%;
-    --accent-foreground: 45 80% 65%;
+    --accent: 25 30% 12%;
+    --accent-foreground: 25 90% 65%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 8% 16%;
     --input: 220 8% 16%;
-    --ring: 45 93% 47%;
+    --ring: 25 100% 55%;
 
     --sidebar-background: 220 10% 7%;
     --sidebar-foreground: 40 10% 85%;
-    --sidebar-primary: 45 93% 47%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 45 20% 12%;
-    --sidebar-accent-foreground: 45 80% 65%;
+    --sidebar-primary: 25 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 30% 12%;
+    --sidebar-accent-foreground: 25 90% 65%;
     --sidebar-border: 220 8% 14%;
-    --sidebar-ring: 45 93% 47%;
+    --sidebar-ring: 25 100% 55%;
   }
 
   /* Font size levels */
@@ -109,16 +109,9 @@
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    background: linear-gradient(135deg, hsl(45, 93%, 47%), hsl(35, 90%, 55%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Keep old class name for compat */
+  .text-gradient-gold,
   .text-gradient-red {
-    background: linear-gradient(135deg, hsl(45, 93%, 47%), hsl(35, 90%, 55%));
+    background: linear-gradient(135deg, hsl(25, 100%, 50%), hsl(15, 95%, 55%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -136,21 +129,12 @@
     @apply bg-white/70 dark:bg-black/30 backdrop-blur-xl border-b border-white/20;
   }
 
-  .glow-gold {
-    box-shadow: 0 0 30px -5px hsl(45, 93%, 47%, 0.3), 0 0 60px -10px hsl(45, 93%, 47%, 0.15);
+  .glow-gold, .glow-red {
+    box-shadow: 0 0 30px -5px hsl(25, 100%, 50%, 0.3), 0 0 60px -10px hsl(25, 100%, 50%, 0.15);
   }
 
-  .glow-gold-subtle {
-    box-shadow: 0 0 20px -5px hsl(45, 93%, 47%, 0.2);
-  }
-
-  /* Keep old class names for compat */
-  .glow-red {
-    box-shadow: 0 0 30px -5px hsl(45, 93%, 47%, 0.3), 0 0 60px -10px hsl(45, 93%, 47%, 0.15);
-  }
-
-  .glow-red-subtle {
-    box-shadow: 0 0 20px -5px hsl(45, 93%, 47%, 0.2);
+  .glow-gold-subtle, .glow-red-subtle {
+    box-shadow: 0 0 20px -5px hsl(25, 100%, 50%, 0.2);
   }
 
   .hover-3d {
@@ -179,10 +163,10 @@
 .auth-gradient-bg {
   background: linear-gradient(
     -45deg,
-    hsl(45, 93%, 47%),
-    hsl(35, 90%, 55%),
-    hsl(50, 85%, 45%),
-    hsl(30, 95%, 50%)
+    hsl(25, 100%, 50%),
+    hsl(15, 95%, 55%),
+    hsl(30, 95%, 45%),
+    hsl(20, 100%, 50%)
   );
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
@@ -205,7 +189,7 @@
 .orb-1 {
   width: 300px;
   height: 300px;
-  background: hsl(45, 93%, 55%);
+  background: hsl(25, 100%, 55%);
   top: -100px;
   right: -100px;
   animation-delay: 0s;
@@ -213,7 +197,7 @@
 .orb-2 {
   width: 200px;
   height: 200px;
-  background: hsl(35, 85%, 55%);
+  background: hsl(15, 95%, 55%);
   bottom: -50px;
   left: -50px;
   animation-delay: -3s;
@@ -221,7 +205,7 @@
 .orb-3 {
   width: 150px;
   height: 150px;
-  background: hsl(50, 80%, 50%);
+  background: hsl(30, 90%, 50%);
   top: 50%;
   left: 50%;
   animation-delay: -5s;
@@ -229,8 +213,8 @@
 
 /* Pro card glow animation */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 30px -5px hsl(45, 93%, 47%, 0.3); }
-  50% { box-shadow: 0 0 50px -5px hsl(45, 93%, 47%, 0.5); }
+  0%, 100% { box-shadow: 0 0 30px -5px hsl(25, 100%, 50%, 0.3); }
+  50% { box-shadow: 0 0 50px -5px hsl(25, 100%, 50%, 0.5); }
 }
 
 .glow-pulse {
