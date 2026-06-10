@@ -123,6 +123,37 @@
 
   .glass-sidebar {
     @apply bg-white/80 dark:bg-black/40 backdrop-blur-2xl;
+    background-image:
+      radial-gradient(circle at 0% 0%, hsl(25 100% 50% / 0.08), transparent 50%),
+      radial-gradient(circle at 100% 100%, hsl(25 100% 50% / 0.05), transparent 40%);
+  }
+
+  /* Sidebar nav items — refined pill style */
+  .nav-item {
+    @apply relative flex items-center gap-3 mx-2 my-0.5 px-2.5 py-2 rounded-xl text-sm
+           text-muted-foreground transition-all duration-300 ease-out;
+  }
+  .nav-item:hover {
+    @apply text-foreground bg-foreground/[0.04];
+  }
+  .nav-item:hover .nav-icon {
+    @apply scale-110 bg-primary/15 text-primary;
+  }
+  .nav-icon {
+    @apply flex items-center justify-center w-8 h-8 rounded-lg
+           bg-foreground/[0.04] text-muted-foreground
+           transition-all duration-300 ease-out shrink-0;
+  }
+  .nav-item-active {
+    @apply text-foreground font-medium bg-gradient-to-r from-primary/10 via-primary/[0.04] to-transparent;
+  }
+  .nav-item-active .nav-icon {
+    @apply bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105;
+  }
+  .nav-item-active::before {
+    content: "";
+    @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-primary;
+    box-shadow: 0 0 12px hsl(25 100% 50% / 0.6);
   }
 
   .glass-header {
