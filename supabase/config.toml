@@ -1,1 +1,4 @@
 project_id = "rmvsjxbzuxttqzcuvtyb"
+
+[functions.focus-gpt]
+verify_jwt = false
