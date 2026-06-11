@@ -18,6 +18,8 @@ import Install from "@/pages/Install";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ResetPassword from "@/pages/ResetPassword";
+import Support from "@/pages/Support";
+import SuperAdmin from "@/pages/SuperAdmin";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/super-admin" element={<SuperAdmin />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
