@@ -88,6 +88,7 @@ export type Database = {
           brand: string
           created_at: string
           id: string
+          person: string | null
           platforms: Json
           updated_at: string
           user_id: string
@@ -96,6 +97,7 @@ export type Database = {
           brand?: string
           created_at?: string
           id?: string
+          person?: string | null
           platforms?: Json
           updated_at?: string
           user_id: string
@@ -104,6 +106,7 @@ export type Database = {
           brand?: string
           created_at?: string
           id?: string
+          person?: string | null
           platforms?: Json
           updated_at?: string
           user_id?: string
@@ -163,6 +166,39 @@ export type Database = {
           plan?: string
           start_date?: string
           status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

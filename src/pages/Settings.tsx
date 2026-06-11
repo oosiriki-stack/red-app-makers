@@ -42,6 +42,7 @@ export default function Settings() {
 
   // Monitoring
   const [brand, setBrand] = useState("");
+  const [person, setPerson] = useState("");
   const [platformStates, setPlatformStates] = useState<Record<string, boolean>>({});
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
@@ -71,6 +72,7 @@ export default function Settings() {
     supabase.from("monitoring_settings").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) {
         setBrand(data.brand || "");
+        setPerson((data as any).person || "");
         setPlatformStates((data.platforms as Record<string, boolean>) || {});
       }
     });
@@ -96,8 +98,9 @@ export default function Settings() {
     const { error } = await supabase.from("monitoring_settings").upsert({
       user_id: user.id,
       brand,
+      person: person || null,
       platforms: platformStates,
-    }, { onConflict: "user_id" });
+    } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
     if (error) toast.error(error.message);
     else toast.success(`Surveillance activée pour "${brand}"`);
@@ -192,6 +195,11 @@ export default function Settings() {
                 <div>
                   <Label>Nom de la marque / entreprise à surveiller</Label>
                   <Input placeholder="Ex: Nike, Apple, Ma Startup..." value={brand} onChange={(e) => setBrand(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Personne à surveiller (optionnel)</Label>
+                  <Input placeholder="Ex: PDG, ministre, dirigeant..." value={person} onChange={(e) => setPerson(e.target.value)} className="rounded-xl mt-1" />
+                  <p className="text-xs text-muted-foreground mt-1">Surveille les mentions d'une personnalité publique (nom complet)</p>
                 </div>
                 <Separator />
                 <div>
