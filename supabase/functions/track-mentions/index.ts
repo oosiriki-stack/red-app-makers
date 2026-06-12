@@ -1,128 +1,187 @@
-// Tracker de mentions: X (réel via Twitter API v2 si clés disponibles) + sources simulées
-// Génère des mentions + alertes pour la marque/personne surveillée de l'utilisateur
+// Tracker gratuit multi-sources (aucune clé requise)
+// Sources: Google News RSS, Reddit JSON, Hacker News Algolia, Mastodon public search, RSS blogs
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
   try {
     const auth = req.headers.get("Authorization");
-    if (!auth) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!auth) return json({ error: "Unauthorized" }, 401);
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: auth } } });
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const userClient = createClient(url, anon, { global: { headers: { Authorization: auth } } });
     const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!user) return json({ error: "Unauthorized" }, 401);
 
-    const admin = createClient(supabaseUrl, serviceKey);
+    const admin = createClient(url, svc);
     const { data: settings } = await admin.from("monitoring_settings").select("*").eq("user_id", user.id).single();
-    if (!settings?.brand) return new Response(JSON.stringify({ error: "Pas de marque configurée" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!settings?.brand) return json({ error: "Pas de marque configurée" }, 400);
 
-    const query = settings.brand;
+    const queries = [settings.brand, (settings as any).person].filter(Boolean) as string[];
     const platforms = (settings.platforms || {}) as Record<string, boolean>;
-    const inserted: any[] = [];
 
-    // --- X (Twitter) RÉEL si bearer disponible ---
-    const bearer = Deno.env.get("TWITTER_BEARER_TOKEN");
-    if (platforms.x && bearer) {
-      try {
-        const q = encodeURIComponent(`${query} -is:retweet lang:fr`);
-        const r = await fetch(
-          `https://api.x.com/2/tweets/search/recent?query=${q}&max_results=10&tweet.fields=author_id,created_at,public_metrics&expansions=author_id&user.fields=username,name`,
-          { headers: { Authorization: `Bearer ${bearer}` } },
-        );
-        if (r.ok) {
-          const json = await r.json();
-          const users = new Map((json.includes?.users || []).map((u: any) => [u.id, u]));
-          for (const t of json.data || []) {
-            const u: any = users.get(t.author_id) || { name: "Anonyme", username: "anon" };
-            inserted.push({
-              user_id: user.id, source: "x", author: `@${u.username}`, avatar: null,
-              content: t.text, sentiment: detectSentiment(t.text),
-              engagement: (t.public_metrics?.like_count || 0) + (t.public_metrics?.retweet_count || 0),
-              mention_date: t.created_at,
-            });
-          }
-        }
-      } catch (e) { console.error("X API:", e); }
-    }
+    // Récupère mentions déjà existantes pour éviter doublons (par contenu+source)
+    const { data: existing } = await admin.from("mentions").select("source,content").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500);
+    const seen = new Set((existing || []).map((m: any) => `${m.source}::${(m.content || "").slice(0, 100)}`));
 
-    // --- Sources simulées (autres plateformes activées) ---
-    const simSources = ["facebook", "instagram", "linkedin", "tiktok", "blog", "google"].filter((p) => platforms[p]);
-    if (!bearer && platforms.x) simSources.push("x");
-    for (const src of simSources) {
-      const n = 1 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < n; i++) {
-        const sample = sampleContent(query, src);
-        inserted.push({
-          user_id: user.id, source: src, author: randomAuthor(src), avatar: null,
-          content: sample, sentiment: detectSentiment(sample),
-          engagement: Math.floor(Math.random() * 500),
-          mention_date: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-        });
+    const collected: any[] = [];
+    const errors: string[] = [];
+
+    for (const q of queries) {
+      // 1. Google News RSS (couvre presse/blogs en français) → mappé selon plateformes
+      if (platforms.blog || platforms.google) {
+        try {
+          const items = await fetchGoogleNews(q);
+          for (const it of items) collected.push(toMention(user.id, platforms.blog ? "blog" : "google", it.author, it.content, it.date, it.engagement));
+        } catch (e) { errors.push("GoogleNews: " + e); }
+      }
+      // 2. Reddit (proxy "communautés sociales")
+      if (platforms.facebook || platforms.linkedin) {
+        try {
+          const items = await fetchReddit(q);
+          for (const it of items) collected.push(toMention(user.id, platforms.facebook ? "facebook" : "linkedin", it.author, it.content, it.date, it.engagement));
+        } catch (e) { errors.push("Reddit: " + e); }
+      }
+      // 3. Hacker News (tech / actualité)
+      if (platforms.blog) {
+        try {
+          const items = await fetchHN(q);
+          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement));
+        } catch (e) { errors.push("HN: " + e); }
+      }
+      // 4. Mastodon public search (remplaçant gratuit de Twitter/X)
+      if (platforms.x || platforms.tiktok || platforms.instagram) {
+        try {
+          const items = await fetchMastodon(q);
+          const src = platforms.x ? "x" : platforms.tiktok ? "tiktok" : "instagram";
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+        } catch (e) { errors.push("Mastodon: " + e); }
       }
     }
 
-    if (inserted.length) {
-      const { error } = await admin.from("mentions").insert(inserted);
-      if (error) console.error("Insert mentions:", error);
+    // Dédoublonnage
+    const fresh = collected.filter((m) => {
+      const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+
+    if (fresh.length) {
+      const { error } = await admin.from("mentions").insert(fresh);
+      if (error) errors.push("Insert: " + error.message);
     }
 
-    // --- Génère alertes selon volume/sentiment ---
-    const negatives = inserted.filter((m) => m.sentiment === "negative");
-    if (negatives.length >= 3) {
+    // Génération d'alertes selon volume et sentiment
+    const negs = fresh.filter((m) => m.sentiment === "negative");
+    if (negs.length >= 3) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "critical",
-        title: `🚨 Pic de mentions négatives détecté pour ${query}`,
-        description: `${negatives.length} mentions négatives en quelques minutes. Risque de crise.`,
+        title: `🚨 Pic négatif détecté pour ${settings.brand}`,
+        description: `${negs.length} mentions négatives collectées sur plusieurs sources. Risque de crise.`,
       });
-    } else if (negatives.length >= 1) {
+    } else if (negs.length >= 1) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "warning",
-        title: `Mention négative sur ${negatives[0].source}`,
-        description: negatives[0].content.slice(0, 140),
+        title: `Mention négative · ${negs[0].source}`,
+        description: (negs[0].content || "").slice(0, 160),
       });
-    } else if (inserted.length > 0) {
+    } else if (fresh.length > 0) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "info",
-        title: `${inserted.length} nouvelle(s) mention(s) pour ${query}`,
-        description: `Sources: ${[...new Set(inserted.map((m) => m.source))].join(", ")}`,
+        title: `${fresh.length} nouvelle(s) mention(s) pour ${settings.brand}`,
+        description: `Sources: ${[...new Set(fresh.map((m) => m.source))].join(", ")}`,
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, count: inserted.length, real_x: !!bearer && platforms.x }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ ok: true, count: fresh.length, scanned: collected.length, sources_used: [...new Set(fresh.map((m) => m.source))], errors });
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ error: String(e) }, 500);
   }
 });
 
+function json(b: any, s = 200) { return new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
+
+function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number) {
+  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date };
+}
+
 function detectSentiment(text: string): string {
-  const t = text.toLowerCase();
-  const neg = ["nul", "horrible", "déçu", "decu", "arnaque", "scandale", "honte", "mauvais", "pire", "pourri", "boycott", "fraude"];
-  const pos = ["bravo", "génial", "genial", "super", "excellent", "merci", "top", "parfait", "incroyable", "j'adore", "jadore"];
+  const t = (text || "").toLowerCase();
+  const neg = ["nul", "horrible", "déçu", "decu", "arnaque", "scandale", "honte", "mauvais", "pire", "pourri", "boycott", "fraude", "catastrophe", "problème", "bug", "panne", "plainte"];
+  const pos = ["bravo", "génial", "genial", "super", "excellent", "merci", "top", "parfait", "incroyable", "j'adore", "jadore", "recommande", "qualité", "innovant"];
   if (neg.some((w) => t.includes(w))) return "negative";
   if (pos.some((w) => t.includes(w))) return "positive";
   return "neutral";
 }
-function randomAuthor(src: string) {
-  const names = ["Mariam K.", "Kofi A.", "Aïcha D.", "Jean-Marc L.", "Fatou S.", "Ousmane B.", "Linda M.", "Cheikh N."];
-  return names[Math.floor(Math.random() * names.length)];
+
+// --- Google News RSS (FR) ---
+async function fetchGoogleNews(q: string) {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=fr&gl=FR&ceid=FR:fr`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`GN ${r.status}`);
+  const xml = await r.text();
+  const items: any[] = [];
+  const matches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
+  for (const m of matches) {
+    const block = m[1];
+    const title = pick(block, "title");
+    const link = pick(block, "link");
+    const pubDate = pick(block, "pubDate");
+    const source = pick(block, "source") || "Presse";
+    items.push({ author: source, content: title, date: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(), link, engagement: 0 });
+    if (items.length >= 10) break;
+  }
+  return items;
 }
-function sampleContent(brand: string, src: string) {
-  const tmpl = [
-    `Je viens de tester ${brand}, vraiment excellent service !`,
-    `${brand} c'est génial, je recommande à fond 👏`,
-    `Déçu de ${brand}, le service client ne répond pas... 😡`,
-    `Quelqu'un a déjà essayé ${brand} ? Vos avis ?`,
-    `${brand} fait encore parler de lui sur ${src}`,
-    `Bravo à l'équipe ${brand} pour cette nouveauté !`,
-    `Mauvaise expérience avec ${brand}, à éviter`,
-    `${brand} reste un acteur incontournable en Afrique francophone.`,
-  ];
-  return tmpl[Math.floor(Math.random() * tmpl.length)];
+function pick(block: string, tag: string) {
+  const m = block.match(new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`));
+  return m ? m[1].trim() : "";
 }
+
+// --- Reddit search.json ---
+async function fetchReddit(q: string) {
+  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(q)}&sort=new&limit=10`;
+  const r = await fetch(url, { headers: { "User-Agent": "Focus-Tracker/1.0" } });
+  if (!r.ok) throw new Error(`Reddit ${r.status}`);
+  const j = await r.json();
+  return (j.data?.children || []).map((c: any) => ({
+    author: `u/${c.data.author}`,
+    content: c.data.title + (c.data.selftext ? " — " + c.data.selftext.slice(0, 200) : ""),
+    date: new Date(c.data.created_utc * 1000).toISOString(),
+    engagement: (c.data.score || 0) + (c.data.num_comments || 0),
+  }));
+}
+
+// --- Hacker News Algolia ---
+async function fetchHN(q: string) {
+  const url = `https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(q)}&hitsPerPage=10`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HN ${r.status}`);
+  const j = await r.json();
+  return (j.hits || []).map((h: any) => ({
+    author: h.author || "HN",
+    content: h.title || h.story_title || h.comment_text || "",
+    date: h.created_at || new Date().toISOString(),
+    engagement: h.points || 0,
+  })).filter((x: any) => x.content);
+}
+
+// --- Mastodon (mastodon.social) statuses search public ---
+async function fetchMastodon(q: string) {
+  const url = `https://mastodon.social/api/v2/search?q=${encodeURIComponent(q)}&type=statuses&limit=10&resolve=true`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Mastodon ${r.status}`);
+  const j = await r.json();
+  return (j.statuses || []).map((s: any) => ({
+    author: `@${s.account?.acct || "anon"}`,
+    content: stripHtml(s.content || ""),
+    date: s.created_at,
+    engagement: (s.favourites_count || 0) + (s.reblogs_count || 0) + (s.replies_count || 0),
+  }));
+}
+function stripHtml(s: string) { return s.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim(); }
