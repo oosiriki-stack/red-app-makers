@@ -11,6 +11,8 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { playAlertSound, isSoundEnabled } from "@/lib/sound";
 
 const sentimentConfig = {
   positive: { label: "Positif", className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: ThumbsUp },
@@ -54,6 +56,16 @@ export default function Mentions() {
   };
 
   useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl]);
+
+  useRealtimeTable("mentions", user?.id, {
+    onInsert: (row) => {
+      setMentions((prev) => [row as Mention, ...prev]);
+      if (isSoundEnabled()) playAlertSound(row.sentiment === "negative" ? "warning" : "info");
+      toast.info(`Nouvelle mention de ${row.author}`, { description: (row.content || "").slice(0, 80) });
+    },
+    onUpdate: (row) => setMentions((prev) => prev.map((m) => (m.id === row.id ? (row as Mention) : m))),
+    onDelete: (row) => setMentions((prev) => prev.filter((m) => m.id !== row.id)),
+  });
 
   const handleRefresh = async () => {
     setRefreshing(true);

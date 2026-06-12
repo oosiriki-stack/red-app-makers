@@ -7,6 +7,8 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { playAlertSound, isSoundEnabled } from "@/lib/sound";
 
 const severityConfig = {
   critical: { icon: AlertCircle, label: "Critique", className: "glass-card border-red-500/20", badge: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400" },
