@@ -43,6 +43,19 @@ export default function Alerts() {
 
   useEffect(() => { fetchAlerts(); }, [user]);
 
+  useRealtimeTable("alerts", user?.id, {
+    onInsert: (row) => {
+      setAlerts((prev) => [row as Alert, ...prev]);
+      if (isSoundEnabled()) {
+        const sev = row.type === "critical" ? "critical" : row.type === "warning" ? "warning" : "info";
+        playAlertSound(sev);
+      }
+      toast[row.type === "critical" ? "error" : row.type === "warning" ? "warning" : "info"](row.title, { description: row.description ?? "" });
+    },
+    onUpdate: (row) => setAlerts((prev) => prev.map((a) => (a.id === row.id ? (row as Alert) : a))),
+    onDelete: (row) => setAlerts((prev) => prev.filter((a) => a.id !== row.id)),
+  });
+
   const markAllRead = async () => {
     if (!user) return;
     await supabase.from("alerts").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
