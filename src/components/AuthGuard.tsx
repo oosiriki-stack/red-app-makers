@@ -1,25 +1,9 @@
-import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AuthGuard() {
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthenticated(!!session);
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthenticated(!!session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -32,7 +16,6 @@ export function AuthGuard() {
       </div>
     );
   }
-
-  if (!authenticated) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   return <Outlet />;
 }

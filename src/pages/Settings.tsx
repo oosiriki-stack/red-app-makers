@@ -12,9 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2 } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -52,6 +53,16 @@ export default function Settings() {
   const [notifCritical, setNotifCritical] = useState(true);
   const [notifDaily, setNotifDaily] = useState(true);
   const [notifInfluencer, setNotifInfluencer] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+  const [tracking, setTracking] = useState(false);
+
+  const runTracker = async () => {
+    setTracking(true);
+    const { data, error } = await supabase.functions.invoke("track-mentions");
+    setTracking(false);
+    if (error) { toast.error("Erreur tracker: " + error.message); return; }
+    toast.success(`Tracker exécuté · ${data?.count ?? 0} mention(s) · ${data?.real_x ? "X réel ✓" : "mode simulé"}`);
+  };
 
   // Font
   const [fontLevel, setFontLevel] = useState(() => {
@@ -244,7 +255,7 @@ export default function Settings() {
 
           <TabsContent value="notifications">
             <Card className="glass-card rounded-2xl">
-              <CardHeader><CardTitle className="text-base">Notifications</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">Notifications & Trackers</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div><p className="text-sm font-medium">Alertes critiques</p><p className="text-xs text-muted-foreground">Notifications push pour les crises</p></div>
@@ -257,6 +268,32 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div><p className="text-sm font-medium">Mentions influenceurs</p><p className="text-xs text-muted-foreground">Alerte quand un influenceur vous mentionne</p></div>
                   <Switch checked={notifInfluencer} onCheckedChange={setNotifInfluencer} />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Alertes sonores</p>
+                      <p className="text-xs text-muted-foreground">Son distinct par niveau (info / warning / critique)</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Button variant="ghost" size="sm" className="rounded-xl text-xs" onClick={() => playAlertSound("critical")}>Tester</Button>
+                    <Switch checked={soundOn} onCheckedChange={(v) => { setSoundOn(v); setSoundEnabled(v); }} />
+                  </div>
+                </div>
+                <Separator />
+                <div className="rounded-xl bg-muted/50 p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Trackers de mentions</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Lance un cycle de collecte (X réel si clés configurées, autres plateformes simulées).</p>
+                  <Button onClick={runTracker} disabled={tracking} className="rounded-xl" size="sm">
+                    {tracking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Zap className="h-4 w-4 mr-2" />}
+                    Lancer le tracker
+                  </Button>
                 </div>
               </CardContent>
             </Card>

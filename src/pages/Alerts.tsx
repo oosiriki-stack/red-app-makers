@@ -7,6 +7,8 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { playAlertSound, isSoundEnabled } from "@/lib/sound";
 
 const severityConfig = {
   critical: { icon: AlertCircle, label: "Critique", className: "glass-card border-red-500/20", badge: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400" },
@@ -40,6 +42,19 @@ export default function Alerts() {
   };
 
   useEffect(() => { fetchAlerts(); }, [user]);
+
+  useRealtimeTable("alerts", user?.id, {
+    onInsert: (row) => {
+      setAlerts((prev) => [row as Alert, ...prev]);
+      if (isSoundEnabled()) {
+        const sev = row.type === "critical" ? "critical" : row.type === "warning" ? "warning" : "info";
+        playAlertSound(sev);
+      }
+      toast[row.type === "critical" ? "error" : row.type === "warning" ? "warning" : "info"](row.title, { description: row.description ?? "" });
+    },
+    onUpdate: (row) => setAlerts((prev) => prev.map((a) => (a.id === row.id ? (row as Alert) : a))),
+    onDelete: (row) => setAlerts((prev) => prev.filter((a) => a.id !== row.id)),
+  });
 
   const markAllRead = async () => {
     if (!user) return;
