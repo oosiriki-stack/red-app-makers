@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, XCircle, Clock, Eye, Download } from "lucide-react";
 import { toast } from "sonner";
 import { generatePaymentReceipt } from "@/lib/pdfReport";
+import { UsageMap } from "@/components/UsageMap";
 
 type Row = {
   id: string; name: string | null; company: string | null;
@@ -171,6 +172,8 @@ export default function SuperAdmin() {
             );
           })}
         </div>
+
+        <UsageMap />
 
         <Tabs defaultValue="pending">
           <TabsList className="rounded-xl flex-wrap h-auto">

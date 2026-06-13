@@ -16,20 +16,36 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    // Supabase recovery links come as #access_token=...&type=recovery (or ?code=... PKCE)
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+
+    if (hash.includes("type=recovery") || search.includes("type=recovery")) {
       setReady(true);
-    } else {
-      // Try to detect session
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) setReady(true);
-        else {
-          toast.error("Lien de réinitialisation invalide ou expiré");
-          navigate("/login");
-        }
-      });
     }
+
+    // Listen for the PASSWORD_RECOVERY event triggered by the SDK after parsing the URL
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && (hash.includes("type=recovery") || search.includes("type=recovery")))) {
+        setReady(true);
+      } else if (event === "SIGNED_IN" && session && !ready) {
+        // Token-link delivered a session but no explicit type=recovery flag — still allow
+        setReady(true);
+      }
+    });
+
+    // Fallback: if after 1.5s we have a session, allow reset; else send back to login
+    const t = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) setReady(true);
+      else {
+        toast.error("Lien de réinitialisation invalide ou expiré");
+        navigate("/login");
+      }
+    }, 1500);
+
+    return () => { subscription.unsubscribe(); clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
