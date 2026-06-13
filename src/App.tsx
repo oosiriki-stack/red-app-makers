@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthGuard } from "@/components/AuthGuard";
+import { useAppUpdate } from "@/hooks/useAppUpdate";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Mentions from "@/pages/Mentions";
@@ -26,7 +27,9 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useAppUpdate(60_000);
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -61,6 +64,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
