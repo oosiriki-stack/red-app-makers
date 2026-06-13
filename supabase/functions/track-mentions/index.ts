@@ -20,12 +20,24 @@ Deno.serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return json({ error: "Unauthorized" }, 401);
 
+    let body: any = {};
+    if (req.method === "POST") { try { body = await req.json(); } catch {} }
+    const adhocQuery = (body?.query ? String(body.query) : "").trim();
+
     const admin = createClient(url, svc);
     const { data: settings } = await admin.from("monitoring_settings").select("*").eq("user_id", user.id).maybeSingle();
-    if (!settings?.brand && !(settings as any)?.person) return json({ error: "Configurez une marque ou une personne à surveiller" }, 400);
+    const { data: profile } = await admin.from("profiles").select("name").eq("id", user.id).maybeSingle();
+    const requesterName = (profile?.name?.trim() || user.email || "Utilisateur").toString();
 
-    const queries = [settings.brand, (settings as any).person].filter(Boolean).map((q) => String(q).trim()).filter(Boolean);
-    const platforms = enabledPlatforms((settings.platforms || {}) as Record<string, boolean>);
+    if (!adhocQuery && !settings?.brand && !(settings as any)?.person) {
+      return json({ error: "Configurez une marque ou une personne à surveiller" }, 400);
+    }
+
+    const baseQueries = adhocQuery
+      ? [adhocQuery]
+      : [settings?.brand, (settings as any)?.person].filter(Boolean).map((q) => String(q).trim()).filter(Boolean);
+    const queries = baseQueries;
+    const platforms = enabledPlatforms((settings?.platforms || {}) as Record<string, boolean>);
 
     // Récupère mentions déjà existantes pour éviter doublons (par contenu+source)
     const { data: existing } = await admin.from("mentions").select("source,content").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500);
