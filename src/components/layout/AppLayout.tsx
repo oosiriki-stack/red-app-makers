@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 export function AppLayout() {
   const navigate = useNavigate();
@@ -16,14 +17,25 @@ export function AppLayout() {
   const [initials, setInitials] = useState("U");
   const [unread, setUnread] = useState(0);
 
+  const refreshUnread = () => {
+    if (!user) return;
+    supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false).then(({ count }) => setUnread(count ?? 0));
+  };
+
   useEffect(() => { if (dark) document.documentElement.classList.add("dark"); }, []);
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("name").eq("id", user.id).single().then(({ data }) => {
       if (data?.name) setInitials(data.name.split(" ").filter(Boolean).map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U");
     });
-    supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false).then(({ count }) => setUnread(count ?? 0));
+    refreshUnread();
   }, [user]);
+
+  useRealtimeTable("alerts", user?.id, {
+    onInsert: () => refreshUnread(),
+    onUpdate: () => refreshUnread(),
+    onDelete: () => refreshUnread(),
+  });
 
   const toggleDark = () => {
     const next = !dark; setDark(next);
