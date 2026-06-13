@@ -186,6 +186,15 @@ export default function AIAssistant() {
                 className="rounded-xl resize-none min-h-[40px]"
                 disabled={streaming}
               />
+              <Button
+                onClick={toggleVoice}
+                disabled={streaming}
+                variant={listening ? "default" : "outline"}
+                className={`rounded-xl shrink-0 h-10 w-10 p-0 ${listening ? "bg-red-500 hover:bg-red-600 animate-pulse" : ""}`}
+                title="Commande vocale"
+              >
+                {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
               <Button onClick={() => send()} disabled={streaming || !input.trim()} className="rounded-xl shrink-0 h-10 w-10 p-0">
                 {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
