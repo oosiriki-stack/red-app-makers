@@ -262,6 +262,24 @@ export default function Mentions() {
             <SelectTrigger className="w-36 rounded-xl h-9"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="all">Tous sentiments</SelectItem><SelectItem value="positive">Positif</SelectItem><SelectItem value="neutral">Neutre</SelectItem><SelectItem value="negative">Négatif</SelectItem></SelectContent>
           </Select>
+          <div className="relative">
+            <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-40 rounded-xl h-9 pl-8 text-sm" />
+          </div>
+          <div className="relative">
+            <UserCircle className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <Input type="text" placeholder="Nom..." value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="w-36 rounded-xl h-9 pl-8 text-sm" />
+          </div>
+          <Select value={timeFilter} onValueChange={setTimeFilter}>
+            <SelectTrigger className="w-36 rounded-xl h-9"><SelectValue placeholder="Heure" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes heures</SelectItem>
+              <SelectItem value="morning">Matin (6h–12h)</SelectItem>
+              <SelectItem value="afternoon">Après-midi (12h–18h)</SelectItem>
+              <SelectItem value="evening">Soir (18h–22h)</SelectItem>
+              <SelectItem value="night">Nuit (22h–6h)</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex gap-1 ml-auto">
             <Button size="sm" variant="outline" className="rounded-xl" onClick={() => audioSummary("today")} title="Résumé audio du jour"><Volume2 className="h-4 w-4 mr-1" />Jour</Button>
             <Button size="sm" variant="outline" className="rounded-xl" onClick={() => audioSummary("week")}><Volume2 className="h-4 w-4 mr-1" />Sem.</Button>
