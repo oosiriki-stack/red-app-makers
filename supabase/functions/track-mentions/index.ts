@@ -294,7 +294,8 @@ async function fetchMastodon(q: string) {
     const block = m[1];
     const title = stripHtml(decodeXml(pick(block, "title")));
     const author = stripHtml(decodeXml(pick(block, "dc:creator") || pick(block, "author") || "Mastodon"));
-    items.push({ author, content: title, date: safeDate(pick(block, "pubDate")), engagement: 0 });
+    const link = decodeXml(pick(block, "link"));
+    items.push({ author, content: title, date: safeDate(pick(block, "pubDate")), engagement: 0, link });
     if (items.length >= 10) break;
   }
   return items.filter((x) => x.content);
