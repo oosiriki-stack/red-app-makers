@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, Loader2, Sparkles, User, Copy, Printer, Download } from "lucide-react";
+import { Bot, Send, Loader2, Sparkles, User, Copy, Printer, Download, Mic, MicOff } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,9 +26,38 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
+
+  const toggleVoice = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { toast.error("Reconnaissance vocale non supportée sur ce navigateur"); return; }
+    if (listening) { recognitionRef.current?.stop(); return; }
+    const rec = new SR();
+    rec.lang = "fr-FR"; rec.interimResults = true; rec.continuous = false;
+    let finalText = "";
+    rec.onresult = (e: any) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      setInput((finalText + interim).trim());
+    };
+    rec.onerror = (e: any) => { toast.error("Erreur micro: " + (e.error || "")); setListening(false); };
+    rec.onend = () => {
+      setListening(false);
+      const text = finalText.trim();
+      if (text) { setInput(""); send(text); }
+    };
+    recognitionRef.current = rec;
+    setListening(true);
+    rec.start();
+    toast.info("🎙️ Parlez maintenant...");
+  };
 
   const send = async (text?: string) => {
     const content = (text ?? input).trim();
