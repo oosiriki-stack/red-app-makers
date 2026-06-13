@@ -38,12 +38,14 @@ export default function Mentions() {
   const [sentimentFilter, setSentimentFilter] = useState("all");
   const [selected, setSelected] = useState<Mention | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [tracking, setTracking] = useState(false);
   const [mentions, setMentions] = useState<Mention[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   const fetchMentions = async () => {
     if (!user) return;
+    setLoading(true);
     let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false });
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
@@ -74,6 +76,15 @@ export default function Mentions() {
     toast.success("Flux actualisé");
   };
 
+  const runTracker = async () => {
+    setTracking(true);
+    const { data, error } = await supabase.functions.invoke("track-mentions");
+    setTracking(false);
+    if (error) return toast.error("Tracker indisponible: " + error.message);
+    await fetchMentions();
+    toast.success(`${data?.count ?? 0} nouvelle(s) mention(s) collectée(s)`, { description: `Sources: ${(data?.sources_used || []).join(", ") || "flux publics"}` });
+  };
+
   const downloadCSV = () => {
     const header = "ID,Source,Auteur,Contenu,Sentiment,Date,Engagement\n";
     const rows = mentions.map(m => `${m.id},"${m.source}","${m.author}","${m.content.replace(/"/g, '""')}","${m.sentiment}","${m.mention_date}",${m.engagement ?? 0}`).join("\n");
@@ -100,6 +111,10 @@ export default function Mentions() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="default" size="sm" className="rounded-xl" onClick={runTracker} disabled={tracking}>
+              {tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+              Tracker
+            </Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
               {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
               Actualiser
@@ -130,7 +145,7 @@ export default function Mentions() {
         </div>
 
         <div className="space-y-3">
-          {loading && <p className="text-center text-muted-foreground py-8">Chargement...</p>}
+          {loading && mentions.length > 0 && <p className="text-center text-xs text-muted-foreground py-2">Synchronisation…</p>}
           {!loading && mentions.length === 0 && (
             <p className="text-center text-muted-foreground py-8">Aucune mention trouvée. Les mentions apparaîtront ici une fois la surveillance active.</p>
           )}
