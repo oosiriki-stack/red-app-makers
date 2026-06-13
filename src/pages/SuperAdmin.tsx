@@ -325,6 +325,11 @@ export default function SuperAdmin() {
                 <div className="grid grid-cols-2 gap-2">
                   <div><strong>Nom :</strong> {detail.name || "—"}</div>
                   <div><strong>Entreprise :</strong> {detail.company || "—"}</div>
+                  <div className="col-span-2 flex items-center gap-2"><strong>Email d'inscription :</strong>
+                    {detail.email ? (
+                      <button onClick={() => copyEmail(detail.email)} className="font-mono inline-flex items-center gap-1 hover:text-primary"><Mail className="w-3 h-3" />{detail.email}<Copy className="w-3 h-3 opacity-50" /></button>
+                    ) : "—"}
+                  </div>
                   <div><strong>Téléphone :</strong> {detail.phone || "—"}</div>
                   <div><strong>Localisation :</strong> {detail.location || "—"}</div>
                   <div><strong>Plan :</strong> {detail.plan || "—"}</div>
