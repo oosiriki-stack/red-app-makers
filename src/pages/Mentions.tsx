@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { useSubscription } from "@/hooks/useSubscription";
 import { playAlertSound, isSoundEnabled } from "@/lib/sound";
 import { speak, summarizeMentions, stopSpeaking } from "@/lib/speech";
 
@@ -52,11 +53,13 @@ export default function Mentions() {
   const [reply, setReply] = useState<{ pro?: string; commercial?: string; humor?: string }>({});
   const [generating, setGenerating] = useState<string | null>(null);
   const { user } = useAuth();
+  const { isTrial, isPaid } = useSubscription();
+  const demoLimit = isTrial && !isPaid ? 10 : 1000;
 
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
-    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false });
+    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(demoLimit);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);

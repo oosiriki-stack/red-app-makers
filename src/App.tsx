@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthGuard } from "@/components/AuthGuard";
+import { DemoGate } from "@/components/DemoGate";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -46,12 +47,12 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/mentions" element={<Mentions />} />
                 <Route path="/alerts" element={<Alerts />} />
-                <Route path="/competitors" element={<Competitors />} />
-                <Route path="/ai-assistant" element={<AIAssistant />} />
-                <Route path="/reports" element={<Reports />} />
+                <Route path="/competitors" element={<DemoGate feature="Veille concurrentielle" description="Comparez votre marque à vos concurrents en temps réel. Disponible dès le plan Starter."><Competitors /></DemoGate>} />
+                <Route path="/ai-assistant" element={<DemoGate feature="FocusGPT" description="Assistant IA avancé pour analyser et répondre aux mentions. Disponible dès le plan Pro."><AIAssistant /></DemoGate>} />
+                <Route path="/reports" element={<DemoGate feature="Rapports PDF & Excel" description="Génération de rapports professionnels exportables. Disponible dès le plan Starter."><Reports /></DemoGate>} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/surveillance" element={<Navigate to="/settings?tab=surveillance" replace />} />
-                <Route path="/crisis" element={<Crisis />} />
+                <Route path="/crisis" element={<DemoGate feature="Gestion de crise" description="Module avancé de détection et gestion de crise. Disponible dès le plan Pro."><Crisis /></DemoGate>} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/support" element={<Support />} />
