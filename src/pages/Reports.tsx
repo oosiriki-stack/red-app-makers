@@ -102,9 +102,14 @@ export default function Reports() {
                   Rapport {p.label.toLowerCase()} avec graphiques de sentiment, top sources et 25 mentions.
                 </p>
                 {p.auto && <p className="text-xs text-primary">📅 {p.auto}</p>}
-                <Button onClick={() => generate(p.key)} disabled={generating === p.key} className="w-full rounded-xl">
+                <Button
+                  onClick={() => generate(p.key)}
+                  disabled={generating === p.key || mentions.length === 0 || totalsByPeriod[p.key] === 0}
+                  className="w-full rounded-xl"
+                  title={mentions.length === 0 ? "Aucune mention collectée" : totalsByPeriod[p.key] === 0 ? "Aucune mention sur cette période" : undefined}
+                >
                   {generating === p.key ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-                  Télécharger PDF
+                  {mentions.length === 0 ? "Aucune mention" : totalsByPeriod[p.key] === 0 ? "Aucune mention sur la période" : "Télécharger PDF"}
                 </Button>
               </CardContent>
             </Card>

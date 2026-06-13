@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 import { MarketingOnboarding } from "@/components/MarketingOnboarding";
 import { useNotifications } from "@/hooks/useNotifications";
+import { TrialBanner } from "@/components/TrialBanner";
+import { TrialLockGuard } from "@/components/TrialLockGuard";
 
 export function AppLayout() {
   useNotifications();
@@ -77,9 +79,13 @@ export function AppLayout() {
         </div>
       </header>
 
+      <TrialBanner />
+
       <main className="flex-1 p-3 md:p-6 pb-32 overflow-auto">
         <div className="max-w-6xl mx-auto w-full">
-          <Outlet />
+          <TrialLockGuard>
+            <Outlet />
+          </TrialLockGuard>
         </div>
       </main>
 
