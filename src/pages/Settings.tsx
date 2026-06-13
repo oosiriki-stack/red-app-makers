@@ -40,8 +40,10 @@ export default function Settings() {
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [saving, setSaving] = useState(false);
-  const [subscription, setSubscription] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<any>(null);
 
   // Monitoring
   const [brand, setBrand] = useState("");
