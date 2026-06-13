@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity, CalendarDays, UserCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
@@ -44,6 +45,9 @@ export default function Mentions() {
   const queryFromUrl = searchParams.get("q") || "";
   const [sourceFilter, setSourceFilter] = useState("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
+  const [timeFilter, setTimeFilter] = useState("all");
   const [selected, setSelected] = useState<Mention | null>(null);
   const [interactionsOpen, setInteractionsOpen] = useState<Mention | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,13 +67,35 @@ export default function Mentions() {
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);
+    if (dateFilter) {
+      const start = new Date(dateFilter);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(dateFilter);
+      end.setHours(23, 59, 59, 999);
+      query = query.gte("mention_date", start.toISOString()).lte("mention_date", end.toISOString());
+    }
+    if (nameFilter) query = query.ilike("author", `%${nameFilter}%`);
     const { data, error } = await query;
     if (error) toast.error(error.message);
     else setMentions((data || []) as Mention[]);
     setLoading(false);
   };
 
-  useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl]);
+  useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl, dateFilter, nameFilter]);
+
+  const displayMentions = useMemo(() => {
+    if (timeFilter === "all") return mentions;
+    return mentions.filter((m) => {
+      const hour = new Date(m.mention_date).getHours();
+      switch (timeFilter) {
+        case "morning": return hour >= 6 && hour < 12;
+        case "afternoon": return hour >= 12 && hour < 18;
+        case "evening": return hour >= 18 && hour < 22;
+        case "night": return hour >= 22 || hour < 6;
+        default: return true;
+      }
+    });
+  }, [mentions, timeFilter]);
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
@@ -210,9 +236,9 @@ export default function Mentions() {
           <div>
             <h1 className="text-2xl md:text-3xl font-light tracking-tight">Flux de Mentions</h1>
             <p className="text-xs md:text-sm text-muted-foreground">
-              {mentions.length} résultat{mentions.length > 1 ? "s" : ""}
+              {displayMentions.length} résultat{displayMentions.length > 1 ? "s" : ""}
               {queryFromUrl && <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>}
-              {!queryFromUrl && mentions.length > 0 && (
+              {!queryFromUrl && displayMentions.length > 0 && (
                 <span className="inline-flex items-center gap-1 ml-2">
                   <Activity className="h-3 w-3 text-green-500 animate-pulse" />
                   Cycle de surveillance activé
@@ -236,6 +262,24 @@ export default function Mentions() {
             <SelectTrigger className="w-36 rounded-xl h-9"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="all">Tous sentiments</SelectItem><SelectItem value="positive">Positif</SelectItem><SelectItem value="neutral">Neutre</SelectItem><SelectItem value="negative">Négatif</SelectItem></SelectContent>
           </Select>
+          <div className="relative">
+            <CalendarDays className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-40 rounded-xl h-9 pl-8 text-sm" />
+          </div>
+          <div className="relative">
+            <UserCircle className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <Input type="text" placeholder="Nom..." value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="w-36 rounded-xl h-9 pl-8 text-sm" />
+          </div>
+          <Select value={timeFilter} onValueChange={setTimeFilter}>
+            <SelectTrigger className="w-36 rounded-xl h-9"><SelectValue placeholder="Heure" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes heures</SelectItem>
+              <SelectItem value="morning">Matin (6h–12h)</SelectItem>
+              <SelectItem value="afternoon">Après-midi (12h–18h)</SelectItem>
+              <SelectItem value="evening">Soir (18h–22h)</SelectItem>
+              <SelectItem value="night">Nuit (22h–6h)</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex gap-1 ml-auto">
             <Button size="sm" variant="outline" className="rounded-xl" onClick={() => audioSummary("today")} title="Résumé audio du jour"><Volume2 className="h-4 w-4 mr-1" />Jour</Button>
             <Button size="sm" variant="outline" className="rounded-xl" onClick={() => audioSummary("week")}><Volume2 className="h-4 w-4 mr-1" />Sem.</Button>
@@ -245,8 +289,8 @@ export default function Mentions() {
         </div>
 
         <div className="space-y-2">
-          {!loading && mentions.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">Aucune mention. Configurez la surveillance et lancez le tracker.</p>}
-          {mentions.map((m) => {
+          {!loading && displayMentions.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">Aucune mention. Configurez la surveillance et lancez le tracker.</p>}
+          {displayMentions.map((m) => {
             const sc = sentimentConfig[m.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral;
             const avatarText = (m.author || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
             const d = new Date(m.mention_date);
