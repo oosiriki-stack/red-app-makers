@@ -91,6 +91,9 @@ export default function Settings() {
       if (data) {
         setBrand(data.brand || "");
         setPerson((data as any).person || "");
+        setCountry((data as any).country || "");
+        setCity((data as any).city || "");
+        setCommune((data as any).commune || "");
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
       }
