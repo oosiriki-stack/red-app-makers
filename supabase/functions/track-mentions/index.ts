@@ -194,6 +194,7 @@ async function fetchGdelt(q: string) {
     content: a.title || "",
     date: safeDate(a.seendate),
     engagement: 0,
+    link: a.url || "",
   })).filter((x: any) => x.content);
 }
 
