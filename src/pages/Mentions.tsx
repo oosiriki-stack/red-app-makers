@@ -236,9 +236,9 @@ export default function Mentions() {
           <div>
             <h1 className="text-2xl md:text-3xl font-light tracking-tight">Flux de Mentions</h1>
             <p className="text-xs md:text-sm text-muted-foreground">
-              {mentions.length} résultat{mentions.length > 1 ? "s" : ""}
+              {displayMentions.length} résultat{displayMentions.length > 1 ? "s" : ""}
               {queryFromUrl && <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>}
-              {!queryFromUrl && mentions.length > 0 && (
+              {!queryFromUrl && displayMentions.length > 0 && (
                 <span className="inline-flex items-center gap-1 ml-2">
                   <Activity className="h-3 w-3 text-green-500 animate-pulse" />
                   Cycle de surveillance activé
