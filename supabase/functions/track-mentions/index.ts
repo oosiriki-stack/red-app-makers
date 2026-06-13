@@ -212,6 +212,7 @@ async function fetchLemmy(q: string) {
         content: `${p.post?.name || ""}${p.post?.body ? " — " + stripHtml(p.post.body).slice(0, 220) : ""}`,
         date: safeDate(p.post?.published),
         engagement: (p.counts?.score || 0) + (p.counts?.comments || 0),
+        link: p.post?.ap_id || p.post?.url || "",
       });
     }
     if (all.length >= 10) break;
