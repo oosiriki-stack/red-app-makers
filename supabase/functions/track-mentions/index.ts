@@ -58,9 +58,9 @@ Deno.serve(async (req) => {
         } catch (e) { errors.push("GoogleNews: " + e); }
 
         try {
-          const items = await fetchGdelt(q);
+          const items = await fetchBingNews(q);
           for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
-        } catch (e) { errors.push("GDELT: " + e); }
+        } catch (e) { errors.push("BingNews: " + e); }
       }
 
       // === APIFY (réseaux sociaux réels si token configuré) ===
