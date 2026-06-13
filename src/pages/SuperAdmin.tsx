@@ -13,7 +13,7 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, XCircle, Clock, Eye, Download } from "lucide-react";
+import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, XCircle, Clock, Eye, Download, Mail, KeyRound, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { generatePaymentReceipt } from "@/lib/pdfReport";
 import { UsageMap } from "@/components/UsageMap";
@@ -21,6 +21,7 @@ import { UsageMap } from "@/components/UsageMap";
 type Row = {
   id: string; name: string | null; company: string | null;
   phone: string | null; location: string | null;
+  email?: string | null;
   plan: string | null; status: string | null; sub_id?: string | null;
   payment_method?: string | null; transaction_id?: string | null;
   payer_name?: string | null; payer_phone?: string | null; card_last4?: string | null;
@@ -49,16 +50,18 @@ export default function SuperAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }] = await Promise.all([
+    const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }, emailsRes] = await Promise.all([
       supabase.from("profiles").select("id, name, company, phone, location"),
       supabase.from("subscriptions").select("*"),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("mentions").select("*", { count: "exact", head: true }),
+      supabase.functions.invoke("admin-users", { body: { action: "list_emails" } }),
     ]);
+    const emailsMap: Record<string, string> = (emailsRes as any)?.data?.emails ?? {};
     const subMap = new Map((subs ?? []).map((s: any) => [s.user_id, s]));
     const rows: Row[] = (profiles ?? []).map((p: any) => {
       const s = subMap.get(p.id) as any;
-      return { ...p, plan: s?.plan ?? null, status: s?.status ?? null, sub_id: s?.id ?? null, ...(s || {}) };
+      return { ...p, email: emailsMap[p.id] ?? null, plan: s?.plan ?? null, status: s?.status ?? null, sub_id: s?.id ?? null, ...(s || {}) };
     });
     setUsers(rows);
     setTickets(tk ?? []);
@@ -116,6 +119,21 @@ export default function SuperAdmin() {
     toast.success("Réponse envoyée");
     setReply({ ...reply, [id]: "" });
     load();
+  };
+
+  const resetPassword = async (u: Row) => {
+    if (!u.email) return toast.error("Email indisponible");
+    const { data, error } = await supabase.functions.invoke("admin-users", {
+      body: { action: "reset_password", user_id: u.id, redirect_to: `${window.location.origin}/reset-password` },
+    });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || "Échec");
+    toast.success(`✉️ Lien de réinitialisation envoyé à ${u.email}`);
+  };
+
+  const copyEmail = (email?: string | null) => {
+    if (!email) return;
+    navigator.clipboard.writeText(email);
+    toast.success("Email copié");
   };
 
   const viewProof = async (u: Row) => {
@@ -225,7 +243,7 @@ export default function SuperAdmin() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader><TableRow>
-                      <TableHead>Nom</TableHead><TableHead>Plan</TableHead>
+                      <TableHead>Nom</TableHead><TableHead>Email</TableHead><TableHead>Plan</TableHead>
                       <TableHead>Statut</TableHead><TableHead>Jours restants</TableHead><TableHead>Actions</TableHead>
                     </TableRow></TableHeader>
                     <TableBody>
@@ -236,6 +254,13 @@ export default function SuperAdmin() {
                         return (
                           <TableRow key={u.id} className="cursor-pointer hover:bg-muted/30" onClick={() => viewProof(u)}>
                             <TableCell><div><p className="font-medium text-sm">{u.name || "—"}</p><p className="text-xs text-muted-foreground">{u.company || u.location || "—"}</p></div></TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              {u.email ? (
+                                <button onClick={() => copyEmail(u.email)} className="text-xs font-mono inline-flex items-center gap-1 hover:text-primary" title="Copier">
+                                  <Mail className="w-3 h-3" />{u.email}
+                                </button>
+                              ) : <span className="text-xs text-muted-foreground">—</span>}
+                            </TableCell>
                             <TableCell>
                               <Select value={u.plan ?? "starter"} onValueChange={(v) => changePlan(u, v)}>
                                 <SelectTrigger onClick={(e) => e.stopPropagation()} className="w-28 rounded-lg h-8 text-xs"><SelectValue /></SelectTrigger>
@@ -251,10 +276,15 @@ export default function SuperAdmin() {
                             <TableCell className="text-sm">
                               {days !== null ? <span className={days < 7 ? "text-red-600 font-medium" : ""}>{days} j</span> : <span className="text-muted-foreground">—</span>}
                             </TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline" className="rounded-lg" onClick={(e) => { e.stopPropagation(); toggleLicense(u); }}>
-                                {u.status === "active" ? "Désactiver" : "Activer"}
-                              </Button>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="outline" className="rounded-lg" onClick={() => toggleLicense(u)}>
+                                  {u.status === "active" ? "Désactiver" : "Activer"}
+                                </Button>
+                                <Button size="sm" variant="outline" className="rounded-lg" title="Réinitialiser le mot de passe" onClick={() => resetPassword(u)} disabled={!u.email}>
+                                  <KeyRound className="w-3 h-3" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -295,6 +325,11 @@ export default function SuperAdmin() {
                 <div className="grid grid-cols-2 gap-2">
                   <div><strong>Nom :</strong> {detail.name || "—"}</div>
                   <div><strong>Entreprise :</strong> {detail.company || "—"}</div>
+                  <div className="col-span-2 flex items-center gap-2"><strong>Email d'inscription :</strong>
+                    {detail.email ? (
+                      <button onClick={() => copyEmail(detail.email)} className="font-mono inline-flex items-center gap-1 hover:text-primary"><Mail className="w-3 h-3" />{detail.email}<Copy className="w-3 h-3 opacity-50" /></button>
+                    ) : "—"}
+                  </div>
                   <div><strong>Téléphone :</strong> {detail.phone || "—"}</div>
                   <div><strong>Localisation :</strong> {detail.location || "—"}</div>
                   <div><strong>Plan :</strong> {detail.plan || "—"}</div>
@@ -328,6 +363,9 @@ export default function SuperAdmin() {
                   {detail.status === "active" && (
                     <Button size="sm" variant="outline" className="rounded-lg" onClick={() => downloadReceipt(detail)}><Download className="w-3 h-3 mr-1" />Reçu PDF</Button>
                   )}
+                  <Button size="sm" variant="outline" className="rounded-lg" disabled={!detail.email} onClick={() => resetPassword(detail)}>
+                    <KeyRound className="w-3 h-3 mr-1" />Réinitialiser mot de passe
+                  </Button>
                 </div>
               </div>
             )}
