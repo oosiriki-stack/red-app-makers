@@ -173,6 +173,8 @@ export default function SuperAdmin() {
           })}
         </div>
 
+        <UsageMap />
+
         <Tabs defaultValue="pending">
           <TabsList className="rounded-xl flex-wrap h-auto">
             <TabsTrigger value="pending" className="rounded-lg">Paiements en attente ({stats.pending})</TabsTrigger>
