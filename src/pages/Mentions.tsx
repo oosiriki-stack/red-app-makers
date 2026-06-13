@@ -67,13 +67,35 @@ export default function Mentions() {
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);
+    if (dateFilter) {
+      const start = new Date(dateFilter);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(dateFilter);
+      end.setHours(23, 59, 59, 999);
+      query = query.gte("mention_date", start.toISOString()).lte("mention_date", end.toISOString());
+    }
+    if (nameFilter) query = query.ilike("author", `%${nameFilter}%`);
     const { data, error } = await query;
     if (error) toast.error(error.message);
     else setMentions((data || []) as Mention[]);
     setLoading(false);
   };
 
-  useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl]);
+  useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl, dateFilter, nameFilter]);
+
+  const displayMentions = useMemo(() => {
+    if (timeFilter === "all") return mentions;
+    return mentions.filter((m) => {
+      const hour = new Date(m.mention_date).getHours();
+      switch (timeFilter) {
+        case "morning": return hour >= 6 && hour < 12;
+        case "afternoon": return hour >= 12 && hour < 18;
+        case "evening": return hour >= 18 && hour < 22;
+        case "night": return hour >= 22 || hour < 6;
+        default: return true;
+      }
+    });
+  }, [mentions, timeFilter]);
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
