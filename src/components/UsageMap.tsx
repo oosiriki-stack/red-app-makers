@@ -154,7 +154,7 @@ export function UsageMap() {
           <div className="flex justify-center p-8"><Loader2 className="w-5 h-5 animate-spin" /></div>
         ) : (
           <div className="rounded-xl overflow-hidden border border-border" style={{ height: 380 }}>
-            <Map defaultCenter={center} defaultZoom={points.length > 0 ? 4 : 5}>
+            <PigeonMap defaultCenter={center} defaultZoom={points.length > 0 ? 4 : 5}>
               {points.map((p) => {
                 const size = Math.round(18 + (p.count / maxCount) * 26);
                 return (
