@@ -175,7 +175,7 @@ export function UsageMap() {
                   </div>
                 </Overlay>
               )}
-            </Map>
+            </PigeonMap>
           </div>
         )}
         {!loading && points.length === 0 && (
