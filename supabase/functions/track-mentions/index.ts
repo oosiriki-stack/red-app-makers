@@ -58,9 +58,9 @@ Deno.serve(async (req) => {
         } catch (e) { errors.push("GoogleNews: " + e); }
 
         try {
-          const items = await fetchGdelt(q);
+          const items = await fetchBingNews(q);
           for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
-        } catch (e) { errors.push("GDELT: " + e); }
+        } catch (e) { errors.push("BingNews: " + e); }
       }
 
       // === APIFY (réseaux sociaux réels si token configuré) ===
@@ -252,19 +252,23 @@ function pick(block: string, tag: string) {
   return m ? m[1].trim() : "";
 }
 
-// --- GDELT Global Knowledge Graph (presse mondiale gratuite) ---
-async function fetchGdelt(q: string) {
-  const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(q)}&mode=ArtList&format=json&maxrecords=10&sort=DateDesc`;
+// --- Bing News RSS (presse mondiale gratuite, sans clé) ---
+async function fetchBingNews(q: string) {
+  const url = `https://www.bing.com/news/search?q=${encodeURIComponent(q)}&format=rss&cc=fr`;
   const r = await fetchWithTimeout(url);
-  if (!r.ok) throw new Error(`GDELT ${r.status}`);
-  const j = await r.json();
-  return (j.articles || []).map((a: any) => ({
-    author: a.domain || a.sourceCountry || "GDELT",
-    content: a.title || "",
-    date: safeDate(a.seendate),
-    engagement: 0,
-    link: a.url || "",
-  })).filter((x: any) => x.content);
+  if (!r.ok) throw new Error(`Bing ${r.status}`);
+  const xml = await r.text();
+  const items: any[] = [];
+  for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    const block = m[1];
+    const title = decodeXml(pick(block, "title"));
+    const link = decodeXml(pick(block, "link"));
+    const pubDate = pick(block, "pubDate");
+    const desc = stripHtml(decodeXml(pick(block, "description")));
+    if (title) items.push({ author: "Bing News", content: desc ? `${title} — ${desc.slice(0, 200)}` : title, date: safeDate(pubDate), link, engagement: 0 });
+    if (items.length >= 12) break;
+  }
+  return items;
 }
 
 // --- Lemmy public API (communautés sociales fédérées) ---
