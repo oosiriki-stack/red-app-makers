@@ -289,8 +289,8 @@ export default function Mentions() {
         </div>
 
         <div className="space-y-2">
-          {!loading && mentions.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">Aucune mention. Configurez la surveillance et lancez le tracker.</p>}
-          {mentions.map((m) => {
+          {!loading && displayMentions.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">Aucune mention. Configurez la surveillance et lancez le tracker.</p>}
+          {displayMentions.map((m) => {
             const sc = sentimentConfig[m.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral;
             const avatarText = (m.author || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
             const d = new Date(m.mention_date);
