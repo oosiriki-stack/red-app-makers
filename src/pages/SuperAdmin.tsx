@@ -363,6 +363,9 @@ export default function SuperAdmin() {
                   {detail.status === "active" && (
                     <Button size="sm" variant="outline" className="rounded-lg" onClick={() => downloadReceipt(detail)}><Download className="w-3 h-3 mr-1" />Reçu PDF</Button>
                   )}
+                  <Button size="sm" variant="outline" className="rounded-lg" disabled={!detail.email} onClick={() => resetPassword(detail)}>
+                    <KeyRound className="w-3 h-3 mr-1" />Réinitialiser mot de passe
+                  </Button>
                 </div>
               </div>
             )}
