@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -14,6 +14,7 @@ import Competitors from "@/pages/Competitors";
 import AIAssistant from "@/pages/AIAssistant";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import Crisis from "@/pages/Crisis";
 import Pricing from "@/pages/Pricing";
 import Install from "@/pages/Install";
 import Login from "@/pages/Login";
@@ -46,6 +47,8 @@ const App = () => (
                 <Route path="/ai-assistant" element={<AIAssistant />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/surveillance" element={<Navigate to="/settings?tab=surveillance" replace />} />
+                <Route path="/crisis" element={<Crisis />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/support" element={<Support />} />
