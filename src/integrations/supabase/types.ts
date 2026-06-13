@@ -20,8 +20,11 @@ export type Database = {
           description: string | null
           id: string
           is_read: boolean
+          platform: string | null
+          query: string | null
           reaction: string | null
           reaction_note: string | null
+          requester: string | null
           title: string
           type: string
           user_id: string
@@ -31,8 +34,11 @@ export type Database = {
           description?: string | null
           id?: string
           is_read?: boolean
+          platform?: string | null
+          query?: string | null
           reaction?: string | null
           reaction_note?: string | null
+          requester?: string | null
           title: string
           type?: string
           user_id: string
@@ -42,8 +48,11 @@ export type Database = {
           description?: string | null
           id?: string
           is_read?: boolean
+          platform?: string | null
+          query?: string | null
           reaction?: string | null
           reaction_note?: string | null
+          requester?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -60,6 +69,8 @@ export type Database = {
           id: string
           interactions: Json | null
           mention_date: string
+          query: string | null
+          requester: string | null
           sentiment: string
           source: string
           source_url: string | null
@@ -74,6 +85,8 @@ export type Database = {
           id?: string
           interactions?: Json | null
           mention_date?: string
+          query?: string | null
+          requester?: string | null
           sentiment?: string
           source: string
           source_url?: string | null
@@ -88,6 +101,8 @@ export type Database = {
           id?: string
           interactions?: Json | null
           mention_date?: string
+          query?: string | null
+          requester?: string | null
           sentiment?: string
           source?: string
           source_url?: string | null

@@ -1,0 +1,2 @@
+ALTER TABLE public.alerts ADD COLUMN IF NOT EXISTS query text, ADD COLUMN IF NOT EXISTS requester text, ADD COLUMN IF NOT EXISTS platform text;
+ALTER TABLE public.mentions ADD COLUMN IF NOT EXISTS query text, ADD COLUMN IF NOT EXISTS requester text;
