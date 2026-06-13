@@ -1,0 +1,15 @@
+{
+  "name": "Focus — e-Réputation & Social Listening",
+  "short_name": "Focus",
+  "description": "Surveillez et pilotez votre e-réputation avec l'IA.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B0B0F",
+  "theme_color": "#E5A100",
+  "lang": "fr",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
