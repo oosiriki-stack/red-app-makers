@@ -232,11 +232,18 @@ export default function Mentions() {
                   <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setSelected(m); setReply({}); }}>
                     <div className="flex items-center gap-1.5 flex-wrap text-xs">
                       <span className="font-medium text-sm">{m.author}</span>
-                      <Badge variant="outline" className="text-[10px] rounded-md py-0">{m.source}</Badge>
+                      <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
                       <Badge className={`text-[10px] border-0 rounded-md py-0 ${sc.className}`}>{sc.label}</Badge>
                       <span className="text-muted-foreground ml-auto">{d.toLocaleDateString("fr-FR")} · {d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                     <p className="text-sm mt-1 text-foreground/90 line-clamp-2">{m.content}</p>
+                    {(m.requester || m.query) && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                        {m.requester && <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><User className="h-3 w-3 text-primary" />Émetteur · <span className="font-medium text-foreground/80">{m.requester}</span></span>}
+                        {m.query && <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Search className="h-3 w-3 text-primary" />Requête · <span className="font-medium text-foreground/80">« {m.query} »</span></span>}
+                        <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Radio className="h-3 w-3 text-primary" />Plateforme · <span className="font-medium text-foreground/80">{PLATFORM_LABEL[m.source] || m.source}</span></span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1 shrink-0">
                     <Button size="sm" variant="ghost" className="rounded-lg h-7 px-2" onClick={(e) => { e.stopPropagation(); setInteractionsOpen(m); }}>
