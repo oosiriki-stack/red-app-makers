@@ -26,6 +26,7 @@ const REACTIONS = [
 type Alert = {
   id: string; type: string; title: string; description: string | null;
   is_read: boolean; created_at: string; reaction?: string | null;
+  query?: string | null; requester?: string | null; platform?: string | null;
 };
 
 export default function Alerts() {
