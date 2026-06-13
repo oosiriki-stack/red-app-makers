@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export type SubInfo = {
   loading: boolean;
@@ -16,6 +17,7 @@ export type SubInfo = {
 
 export function useSubscription(): SubInfo {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
@@ -29,6 +31,21 @@ export function useSubscription(): SubInfo {
     return () => { cancelled = true; };
   }, [user, tick]);
 
+  // Admins & super admins bypass all subscription/demo restrictions
+  if (isAdmin) {
+    return {
+      loading: loading || roleLoading,
+      plan: "admin",
+      status: "active",
+      expiresAt: null,
+      daysLeft: 9999,
+      isTrial: false,
+      isPaid: true,
+      locked: false,
+      refresh: () => setTick((t) => t + 1),
+    };
+  }
+
   const plan = data?.plan ?? null;
   const status = data?.status ?? null;
   const expiresAt = data?.expires_at ? new Date(data.expires_at) : null;
@@ -37,10 +54,11 @@ export function useSubscription(): SubInfo {
   const notExpired = expiresAt ? expiresAt.getTime() > now : false;
   const isTrial = plan === "trial" && status === "active" && notExpired;
   const isPaid = (plan === "starter" || plan === "pro" || plan === "enterprise") && status === "active" && notExpired;
-  const locked = !loading && !isTrial && !isPaid;
+  const locked = !loading && !roleLoading && !isTrial && !isPaid;
 
   return {
-    loading, plan, status, expiresAt, daysLeft, isTrial, isPaid, locked,
+    loading: loading || roleLoading, plan, status, expiresAt, daysLeft, isTrial, isPaid, locked,
     refresh: () => setTick((t) => t + 1),
   };
 }
+
