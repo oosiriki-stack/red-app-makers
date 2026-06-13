@@ -146,8 +146,8 @@ function enabledPlatforms(platforms: Record<string, boolean>) {
   return out;
 }
 
-function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number) {
-  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date };
+function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number, source_url?: string) {
+  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date, source_url: source_url || null };
 }
 
 function detectSentiment(text: string): string {
