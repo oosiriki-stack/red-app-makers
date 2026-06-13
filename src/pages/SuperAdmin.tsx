@@ -50,16 +50,18 @@ export default function SuperAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }] = await Promise.all([
+    const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }, emailsRes] = await Promise.all([
       supabase.from("profiles").select("id, name, company, phone, location"),
       supabase.from("subscriptions").select("*"),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("mentions").select("*", { count: "exact", head: true }),
+      supabase.functions.invoke("admin-users", { body: { action: "list_emails" } }),
     ]);
+    const emailsMap: Record<string, string> = (emailsRes as any)?.data?.emails ?? {};
     const subMap = new Map((subs ?? []).map((s: any) => [s.user_id, s]));
     const rows: Row[] = (profiles ?? []).map((p: any) => {
       const s = subMap.get(p.id) as any;
-      return { ...p, plan: s?.plan ?? null, status: s?.status ?? null, sub_id: s?.id ?? null, ...(s || {}) };
+      return { ...p, email: emailsMap[p.id] ?? null, plan: s?.plan ?? null, status: s?.status ?? null, sub_id: s?.id ?? null, ...(s || {}) };
     });
     setUsers(rows);
     setTickets(tk ?? []);
