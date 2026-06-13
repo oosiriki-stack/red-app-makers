@@ -323,7 +323,14 @@ export default function Mentions() {
                     <div key={t} className="rounded-xl bg-primary/5 p-3 text-sm space-y-2">
                       <p className="text-xs font-medium text-primary capitalize">{t === "pro" ? "Professionnelle" : t === "commercial" ? "Commerciale" : "Humoristique"}</p>
                       <p className="whitespace-pre-wrap">{reply[t]}</p>
-                      <Button size="sm" variant="ghost" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); toast.success("Copié"); }}><Copy className="h-3 w-3 mr-1" />Copier</Button>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" variant="ghost" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); toast.success("Copié"); }}><Copy className="h-3 w-3 mr-1" />Copier</Button>
+                        {selected?.source_url && (
+                          <Button size="sm" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); window.open(selected.source_url!, "_blank"); toast.success("Réponse copiée · ouverture de la plateforme"); }}>
+                            <ExternalLink className="h-3 w-3 mr-1" />Répondre sur la plateforme
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
