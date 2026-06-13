@@ -100,7 +100,8 @@ export default function Login() {
                 Apple
               </Button>
             </div>
-
+            <p className="text-sm text-center text-muted-foreground">
+              Pas de compte ?{" "}
               <Link to="/register" className="text-primary hover:underline font-medium">S'inscrire</Link>
             </p>
             <div className="flex justify-center text-xs text-muted-foreground">
