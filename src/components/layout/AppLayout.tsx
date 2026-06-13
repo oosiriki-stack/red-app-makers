@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import { MarketingOnboarding } from "@/components/MarketingOnboarding";
 
 export function AppLayout() {
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ export function AppLayout() {
       </main>
 
       <BottomNav />
+      <MarketingOnboarding />
     </div>
   );
 }
