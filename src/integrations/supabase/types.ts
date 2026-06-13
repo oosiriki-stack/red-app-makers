@@ -98,6 +98,9 @@ export type Database = {
       monitoring_settings: {
         Row: {
           brand: string
+          city: string | null
+          commune: string | null
+          country: string | null
           created_at: string
           id: string
           person: string | null
@@ -107,6 +110,9 @@ export type Database = {
         }
         Insert: {
           brand?: string
+          city?: string | null
+          commune?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           person?: string | null
@@ -116,6 +122,9 @@ export type Database = {
         }
         Update: {
           brand?: string
+          city?: string | null
+          commune?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           person?: string | null

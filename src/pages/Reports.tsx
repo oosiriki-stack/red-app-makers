@@ -20,6 +20,8 @@ const PERIODS: { key: ReportPeriod; label: string; auto?: string }[] = [
 export default function Reports() {
   const { user } = useAuth();
   const [brand, setBrand] = useState("");
+  const [settings, setSettings] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [alertsCount, setAlertsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -28,12 +30,15 @@ export default function Reports() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [{ data: m }, { data: s }, { count }] = await Promise.all([
+      const [{ data: m }, { data: s }, { count }, { data: p }] = await Promise.all([
         supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }),
-        supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).maybeSingle(),
+        supabase.from("monitoring_settings").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
+        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       ]);
       setMentions((m as Mention[]) || []);
+      setSettings(s);
+      setProfile(p);
       setBrand(s?.brand || "");
       setAlertsCount(count || 0);
       setLoading(false);
@@ -44,7 +49,18 @@ export default function Reports() {
     setGenerating(period);
     try {
       const filtered = filterByPeriod(mentions, period);
-      const doc = generatePdfReport({ brand, period, mentions: filtered, alertsCount });
+      const doc = generatePdfReport({
+        brand,
+        period,
+        mentions: filtered,
+        alertsCount,
+        person: settings?.person,
+        country: settings?.country,
+        city: settings?.city,
+        commune: settings?.commune,
+        ownerName: profile?.name,
+        ownerEmail: user?.email,
+      });
       doc.save(`focus-rapport-${period}-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success(`Rapport ${period} téléchargé`);
     } catch (e: any) {

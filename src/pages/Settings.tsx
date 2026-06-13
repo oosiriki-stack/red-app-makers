@@ -48,6 +48,9 @@ export default function Settings() {
   // Monitoring
   const [brand, setBrand] = useState("");
   const [person, setPerson] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [commune, setCommune] = useState("");
   const [platformStates, setPlatformStates] = useState<Record<string, boolean>>(defaultPlatformStates);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
@@ -88,6 +91,9 @@ export default function Settings() {
       if (data) {
         setBrand(data.brand || "");
         setPerson((data as any).person || "");
+        setCountry((data as any).country || "");
+        setCity((data as any).city || "");
+        setCommune((data as any).commune || "");
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
       }
@@ -132,6 +138,9 @@ export default function Settings() {
       user_id: user.id,
       brand,
       person: person || null,
+      country: country || null,
+      city: city || null,
+      commune: commune || null,
       platforms: platformStates,
     } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
@@ -256,6 +265,20 @@ export default function Settings() {
                   <Label>Personne à surveiller (optionnel)</Label>
                   <Input placeholder="Ex: PDG, ministre, dirigeant..." value={person} onChange={(e) => setPerson(e.target.value)} className="rounded-xl mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">Surveille les mentions d'une personnalité publique (nom complet)</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <Label>Pays</Label>
+                    <Input placeholder="Ex: Côte d'Ivoire" value={country} onChange={(e) => setCountry(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
+                  <div>
+                    <Label>Ville</Label>
+                    <Input placeholder="Ex: Abidjan" value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
+                  <div>
+                    <Label>Commune</Label>
+                    <Input placeholder="Ex: Cocody" value={commune} onChange={(e) => setCommune(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
                 </div>
                 <Separator />
                 <div>
