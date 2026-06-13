@@ -4,31 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { MessageSquare, Heart, Bell, Zap, ArrowUp, RefreshCw, Loader2 } from "lucide-react";
+import { MessageSquare, Heart, Bell, RefreshCw, Loader2 } from "lucide-react";
 import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/AnimatedPage";
 import { ReputationGauge } from "@/components/ReputationGauge";
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div><Skeleton className="h-8 w-48 mb-2" /><Skeleton className="h-4 w-64" /></div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (<Skeleton key={i} className="h-32 rounded-2xl" />))}
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "" });
@@ -39,26 +27,22 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     if (!user) return;
+    setLoading(true);
+    const [mentionsRes, positiveRes, alertsRes, monitoringRes] = await Promise.all([
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "positive"),
+      supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
+      supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).maybeSingle(),
+    ]);
 
-    // Fetch mention count
-    const { count: mentionCount } = await supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id);
-    
-    // Fetch positive mentions
-    const { count: positiveCount } = await supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "positive");
-    
-    // Fetch unread alerts
-    const { count: alertCount } = await supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false);
-
-    // Fetch brand
-    const { data: monitoring } = await supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).single();
-
-    const total = mentionCount ?? 0;
-    const positive = positiveCount ?? 0;
+    const total = mentionsRes.count ?? 0;
+    const positive = positiveRes.count ?? 0;
+    const monitoring = monitoringRes.data;
 
     setStats({
       mentions: total,
       positivePercent: total > 0 ? Math.round((positive / total) * 100) : 0,
-      alerts: alertCount ?? 0,
+      alerts: alertsRes.count ?? 0,
       brand: monitoring?.brand || "",
     });
 
@@ -86,8 +70,6 @@ export default function Dashboard() {
     });
   }, [user]);
 
-  if (loading) return <DashboardSkeleton />;
-
   const reputationScore = stats.positivePercent > 0 ? Math.min(stats.positivePercent + 10, 100) : 50;
 
   const statCards = [
@@ -107,7 +89,7 @@ export default function Dashboard() {
             </p>
           </div>
           <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+            {refreshing || loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
             Actualiser
           </Button>
         </div>
