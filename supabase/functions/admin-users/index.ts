@@ -52,16 +52,17 @@ Deno.serve(async (req) => {
     }
 
     if (action === "reset_password") {
-      const userId = body.user_id as string;
-      if (!userId) return json({ error: "user_id requis" }, 400);
-      const { data: target, error: ge } = await admin.auth.admin.getUserById(userId);
-      if (ge || !target?.user?.email) return json({ error: "Utilisateur introuvable" }, 404);
+      const userId = body.user_id as string | undefined;
+      let email = (body.email as string | undefined)?.trim();
+      if (!email && userId) {
+        const { data: target } = await admin.auth.admin.getUserById(userId);
+        email = target?.user?.email ?? undefined;
+      }
+      if (!email) return json({ error: "Email introuvable pour cet utilisateur" }, 404);
       const redirectTo = body.redirect_to as string | undefined;
-      const { error } = await admin.auth.resetPasswordForEmail(target.user.email, {
-        redirectTo,
-      });
+      const { error } = await admin.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) return json({ error: error.message }, 500);
-      return json({ ok: true, email: target.user.email });
+      return json({ ok: true, email });
     }
 
     return json({ error: "Action inconnue" }, 400);
