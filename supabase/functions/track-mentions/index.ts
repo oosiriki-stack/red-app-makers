@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const DEFAULT_PLATFORMS = ["x", "facebook", "instagram", "linkedin", "tiktok", "blog", "google"];
+const PLATFORM_LABEL: Record<string, string> = { x: "X (Twitter)", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn", tiktok: "TikTok", blog: "Blogs & forums", google: "Google News" };
 const UA = "Mozilla/5.0 (compatible; FocusTracker/2.0; +https://lovable.app)";
 
 Deno.serve(async (req) => {
