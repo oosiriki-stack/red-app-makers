@@ -24,7 +24,7 @@ async function processUser(admin: any, APIFY: string, settings: any) {
       if (platforms.blog || platforms.google) {
         const src = platforms.google ? "google" : "blog";
         tasks.push(fetchGoogleNews(q).then((items) => items.map((it) => toMention(userId, src, it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
-        tasks.push(fetchGdelt(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+        tasks.push(fetchBingNews(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
         tasks.push(fetchHN(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
       }
       if (APIFY) {
