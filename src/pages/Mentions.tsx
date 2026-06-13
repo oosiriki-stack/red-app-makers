@@ -149,8 +149,7 @@ export default function Mentions() {
     toast.info("Recherche sur Google (URL source non disponible)");
   };
 
-  const generateReply = async (tone: "pro" | "commercial" | "humor") => {
-    if (!selected) return;
+  const generateReplyFor = async (target: Mention, tone: "pro" | "commercial" | "humor") => {
     setGenerating(tone);
     try {
       const prompts = {
@@ -164,7 +163,7 @@ export default function Mentions() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
-          messages: [{ role: "user", content: `Rédige une réponse ${prompts[tone]} à cet avis client :\n\nAuteur: ${selected.author}\nSource: ${selected.source}\nSentiment: ${selected.sentiment}\n\n"${selected.content}"\n\nDonne uniquement le texte de la réponse, sans introduction.` }],
+          messages: [{ role: "user", content: `Rédige une réponse ${prompts[tone]} à cet avis client :\n\nAuteur: ${target.author}\nSource: ${target.source}\nSentiment: ${target.sentiment}\n\n"${target.content}"\n\nDonne uniquement le texte de la réponse, sans introduction.` }],
         }),
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -192,6 +191,11 @@ export default function Mentions() {
     } finally {
       setGenerating(null);
     }
+  };
+
+  const generateReply = (tone: "pro" | "commercial" | "humor") => {
+    if (!selected) return;
+    return generateReplyFor(selected, tone);
   };
 
   const sources = [...new Set(mentions.map((m) => m.source))];
