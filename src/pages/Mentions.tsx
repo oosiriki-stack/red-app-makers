@@ -192,7 +192,7 @@ export default function Mentions() {
             </p>
           </div>
           <div className="flex gap-1.5 flex-wrap">
-            <Button size="sm" className="rounded-xl" onClick={runTracker} disabled={tracking}>{tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}Tracker</Button>
+            <Button size="sm" className="rounded-xl" onClick={() => runTracker()} disabled={tracking}>{tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}Tracker</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
           </div>
