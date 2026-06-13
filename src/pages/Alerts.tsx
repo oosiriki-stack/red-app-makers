@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Info, AlertCircle, CheckCircle2, ThumbsUp, MessageCircle, Eye, Flag } from "lucide-react";
+import { AlertTriangle, Info, AlertCircle, CheckCircle2, ThumbsUp, MessageCircle, Eye, Flag, User, Search, Radio } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
