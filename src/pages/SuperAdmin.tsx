@@ -243,7 +243,7 @@ export default function SuperAdmin() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader><TableRow>
-                      <TableHead>Nom</TableHead><TableHead>Plan</TableHead>
+                      <TableHead>Nom</TableHead><TableHead>Email</TableHead><TableHead>Plan</TableHead>
                       <TableHead>Statut</TableHead><TableHead>Jours restants</TableHead><TableHead>Actions</TableHead>
                     </TableRow></TableHeader>
                     <TableBody>
@@ -254,6 +254,13 @@ export default function SuperAdmin() {
                         return (
                           <TableRow key={u.id} className="cursor-pointer hover:bg-muted/30" onClick={() => viewProof(u)}>
                             <TableCell><div><p className="font-medium text-sm">{u.name || "—"}</p><p className="text-xs text-muted-foreground">{u.company || u.location || "—"}</p></div></TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              {u.email ? (
+                                <button onClick={() => copyEmail(u.email)} className="text-xs font-mono inline-flex items-center gap-1 hover:text-primary" title="Copier">
+                                  <Mail className="w-3 h-3" />{u.email}
+                                </button>
+                              ) : <span className="text-xs text-muted-foreground">—</span>}
+                            </TableCell>
                             <TableCell>
                               <Select value={u.plan ?? "starter"} onValueChange={(v) => changePlan(u, v)}>
                                 <SelectTrigger onClick={(e) => e.stopPropagation()} className="w-28 rounded-lg h-8 text-xs"><SelectValue /></SelectTrigger>
@@ -269,10 +276,15 @@ export default function SuperAdmin() {
                             <TableCell className="text-sm">
                               {days !== null ? <span className={days < 7 ? "text-red-600 font-medium" : ""}>{days} j</span> : <span className="text-muted-foreground">—</span>}
                             </TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline" className="rounded-lg" onClick={(e) => { e.stopPropagation(); toggleLicense(u); }}>
-                                {u.status === "active" ? "Désactiver" : "Activer"}
-                              </Button>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="outline" className="rounded-lg" onClick={() => toggleLicense(u)}>
+                                  {u.status === "active" ? "Désactiver" : "Activer"}
+                                </Button>
+                                <Button size="sm" variant="outline" className="rounded-lg" title="Réinitialiser le mot de passe" onClick={() => resetPassword(u)} disabled={!u.email}>
+                                  <KeyRound className="w-3 h-3" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
