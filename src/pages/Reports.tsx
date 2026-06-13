@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Loader2, Calendar } from "lucide-react";
+import { FileText, Download, Loader2, Calendar, TrendingUp, BarChart3, PieChart as PieIcon } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePdfReport, filterByPeriod, type ReportPeriod, type Mention } from "@/lib/pdfReport";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, BarChart, Bar, Legend } from "recharts";
 
 const PERIODS: { key: ReportPeriod; label: string; auto?: string }[] = [
   { key: "daily", label: "Quotidien" },
@@ -74,6 +75,42 @@ export default function Reports() {
 
   const totalsByPeriod = Object.fromEntries(PERIODS.map((p) => [p.key, filterByPeriod(mentions, p.key).length]));
 
+  const chartData = useMemo(() => {
+    const days: Record<string, { date: string; total: number; positive: number; negative: number; neutral: number }> = {};
+    const now = Date.now();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now - i * 86400000).toISOString().slice(0, 10);
+      days[d] = { date: d.slice(5), total: 0, positive: 0, negative: 0, neutral: 0 };
+    }
+    for (const m of mentions) {
+      const k = (m as any).mention_date?.slice(0, 10);
+      if (k && days[k]) {
+        days[k].total++;
+        const s = (m as any).sentiment || "neutral";
+        if (s === "positive") days[k].positive++;
+        else if (s === "negative") days[k].negative++;
+        else days[k].neutral++;
+      }
+    }
+    return Object.values(days);
+  }, [mentions]);
+
+  const sentimentData = useMemo(() => {
+    const acc = { positive: 0, negative: 0, neutral: 0 } as Record<string, number>;
+    for (const m of mentions) acc[(m as any).sentiment || "neutral"]++;
+    return [
+      { name: "Positives", value: acc.positive, color: "hsl(142 71% 45%)" },
+      { name: "Négatives", value: acc.negative, color: "hsl(0 84% 60%)" },
+      { name: "Neutres", value: acc.neutral, color: "hsl(220 9% 60%)" },
+    ];
+  }, [mentions]);
+
+  const sourcesData = useMemo(() => {
+    const acc: Record<string, number> = {};
+    for (const m of mentions) acc[(m as any).source || "autre"] = (acc[(m as any).source || "autre"] || 0) + 1;
+    return Object.entries(acc).map(([source, count]) => ({ source, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+  }, [mentions]);
+
   return (
     <AnimatedPage>
       <div className="space-y-6">
@@ -81,6 +118,67 @@ export default function Reports() {
           <h1 className="text-3xl font-light tracking-tight">Rapports PDF</h1>
           <p className="text-muted-foreground">Rapports avec graphiques · {brand || "Aucune marque configurée"}</p>
         </div>
+
+        {mentions.length > 0 && (
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="glass-card rounded-2xl lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" />Évolution des mentions (14 jours)</CardTitle>
+              </CardHeader>
+              <CardContent className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                    <Area type="monotone" dataKey="total" stroke="hsl(var(--primary))" fill="url(#gTotal)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2"><PieIcon className="w-4 h-4 text-primary" />Sentiments</CardTitle>
+              </CardHeader>
+              <CardContent className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={sentimentData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
+                      {sentimentData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card rounded-2xl lg:col-span-3">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2"><BarChart3 className="w-4 h-4 text-primary" />Top sources</CardTitle>
+              </CardHeader>
+              <CardContent className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sourcesData}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                    <XAxis dataKey="source" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {mentions.length === 0 && (
           <Card className="glass-card rounded-2xl p-6 text-center text-sm text-muted-foreground">
