@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0.96, y: 0 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 },
+  exit: { opacity: 1, y: 0 },
 };
 
 export function AnimatedPage({ children }: { children: ReactNode }) {
@@ -14,7 +14,7 @@ export function AnimatedPage({ children }: { children: ReactNode }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.08, ease: "linear" }}
     >
       {children}
     </motion.div>
