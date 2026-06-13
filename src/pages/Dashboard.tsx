@@ -80,7 +80,16 @@ export default function Dashboard() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h1 className="text-2xl md:text-3xl font-light tracking-tight">{greeting}</h1>
-            <p className="text-xs md:text-sm text-muted-foreground">{stats.brand ? `Surveillance de ${stats.brand}` : "Configurez la surveillance pour activer les données"}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {stats.brand ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Activity className="h-3 w-3 text-green-500 animate-pulse" />
+                  Cycle de surveillance activé — {stats.brand}
+                </span>
+              ) : (
+                "Configurez la surveillance pour activer les données"
+              )}
+            </p>
           </div>
           <div className="flex gap-1.5">
             <Button variant="outline" size="sm" className="rounded-xl" onClick={audioToday}><Volume2 className="h-4 w-4 mr-1" />Écouter</Button>
