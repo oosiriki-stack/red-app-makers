@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Map, Marker, Overlay } from "pigeon-maps";
+import { Map as PigeonMap, Marker, Overlay } from "pigeon-maps";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Loader2 } from "lucide-react";
