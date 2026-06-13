@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
@@ -212,6 +212,12 @@ export default function Mentions() {
             <p className="text-xs md:text-sm text-muted-foreground">
               {mentions.length} résultat{mentions.length > 1 ? "s" : ""}
               {queryFromUrl && <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>}
+              {!queryFromUrl && mentions.length > 0 && (
+                <span className="inline-flex items-center gap-1 ml-2">
+                  <Activity className="h-3 w-3 text-green-500 animate-pulse" />
+                  Cycle de surveillance activé
+                </span>
+              )}
             </p>
           </div>
           <div className="flex gap-1.5 flex-wrap">
