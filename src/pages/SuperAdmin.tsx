@@ -361,7 +361,7 @@ export default function SuperAdmin() {
           </TabsContent>
         </Tabs>
 
-        <Dialog open={!!detail} onOpenChange={() => { setDetail(null); setProofUrl(null); }}>
+        <Dialog open={!!detail} onOpenChange={() => { setDetail(null); setProofUrl(null); setExtras(null); }}>
           <DialogContent className="glass-card rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Détails utilisateur</DialogTitle></DialogHeader>
             {detail && (
@@ -386,7 +386,40 @@ export default function SuperAdmin() {
                   {detail.card_last4 && <div><strong>Carte :</strong> ••••{detail.card_last4}</div>}
                   <div><strong>Validé le :</strong> {detail.validated_at ? new Date(detail.validated_at).toLocaleString("fr-FR") : "—"}</div>
                   <div><strong>Expire le :</strong> {detail.expires_at ? new Date(detail.expires_at).toLocaleString("fr-FR") : "—"}</div>
+                  <div><strong>Inscrit le :</strong> {detail.created_at ? new Date(detail.created_at).toLocaleString("fr-FR") : "—"}</div>
+                  <div><strong>Rôle :</strong> {extras?.role ?? (loadingExtras ? "…" : "user")}</div>
                 </div>
+
+                <div className="rounded-xl border border-border/40 p-3 space-y-1.5 bg-muted/20">
+                  <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Configuration monitoring</p>
+                  {loadingExtras && !extras ? <p className="text-xs text-muted-foreground">Chargement…</p> : (
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div><strong>Marque :</strong> {extras?.brand || "—"}</div>
+                      <div><strong>Personne suivie :</strong> {extras?.person || "—"}</div>
+                      <div><strong>Pays :</strong> {extras?.country || "—"}</div>
+                      <div><strong>Ville :</strong> {extras?.city || "—"}</div>
+                      <div className="col-span-2"><strong>Plateformes :</strong> {extras?.platforms?.length ? extras.platforms.join(", ") : "—"}</div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Mentions</p>
+                    <p className="text-lg font-semibold">{extras?.mentionsCount ?? "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Alertes</p>
+                    <p className="text-lg font-semibold">{extras?.alertsCount ?? "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Tickets</p>
+                    <p className="text-lg font-semibold">{extras?.ticketsCount ?? "—"}</p>
+                  </div>
+                </div>
+                {extras?.lastMentionAt && (
+                  <p className="text-xs text-muted-foreground">Dernière mention : {new Date(extras.lastMentionAt).toLocaleString("fr-FR")}</p>
+                )}
                 {proofUrl && (
                   <div>
                     <p className="font-medium mb-2">Capture de paiement</p>
