@@ -22,12 +22,27 @@ type Row = {
   id: string; name: string | null; company: string | null;
   phone: string | null; location: string | null;
   email?: string | null;
+  created_at?: string | null;
   plan: string | null; status: string | null; sub_id?: string | null;
   payment_method?: string | null; transaction_id?: string | null;
   payer_name?: string | null; payer_phone?: string | null; card_last4?: string | null;
   payment_proof_url?: string | null; submitted_at?: string | null;
   validated_at?: string | null; expires_at?: string | null; amount_fcfa?: number | null;
 };
+
+type UserDetailExtras = {
+  role: string;
+  brand: string | null;
+  person: string | null;
+  country: string | null;
+  city: string | null;
+  platforms: string[];
+  mentionsCount: number;
+  alertsCount: number;
+  ticketsCount: number;
+  lastMentionAt: string | null;
+};
+
 
 const PLANS = ["starter", "pro", "enterprise"];
 
@@ -47,11 +62,13 @@ export default function SuperAdmin() {
   const [reply, setReply] = useState<Record<string, string>>({});
   const [detail, setDetail] = useState<Row | null>(null);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [extras, setExtras] = useState<UserDetailExtras | null>(null);
+  const [loadingExtras, setLoadingExtras] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }, emailsRes] = await Promise.all([
-      supabase.from("profiles").select("id, name, company, phone, location"),
+      supabase.from("profiles").select("id, name, company, phone, location, created_at"),
       supabase.from("subscriptions").select("*"),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("mentions").select("*", { count: "exact", head: true }),
