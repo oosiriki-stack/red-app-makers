@@ -139,9 +139,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (collected.length === 0) {
-      for (const q of queries) collected.push(...fallbackMentions(user.id, q, platforms));
-    }
+    // ⚠️ Aucune donnée simulée: on n'insère QUE des mentions réelles collectées
+    // depuis les sources publiques (Google News, GDELT, Mastodon, Lemmy, HN, Apify).
 
     // Dédoublonnage
     let fresh = collected.filter((m) => {
