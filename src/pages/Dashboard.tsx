@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Heart, Bell, RefreshCw, Loader2, Volume2 } from "lucide-react";
+import { MessageSquare, Heart, Bell, RefreshCw, Loader2, Volume2, Activity } from "lucide-react";
 import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/AnimatedPage";
 import { ReputationGauge } from "@/components/ReputationGauge";
 import { motion } from "framer-motion";
