@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Loader2, Calendar } from "lucide-react";
+import { FileText, Download, Loader2, Calendar, TrendingUp, BarChart3, PieChart as PieIcon } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePdfReport, filterByPeriod, type ReportPeriod, type Mention } from "@/lib/pdfReport";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, BarChart, Bar, Legend } from "recharts";
 
 const PERIODS: { key: ReportPeriod; label: string; auto?: string }[] = [
   { key: "daily", label: "Quotidien" },
