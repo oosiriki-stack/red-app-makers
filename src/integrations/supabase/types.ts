@@ -20,6 +20,8 @@ export type Database = {
           description: string | null
           id: string
           is_read: boolean
+          reaction: string | null
+          reaction_note: string | null
           title: string
           type: string
           user_id: string
@@ -29,6 +31,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_read?: boolean
+          reaction?: string | null
+          reaction_note?: string | null
           title: string
           type?: string
           user_id: string
@@ -38,6 +42,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_read?: boolean
+          reaction?: string | null
+          reaction_note?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -52,9 +58,11 @@ export type Database = {
           created_at: string
           engagement: number | null
           id: string
+          interactions: Json | null
           mention_date: string
           sentiment: string
           source: string
+          source_url: string | null
           user_id: string
         }
         Insert: {
@@ -64,9 +72,11 @@ export type Database = {
           created_at?: string
           engagement?: number | null
           id?: string
+          interactions?: Json | null
           mention_date?: string
           sentiment?: string
           source: string
+          source_url?: string | null
           user_id: string
         }
         Update: {
@@ -76,9 +86,11 @@ export type Database = {
           created_at?: string
           engagement?: number | null
           id?: string
+          interactions?: Json | null
           mention_date?: string
           sentiment?: string
           source?: string
+          source_url?: string | null
           user_id?: string
         }
         Relationships: []
@@ -119,7 +131,9 @@ export type Database = {
           company: string | null
           created_at: string
           id: string
+          location: string | null
           name: string
+          phone: string | null
           updated_at: string
         }
         Insert: {
@@ -127,7 +141,9 @@ export type Database = {
           company?: string | null
           created_at?: string
           id: string
+          location?: string | null
           name?: string
+          phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -135,38 +151,73 @@ export type Database = {
           company?: string | null
           created_at?: string
           id?: string
+          location?: string | null
           name?: string
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
       }
       subscriptions: {
         Row: {
+          amount_fcfa: number | null
+          card_last4: string | null
           created_at: string
           end_date: string | null
+          expires_at: string | null
           id: string
+          payer_name: string | null
+          payer_phone: string | null
+          payment_method: string | null
+          payment_proof_url: string | null
           plan: string
           start_date: string
           status: string
+          submitted_at: string | null
+          transaction_id: string | null
           user_id: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
+          amount_fcfa?: number | null
+          card_last4?: string | null
           created_at?: string
           end_date?: string | null
+          expires_at?: string | null
           id?: string
+          payer_name?: string | null
+          payer_phone?: string | null
+          payment_method?: string | null
+          payment_proof_url?: string | null
           plan?: string
           start_date?: string
           status?: string
+          submitted_at?: string | null
+          transaction_id?: string | null
           user_id: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
+          amount_fcfa?: number | null
+          card_last4?: string | null
           created_at?: string
           end_date?: string | null
+          expires_at?: string | null
           id?: string
+          payer_name?: string | null
+          payer_phone?: string | null
+          payment_method?: string | null
+          payment_proof_url?: string | null
           plan?: string
           start_date?: string
           status?: string
+          submitted_at?: string | null
+          transaction_id?: string | null
           user_id?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: []
       }
