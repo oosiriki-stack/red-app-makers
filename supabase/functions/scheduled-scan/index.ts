@@ -6,74 +6,80 @@ const DEFAULT_PLATFORMS = ["x", "facebook", "instagram", "linkedin", "tiktok", "
 const PLATFORM_LABEL: Record<string, string> = { x: "X (Twitter)", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn", tiktok: "TikTok", blog: "Blogs & forums", google: "Google News" };
 const UA = "Mozilla/5.0 (compatible; FocusTracker/2.0; +https://lovable.app)";
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+async function processUser(admin: any, APIFY: string, settings: any) {
   try {
-    const url = Deno.env.get("SUPABASE_URL")!;
-    const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const APIFY = Deno.env.get("APIFY_TOKEN") || "";
-    const admin = createClient(url, svc);
+    const userId = settings.user_id;
+    const queries = [settings.brand, (settings as any).person].filter(Boolean).map((q: any) => String(q).trim()).filter(Boolean);
+    if (!queries.length) return { user: userId, skipped: true };
 
-    const { data: allSettings } = await admin.from("monitoring_settings").select("*");
-    const results: any[] = [];
+    const { data: profile } = await admin.from("profiles").select("name").eq("id", userId).maybeSingle();
+    const requesterName = (profile?.name?.trim() || "Utilisateur").toString();
+    const platforms = enabledPlatforms((settings.platforms || {}) as Record<string, boolean>);
 
-    for (const settings of (allSettings || [])) {
-      try {
-        const userId = settings.user_id;
-        const queries = [settings.brand, (settings as any).person].filter(Boolean).map((q: any) => String(q).trim()).filter(Boolean);
-        if (!queries.length) continue;
+    const { data: existing } = await admin.from("mentions").select("source,content").eq("user_id", userId).order("created_at", { ascending: false }).limit(500);
+    const seen = new Set((existing || []).map((m: any) => `${m.source}::${(m.content || "").slice(0, 100)}`));
 
-        const { data: profile } = await admin.from("profiles").select("name").eq("id", userId).maybeSingle();
-        const requesterName = (profile?.name?.trim() || "Utilisateur").toString();
-        const platforms = enabledPlatforms((settings.platforms || {}) as Record<string, boolean>);
-
-        const { data: existing } = await admin.from("mentions").select("source,content").eq("user_id", userId).order("created_at", { ascending: false }).limit(500);
-        const seen = new Set((existing || []).map((m: any) => `${m.source}::${(m.content || "").slice(0, 100)}`));
-
-        const collected: any[] = [];
-        for (const q of queries) {
-          if (platforms.blog || platforms.google) {
-            try { const items = await fetchGoogleNews(q); const src = platforms.google ? "google" : "blog"; for (const it of items) collected.push(toMention(userId, src, it.author, it.content, it.date, it.engagement, it.link)); } catch {}
-            try { const items = await fetchGdelt(q); for (const it of items) collected.push(toMention(userId, "blog", it.author, it.content, it.date, it.engagement, (it as any).link)); } catch {}
-            try { const items = await fetchHN(q); for (const it of items) collected.push(toMention(userId, "blog", it.author, it.content, it.date, it.engagement, (it as any).link)); } catch {}
-          }
-          if (APIFY) {
-            if (platforms.x) { try { const items = await apifyRun(APIFY, "apidojo~tweet-scraper", { searchTerms: [q], maxItems: 10, sort: "Latest" }); for (const it of items) collected.push(toMention(userId, "x", it.author?.userName || "X user", it.text || it.fullText || "", safeDate(it.createdAt), (it.likeCount || 0) + (it.retweetCount || 0), it.url)); } catch {} }
-            if (platforms.instagram) { try { const items = await apifyRun(APIFY, "apify~instagram-search-scraper", { search: q, searchType: "hashtag", searchLimit: 1, resultsLimit: 10 }); for (const it of items) collected.push(toMention(userId, "instagram", it.ownerUsername || "Instagram", it.caption || "", safeDate(it.timestamp), (it.likesCount || 0) + (it.commentsCount || 0), it.url)); } catch {} }
-            if (platforms.tiktok) { try { const items = await apifyRun(APIFY, "clockworks~tiktok-scraper", { hashtags: [q.replace(/\s+/g, "")], resultsPerPage: 10, shouldDownloadVideos: false }); for (const it of items) collected.push(toMention(userId, "tiktok", it.authorMeta?.name || "TikTok", it.text || "", safeDate(it.createTimeISO), (it.diggCount || 0) + (it.commentCount || 0), it.webVideoUrl)); } catch {} }
-            if (platforms.facebook) { try { const items = await apifyRun(APIFY, "apify~facebook-posts-scraper", { searchQueries: [q], resultsLimit: 10 }); for (const it of items) collected.push(toMention(userId, "facebook", it.user?.name || "Facebook", it.text || it.message || "", safeDate(it.time), (it.likesCount || 0), it.url)); } catch {} }
-            if (platforms.linkedin) { try { const items = await apifyRun(APIFY, "apimaestro~linkedin-posts-search-scraper-no-cookies", { keywords: q, totalPosts: 10 }); for (const it of items) collected.push(toMention(userId, "linkedin", it.author?.name || "LinkedIn", it.text || "", safeDate(it.postedAt), (it.likes || 0), it.url)); } catch {} }
-          } else {
-            try { const items = await fetchMastodon(q); const src = platforms.x ? "x" : "blog"; for (const it of items) collected.push(toMention(userId, src, it.author, it.content, it.date, it.engagement, (it as any).link)); } catch {}
-          }
-        }
-
-        const fresh = collected.filter((m) => {
-          const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
-          if (seen.has(k)) return false;
-          seen.add(k);
-          return true;
-        });
-        const primaryQuery = queries[0] || "";
-        for (const m of fresh) { (m as any).query = primaryQuery; (m as any).requester = requesterName; }
-
-        if (fresh.length) {
-          await admin.from("mentions").insert(fresh);
-          const negs = fresh.filter((m) => m.sentiment === "negative");
-          const platformLabel = [...new Set(fresh.map((m) => PLATFORM_LABEL[m.source] || m.source))].join(", ");
-          const base = { user_id: userId, query: primaryQuery, requester: requesterName, platform: platformLabel };
-          if (negs.length >= 3) await admin.from("alerts").insert({ ...base, type: "critical", title: "🚨 Pic négatif détecté", description: `${negs.length} mentions négatives sur ${primaryQuery}.` });
-          else if (negs.length >= 1) await admin.from("alerts").insert({ ...base, type: "warning", title: "Mention négative détectée", description: (negs[0].content || "").slice(0, 200) });
-          else await admin.from("alerts").insert({ ...base, type: "info", title: `${fresh.length} nouvelle(s) mention(s)`, description: `Veille mise à jour.` });
-        }
-        results.push({ user: userId, inserted: fresh.length });
-      } catch (e) { results.push({ user: settings.user_id, error: String(e) }); }
+    const tasks: Promise<any[]>[] = [];
+    for (const q of queries) {
+      if (platforms.blog || platforms.google) {
+        const src = platforms.google ? "google" : "blog";
+        tasks.push(fetchGoogleNews(q).then((items) => items.map((it) => toMention(userId, src, it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+        tasks.push(fetchGdelt(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+        tasks.push(fetchHN(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+      }
+      if (APIFY) {
+        if (platforms.x) tasks.push(apifyRun(APIFY, "apidojo~tweet-scraper", { searchTerms: [q], maxItems: 10, sort: "Latest" }).then((items) => items.map((it: any) => toMention(userId, "x", it.author?.userName || "X user", it.text || it.fullText || "", safeDate(it.createdAt), (it.likeCount || 0) + (it.retweetCount || 0), it.url))).catch(() => []));
+        if (platforms.instagram) tasks.push(apifyRun(APIFY, "apify~instagram-search-scraper", { search: q, searchType: "hashtag", searchLimit: 1, resultsLimit: 10 }).then((items) => items.map((it: any) => toMention(userId, "instagram", it.ownerUsername || "Instagram", it.caption || "", safeDate(it.timestamp), (it.likesCount || 0) + (it.commentsCount || 0), it.url))).catch(() => []));
+        if (platforms.tiktok) tasks.push(apifyRun(APIFY, "clockworks~tiktok-scraper", { hashtags: [q.replace(/\s+/g, "")], resultsPerPage: 10, shouldDownloadVideos: false }).then((items) => items.map((it: any) => toMention(userId, "tiktok", it.authorMeta?.name || "TikTok", it.text || "", safeDate(it.createTimeISO), (it.diggCount || 0) + (it.commentCount || 0), it.webVideoUrl))).catch(() => []));
+        if (platforms.facebook) tasks.push(apifyRun(APIFY, "apify~facebook-posts-scraper", { searchQueries: [q], resultsLimit: 10 }).then((items) => items.map((it: any) => toMention(userId, "facebook", it.user?.name || "Facebook", it.text || it.message || "", safeDate(it.time), (it.likesCount || 0), it.url))).catch(() => []));
+        if (platforms.linkedin) tasks.push(apifyRun(APIFY, "apimaestro~linkedin-posts-search-scraper-no-cookies", { keywords: q, totalPosts: 10 }).then((items) => items.map((it: any) => toMention(userId, "linkedin", it.author?.name || "LinkedIn", it.text || "", safeDate(it.postedAt), (it.likes || 0), it.url))).catch(() => []));
+      } else {
+        const src = platforms.x ? "x" : "blog";
+        tasks.push(fetchMastodon(q).then((items) => items.map((it: any) => toMention(userId, src, it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+      }
     }
 
-    return json({ ok: true, processed: results.length, results });
-  } catch (e) {
-    return json({ error: String(e) }, 500);
-  }
+    const settled = await Promise.all(tasks);
+    const collected = settled.flat();
+
+    const fresh = collected.filter((m: any) => {
+      const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    const primaryQuery = queries[0] || "";
+    for (const m of fresh) { (m as any).query = primaryQuery; (m as any).requester = requesterName; }
+
+    if (fresh.length) {
+      await admin.from("mentions").insert(fresh);
+      const negs = fresh.filter((m: any) => m.sentiment === "negative");
+      const platformLabel = [...new Set(fresh.map((m: any) => PLATFORM_LABEL[m.source] || m.source))].join(", ");
+      const base = { user_id: userId, query: primaryQuery, requester: requesterName, platform: platformLabel };
+      if (negs.length >= 3) await admin.from("alerts").insert({ ...base, type: "critical", title: "🚨 Pic négatif détecté", description: `${negs.length} mentions négatives sur ${primaryQuery}.` });
+      else if (negs.length >= 1) await admin.from("alerts").insert({ ...base, type: "warning", title: "Mention négative détectée", description: (negs[0].content || "").slice(0, 200) });
+      else await admin.from("alerts").insert({ ...base, type: "info", title: `${fresh.length} nouvelle(s) mention(s)`, description: `Veille mise à jour.` });
+    }
+    return { user: userId, inserted: fresh.length };
+  } catch (e) { return { user: settings.user_id, error: String(e) }; }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const url = Deno.env.get("SUPABASE_URL")!;
+  const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const APIFY = Deno.env.get("APIFY_TOKEN") || "";
+  const admin = createClient(url, svc);
+
+  const { data: allSettings } = await admin.from("monitoring_settings").select("*");
+  const list = allSettings || [];
+
+  // Run all users in parallel in the background so cron HTTP call returns immediately
+  const work = Promise.all(list.map((s: any) => processUser(admin, APIFY, s))).catch((e) => console.error("scan error", e));
+  // @ts-ignore EdgeRuntime is available in Supabase Edge Runtime
+  try { (globalThis as any).EdgeRuntime?.waitUntil?.(work); } catch {}
+
+  return json({ ok: true, dispatched: list.length });
 });
 
 function json(b: any, s = 200) { return new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
