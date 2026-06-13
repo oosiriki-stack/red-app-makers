@@ -76,14 +76,14 @@ export default function Settings() {
 
   useEffect(() => {
     if (!user) return;
-    // Load profile
     supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
       if (data) {
         setName(data.name || "");
         setCompany(data.company || "");
+        setPhone((data as any).phone || "");
+        setLocation((data as any).location || "");
       }
     });
-    // Load monitoring
     supabase.from("monitoring_settings").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) {
         setBrand(data.brand || "");
@@ -92,20 +92,37 @@ export default function Settings() {
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
       }
     });
-    // Load subscription
-    supabase.from("subscriptions").select("plan").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setSubscription(data.plan);
+    supabase.from("subscriptions").select("*").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) setSubscription(data);
     });
   }, [user]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({ name, company }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ name, company, phone, location } as any).eq("id", user.id);
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Profil sauvegardé");
   };
+
+  const downloadReceipt = async () => {
+    if (!subscription || subscription.status !== "active") { toast.error("Aucun paiement validé"); return; }
+    const { generatePaymentReceipt } = await import("@/lib/pdfReport");
+    const doc = generatePaymentReceipt({
+      payerName: subscription.payer_name || name || "—",
+      payerEmail: user?.email || "",
+      plan: subscription.plan,
+      amount: subscription.amount_fcfa || 0,
+      paymentMethod: subscription.payment_method || "—",
+      transactionId: subscription.transaction_id || subscription.id,
+      validatedAt: subscription.validated_at || subscription.start_date,
+      expiresAt: subscription.expires_at || subscription.start_date,
+    });
+    doc.save(`recu-focus-${subscription.transaction_id || subscription.id}.pdf`);
+    toast.success("Reçu téléchargé");
+  };
+
 
   const handleSaveMonitoring = async () => {
     if (!user) return;
