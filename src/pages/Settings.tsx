@@ -138,6 +138,9 @@ export default function Settings() {
       user_id: user.id,
       brand,
       person: person || null,
+      country: country || null,
+      city: city || null,
+      commune: commune || null,
       platforms: platformStates,
     } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
