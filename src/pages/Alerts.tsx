@@ -148,6 +148,7 @@ export default function Alerts() {
                         </div>
                       )}
                       <span className="text-xs text-muted-foreground mt-1.5 block">{new Date(alert.created_at).toLocaleString("fr-FR")}</span>
+                    </div>
                     {!alert.is_read && <Button variant="ghost" size="sm" className="rounded-lg shrink-0" onClick={() => markRead(alert.id)}>Lu</Button>}
                   </div>
                   <div className="flex gap-1.5 mt-3 flex-wrap">
