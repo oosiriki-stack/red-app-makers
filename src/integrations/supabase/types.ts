@@ -236,7 +236,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      user_owns_resource: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "user" | "admin" | "super_admin"
