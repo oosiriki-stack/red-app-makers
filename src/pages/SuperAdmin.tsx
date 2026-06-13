@@ -22,12 +22,27 @@ type Row = {
   id: string; name: string | null; company: string | null;
   phone: string | null; location: string | null;
   email?: string | null;
+  created_at?: string | null;
   plan: string | null; status: string | null; sub_id?: string | null;
   payment_method?: string | null; transaction_id?: string | null;
   payer_name?: string | null; payer_phone?: string | null; card_last4?: string | null;
   payment_proof_url?: string | null; submitted_at?: string | null;
   validated_at?: string | null; expires_at?: string | null; amount_fcfa?: number | null;
 };
+
+type UserDetailExtras = {
+  role: string;
+  brand: string | null;
+  person: string | null;
+  country: string | null;
+  city: string | null;
+  platforms: string[];
+  mentionsCount: number;
+  alertsCount: number;
+  ticketsCount: number;
+  lastMentionAt: string | null;
+};
+
 
 const PLANS = ["starter", "pro", "enterprise"];
 
@@ -47,11 +62,13 @@ export default function SuperAdmin() {
   const [reply, setReply] = useState<Record<string, string>>({});
   const [detail, setDetail] = useState<Row | null>(null);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [extras, setExtras] = useState<UserDetailExtras | null>(null);
+  const [loadingExtras, setLoadingExtras] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [{ data: profiles }, { data: subs }, { data: tk }, { count: mc }, emailsRes] = await Promise.all([
-      supabase.from("profiles").select("id, name, company, phone, location"),
+      supabase.from("profiles").select("id, name, company, phone, location, created_at"),
       supabase.from("subscriptions").select("*"),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("mentions").select("*", { count: "exact", head: true }),
@@ -139,10 +156,37 @@ export default function SuperAdmin() {
   const viewProof = async (u: Row) => {
     setDetail(u);
     setProofUrl(null);
+    setExtras(null);
+    setLoadingExtras(true);
     if (u.payment_proof_url) {
-      const { data } = await supabase.storage.from("payment-proofs").createSignedUrl(u.payment_proof_url, 600);
-      if (data?.signedUrl) setProofUrl(data.signedUrl);
+      supabase.storage.from("payment-proofs").createSignedUrl(u.payment_proof_url, 600).then(({ data }) => {
+        if (data?.signedUrl) setProofUrl(data.signedUrl);
+      });
     }
+    const [{ data: roleRow }, { data: ms }, { count: mc }, { count: ac }, { count: tc }, { data: lastM }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", u.id).order("role", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("monitoring_settings").select("brand, person, country, city, platforms").eq("user_id", u.id).maybeSingle(),
+      supabase.from("mentions").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("mentions").select("created_at").eq("user_id", u.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    const platforms = ms?.platforms && typeof ms.platforms === "object"
+      ? Object.entries(ms.platforms as Record<string, any>).filter(([, v]) => v).map(([k]) => k)
+      : [];
+    setExtras({
+      role: (roleRow as any)?.role ?? "user",
+      brand: (ms as any)?.brand ?? null,
+      person: (ms as any)?.person ?? null,
+      country: (ms as any)?.country ?? null,
+      city: (ms as any)?.city ?? null,
+      platforms,
+      mentionsCount: mc ?? 0,
+      alertsCount: ac ?? 0,
+      ticketsCount: tc ?? 0,
+      lastMentionAt: (lastM as any)?.created_at ?? null,
+    });
+    setLoadingExtras(false);
   };
 
   const downloadReceipt = (u: Row) => {
@@ -317,7 +361,7 @@ export default function SuperAdmin() {
           </TabsContent>
         </Tabs>
 
-        <Dialog open={!!detail} onOpenChange={() => { setDetail(null); setProofUrl(null); }}>
+        <Dialog open={!!detail} onOpenChange={() => { setDetail(null); setProofUrl(null); setExtras(null); }}>
           <DialogContent className="glass-card rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Détails utilisateur</DialogTitle></DialogHeader>
             {detail && (
@@ -342,7 +386,40 @@ export default function SuperAdmin() {
                   {detail.card_last4 && <div><strong>Carte :</strong> ••••{detail.card_last4}</div>}
                   <div><strong>Validé le :</strong> {detail.validated_at ? new Date(detail.validated_at).toLocaleString("fr-FR") : "—"}</div>
                   <div><strong>Expire le :</strong> {detail.expires_at ? new Date(detail.expires_at).toLocaleString("fr-FR") : "—"}</div>
+                  <div><strong>Inscrit le :</strong> {detail.created_at ? new Date(detail.created_at).toLocaleString("fr-FR") : "—"}</div>
+                  <div><strong>Rôle :</strong> {extras?.role ?? (loadingExtras ? "…" : "user")}</div>
                 </div>
+
+                <div className="rounded-xl border border-border/40 p-3 space-y-1.5 bg-muted/20">
+                  <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Configuration monitoring</p>
+                  {loadingExtras && !extras ? <p className="text-xs text-muted-foreground">Chargement…</p> : (
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div><strong>Marque :</strong> {extras?.brand || "—"}</div>
+                      <div><strong>Personne suivie :</strong> {extras?.person || "—"}</div>
+                      <div><strong>Pays :</strong> {extras?.country || "—"}</div>
+                      <div><strong>Ville :</strong> {extras?.city || "—"}</div>
+                      <div className="col-span-2"><strong>Plateformes :</strong> {extras?.platforms?.length ? extras.platforms.join(", ") : "—"}</div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Mentions</p>
+                    <p className="text-lg font-semibold">{extras?.mentionsCount ?? "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Alertes</p>
+                    <p className="text-lg font-semibold">{extras?.alertsCount ?? "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/40 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Tickets</p>
+                    <p className="text-lg font-semibold">{extras?.ticketsCount ?? "—"}</p>
+                  </div>
+                </div>
+                {extras?.lastMentionAt && (
+                  <p className="text-xs text-muted-foreground">Dernière mention : {new Date(extras.lastMentionAt).toLocaleString("fr-FR")}</p>
+                )}
                 {proofUrl && (
                   <div>
                     <p className="font-medium mb-2">Capture de paiement</p>
