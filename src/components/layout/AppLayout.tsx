@@ -10,8 +10,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 import { MarketingOnboarding } from "@/components/MarketingOnboarding";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export function AppLayout() {
+  useNotifications();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [dark, setDark] = useState(() => localStorage.getItem("arobase_dark") === "true");
