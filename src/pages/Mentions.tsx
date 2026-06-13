@@ -274,6 +274,20 @@ export default function Mentions() {
                   <Button size="sm" variant="outline" className="rounded-xl" onClick={() => openSource(selected)}><ExternalLink className="h-3 w-3 mr-1" />Voir la source</Button>
                 </div>
                 <p className="text-sm bg-muted/50 p-3 rounded-xl">{selected.content}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-border/50 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><User className="h-3 w-3" />Émetteur</p>
+                    <p className="text-sm font-medium mt-1 truncate">{selected.requester || "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/50 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" />Requête</p>
+                    <p className="text-sm font-medium mt-1 truncate">{selected.query ? `« ${selected.query} »` : "—"}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/50 bg-background/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Radio className="h-3 w-3" />Plateforme</p>
+                    <p className="text-sm font-medium mt-1 truncate">{PLATFORM_LABEL[selected.source] || selected.source}</p>
+                  </div>
+                </div>
                 <div className="flex gap-2 flex-wrap">
                   <Badge className={(sentimentConfig[selected.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral).className}>{(sentimentConfig[selected.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral).label}</Badge>
                   <Badge variant="outline">{selected.engagement ?? 0} interactions</Badge>
