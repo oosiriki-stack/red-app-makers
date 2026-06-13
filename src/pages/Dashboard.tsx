@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNotifications } from "@/hooks/useNotifications";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 import { speak, summarizeMentions } from "@/lib/speech";
 
@@ -20,7 +19,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "", configured: false });
   const navigate = useNavigate();
   const { user } = useAuth();
-  useNotifications();
 
   const fetchDashboard = async () => {
     if (!user) return;
