@@ -13,7 +13,7 @@ import { AnimatedPage } from "@/components/AnimatedPage";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, XCircle, Clock, Eye, Download } from "lucide-react";
+import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, XCircle, Clock, Eye, Download, Mail, KeyRound, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { generatePaymentReceipt } from "@/lib/pdfReport";
 import { UsageMap } from "@/components/UsageMap";
@@ -21,6 +21,7 @@ import { UsageMap } from "@/components/UsageMap";
 type Row = {
   id: string; name: string | null; company: string | null;
   phone: string | null; location: string | null;
+  email?: string | null;
   plan: string | null; status: string | null; sub_id?: string | null;
   payment_method?: string | null; transaction_id?: string | null;
   payer_name?: string | null; payer_phone?: string | null; card_last4?: string | null;
