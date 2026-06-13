@@ -156,10 +156,37 @@ export default function SuperAdmin() {
   const viewProof = async (u: Row) => {
     setDetail(u);
     setProofUrl(null);
+    setExtras(null);
+    setLoadingExtras(true);
     if (u.payment_proof_url) {
-      const { data } = await supabase.storage.from("payment-proofs").createSignedUrl(u.payment_proof_url, 600);
-      if (data?.signedUrl) setProofUrl(data.signedUrl);
+      supabase.storage.from("payment-proofs").createSignedUrl(u.payment_proof_url, 600).then(({ data }) => {
+        if (data?.signedUrl) setProofUrl(data.signedUrl);
+      });
     }
+    const [{ data: roleRow }, { data: ms }, { count: mc }, { count: ac }, { count: tc }, { data: lastM }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", u.id).order("role", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("monitoring_settings").select("brand, person, country, city, platforms").eq("user_id", u.id).maybeSingle(),
+      supabase.from("mentions").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("user_id", u.id),
+      supabase.from("mentions").select("created_at").eq("user_id", u.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    const platforms = ms?.platforms && typeof ms.platforms === "object"
+      ? Object.entries(ms.platforms as Record<string, any>).filter(([, v]) => v).map(([k]) => k)
+      : [];
+    setExtras({
+      role: (roleRow as any)?.role ?? "user",
+      brand: (ms as any)?.brand ?? null,
+      person: (ms as any)?.person ?? null,
+      country: (ms as any)?.country ?? null,
+      city: (ms as any)?.city ?? null,
+      platforms,
+      mentionsCount: mc ?? 0,
+      alertsCount: ac ?? 0,
+      ticketsCount: tc ?? 0,
+      lastMentionAt: (lastM as any)?.created_at ?? null,
+    });
+    setLoadingExtras(false);
   };
 
   const downloadReceipt = (u: Row) => {
