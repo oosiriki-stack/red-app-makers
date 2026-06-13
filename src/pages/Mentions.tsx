@@ -70,9 +70,21 @@ export default function Mentions() {
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
-      setMentions((prev) => [row as Mention, ...prev]);
-      if (isSoundEnabled()) playAlertSound(row.sentiment === "negative" ? "warning" : "info");
-      toast.info(`Nouvelle mention de ${row.author}`, { description: (row.content || "").slice(0, 80) });
+      const m = row as Mention;
+      setMentions((prev) => [m, ...prev]);
+      if (isSoundEnabled()) playAlertSound(m.sentiment === "negative" ? "warning" : "info");
+      toast.info(`Nouvelle mention de ${m.author}`, {
+        description: (m.content || "").slice(0, 100),
+        action: { label: "Ouvrir", onClick: () => { setSelected(m); setReply({}); setTimeout(() => generateReplyFor(m, "pro"), 200); } },
+        duration: 8000,
+      });
+      // Auto-ouverture si aucune mention n'est déjà ouverte (réaction automatique)
+      setSelected((cur) => {
+        if (cur) return cur;
+        setReply({});
+        setTimeout(() => generateReplyFor(m, "pro"), 300);
+        return m;
+      });
     },
     onUpdate: (row) => setMentions((prev) => prev.map((m) => (m.id === row.id ? (row as Mention) : m))),
     onDelete: (row) => setMentions((prev) => prev.filter((m) => m.id !== row.id)),
