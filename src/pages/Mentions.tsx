@@ -21,6 +21,8 @@ const sentimentConfig = {
   negative: { label: "Négatif", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", icon: ThumbsDown },
 };
 
+const PLATFORM_LABEL: Record<string, string> = { x: "X (Twitter)", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn", tiktok: "TikTok", blog: "Blogs & forums", google: "Google News" };
+
 type Mention = {
   id: string;
   source: string;
@@ -32,6 +34,8 @@ type Mention = {
   mention_date: string;
   source_url: string | null;
   interactions: any;
+  query: string | null;
+  requester: string | null;
 };
 
 export default function Mentions() {
