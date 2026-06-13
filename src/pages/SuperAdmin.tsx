@@ -124,7 +124,7 @@ export default function SuperAdmin() {
   const resetPassword = async (u: Row) => {
     if (!u.email) return toast.error("Email indisponible");
     const { data, error } = await supabase.functions.invoke("admin-users", {
-      body: { action: "reset_password", user_id: u.id, redirect_to: `${window.location.origin}/reset-password` },
+      body: { action: "reset_password", user_id: u.id, email: u.email, redirect_to: `${window.location.origin}/reset-password` },
     });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || "Échec");
     toast.success(`✉️ Lien de réinitialisation envoyé à ${u.email}`);
