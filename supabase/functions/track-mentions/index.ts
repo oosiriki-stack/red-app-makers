@@ -39,12 +39,12 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchGoogleNews(q);
           const src = platforms.google ? "google" : "blog";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, it.link));
         } catch (e) { errors.push("GoogleNews: " + e); }
 
         try {
           const items = await fetchGdelt(q);
-          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("GDELT: " + e); }
       }
 
@@ -52,14 +52,14 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchLemmy(q);
           const src = platforms.linkedin ? "linkedin" : "facebook";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("Lemmy: " + e); }
       }
 
       if (platforms.blog) {
         try {
           const items = await fetchHN(q);
-          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("HN: " + e); }
       }
 
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchMastodon(q);
           const src = platforms.x ? "x" : platforms.tiktok ? "tiktok" : "instagram";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("Mastodon: " + e); }
       }
     }
@@ -146,8 +146,8 @@ function enabledPlatforms(platforms: Record<string, boolean>) {
   return out;
 }
 
-function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number) {
-  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date };
+function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number, source_url?: string) {
+  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date, source_url: source_url || null };
 }
 
 function detectSentiment(text: string): string {
@@ -194,6 +194,7 @@ async function fetchGdelt(q: string) {
     content: a.title || "",
     date: safeDate(a.seendate),
     engagement: 0,
+    link: a.url || "",
   })).filter((x: any) => x.content);
 }
 
@@ -211,6 +212,7 @@ async function fetchLemmy(q: string) {
         content: `${p.post?.name || ""}${p.post?.body ? " — " + stripHtml(p.post.body).slice(0, 220) : ""}`,
         date: safeDate(p.post?.published),
         engagement: (p.counts?.score || 0) + (p.counts?.comments || 0),
+        link: p.post?.ap_id || p.post?.url || "",
       });
     }
     if (all.length >= 10) break;
@@ -275,6 +277,7 @@ async function fetchHN(q: string) {
     content: h.title || h.story_title || h.comment_text || "",
     date: safeDate(h.created_at),
     engagement: h.points || 0,
+    link: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
   })).filter((x: any) => x.content);
 }
 
@@ -291,7 +294,8 @@ async function fetchMastodon(q: string) {
     const block = m[1];
     const title = stripHtml(decodeXml(pick(block, "title")));
     const author = stripHtml(decodeXml(pick(block, "dc:creator") || pick(block, "author") || "Mastodon"));
-    items.push({ author, content: title, date: safeDate(pick(block, "pubDate")), engagement: 0 });
+    const link = decodeXml(pick(block, "link"));
+    items.push({ author, content: title, date: safeDate(pick(block, "pubDate")), engagement: 0, link });
     if (items.length >= 10) break;
   }
   return items.filter((x) => x.content);

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const primary = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Accueil" },
   { to: "/mentions", icon: MessageSquare, label: "Mentions" },
-  { to: "/ai-assistant", icon: Bot, label: "FocusGPT", center: true },
+  { to: "/ai-assistant", icon: Bot, label: "GPT", center: true },
   { to: "/alerts", icon: Bell, label: "Alertes" },
 ];
 
@@ -34,39 +34,38 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto max-w-2xl px-3 pb-3">
-        <div className="relative glass-card rounded-3xl border border-border/60 shadow-2xl shadow-primary/10 backdrop-blur-2xl">
-          <div className="flex items-end justify-around px-2 py-2">
+      <div className="mx-auto max-w-md px-2 pb-2">
+        <div className="relative glass-card rounded-2xl border border-border/60 shadow-xl shadow-primary/10 backdrop-blur-2xl">
+          <div className="flex items-end justify-around px-1 py-1">
             {primary.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.to);
               if (item.center) {
                 return (
-                  <NavLink key={item.to} to={item.to} className="relative -mt-7 flex flex-col items-center gap-1">
+                  <NavLink key={item.to} to={item.to} className="relative -mt-5 flex flex-col items-center gap-0.5">
                     <div className={cn(
-                      "w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-primary to-orange-600 flex items-center justify-center shadow-xl shadow-primary/40 ring-4 ring-background transition-transform",
+                      "w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary to-orange-600 flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-background transition-transform",
                       active && "scale-110"
                     )}>
-                      <Icon className="w-6 h-6 text-primary-foreground" strokeWidth={2.5} />
+                      <Icon className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
                     </div>
-                    <span className="text-[10px] font-semibold text-primary">{item.label}</span>
+                    <span className="text-[9px] font-semibold text-primary leading-tight">{item.label}</span>
                   </NavLink>
                 );
               }
               return (
-                <NavLink key={item.to} to={item.to} className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-colors">
-                  <Icon className={cn("w-5 h-5 transition-colors", active ? "text-primary" : "text-muted-foreground")} strokeWidth={active ? 2.5 : 2} />
-                  <span className={cn("text-[10px] font-medium", active ? "text-primary" : "text-muted-foreground")}>{item.label}</span>
-                  {active && <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary" />}
+                <NavLink key={item.to} to={item.to} className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                  <Icon className={cn("w-4 h-4", active ? "text-primary" : "text-muted-foreground")} strokeWidth={active ? 2.5 : 2} />
+                  <span className={cn("text-[9px] font-medium leading-tight", active ? "text-primary" : "text-muted-foreground")}>{item.label}</span>
                 </NavLink>
               );
             })}
 
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl">
-                  <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[10px] font-medium text-muted-foreground">Plus</span>
+                <button className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                  <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-[9px] font-medium text-muted-foreground leading-tight">Plus</span>
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="glass-card rounded-t-3xl border-t border-border/60">
@@ -86,9 +85,7 @@ export function BottomNav() {
                         onClick={() => setOpen(false)}
                         className={cn(
                           "flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all",
-                          active
-                            ? "bg-primary/10 border-primary/40 text-primary"
-                            : "border-border/50 hover:bg-muted/50"
+                          active ? "bg-primary/10 border-primary/40 text-primary" : "border-border/50 hover:bg-muted/50"
                         )}
                       >
                         <Icon className="w-6 h-6" />

@@ -40,8 +40,10 @@ export default function Settings() {
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [saving, setSaving] = useState(false);
-  const [subscription, setSubscription] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<any>(null);
 
   // Monitoring
   const [brand, setBrand] = useState("");
@@ -74,14 +76,14 @@ export default function Settings() {
 
   useEffect(() => {
     if (!user) return;
-    // Load profile
     supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
       if (data) {
         setName(data.name || "");
         setCompany(data.company || "");
+        setPhone((data as any).phone || "");
+        setLocation((data as any).location || "");
       }
     });
-    // Load monitoring
     supabase.from("monitoring_settings").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) {
         setBrand(data.brand || "");
@@ -90,20 +92,37 @@ export default function Settings() {
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
       }
     });
-    // Load subscription
-    supabase.from("subscriptions").select("plan").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setSubscription(data.plan);
+    supabase.from("subscriptions").select("*").eq("user_id", user.id).single().then(({ data }) => {
+      if (data) setSubscription(data);
     });
   }, [user]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({ name, company }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ name, company, phone, location } as any).eq("id", user.id);
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Profil sauvegardé");
   };
+
+  const downloadReceipt = async () => {
+    if (!subscription || subscription.status !== "active") { toast.error("Aucun paiement validé"); return; }
+    const { generatePaymentReceipt } = await import("@/lib/pdfReport");
+    const doc = generatePaymentReceipt({
+      payerName: subscription.payer_name || name || "—",
+      payerEmail: user?.email || "",
+      plan: subscription.plan,
+      amount: subscription.amount_fcfa || 0,
+      paymentMethod: subscription.payment_method || "—",
+      transactionId: subscription.transaction_id || subscription.id,
+      validatedAt: subscription.validated_at || subscription.start_date,
+      expiresAt: subscription.expires_at || subscription.start_date,
+    });
+    doc.save(`recu-focus-${subscription.transaction_id || subscription.id}.pdf`);
+    toast.success("Reçu téléchargé");
+  };
+
 
   const handleSaveMonitoring = async () => {
     if (!user) return;
@@ -179,19 +198,38 @@ export default function Settings() {
                   </div>
                 </div>
                 <Separator />
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Plan actif</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="rounded-lg capitalize">{subscription || "Aucun"}</Badge>
-                    <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
-                      <CreditCard className="h-3 w-3 mr-1" /> Changer
-                    </Button>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Plan actif</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="rounded-lg capitalize">{subscription?.plan || "Aucun"}</Badge>
+                      {subscription?.status && (
+                        <Badge variant={subscription.status === "active" ? "default" : "outline"} className={`rounded-lg ${subscription.status === "active" ? "bg-green-600" : subscription.status === "pending" ? "bg-orange-500 text-white" : ""}`}>
+                          {subscription.status === "active" ? "Validé" : subscription.status === "pending" ? "En attente" : subscription.status === "expired" ? "Expiré" : subscription.status}
+                        </Badge>
+                      )}
+                      <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
+                        <CreditCard className="h-3 w-3 mr-1" />Changer
+                      </Button>
+                    </div>
                   </div>
+                  {subscription?.expires_at && (
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Expire le</span><span>{new Date(subscription.expires_at).toLocaleDateString("fr-FR")}</span>
+                    </div>
+                  )}
+                  {subscription?.status === "active" && (
+                    <Button size="sm" variant="outline" className="rounded-xl w-full" onClick={downloadReceipt}>
+                      <CreditCard className="h-3 w-3 mr-1" />Télécharger le reçu PDF
+                    </Button>
+                  )}
                 </div>
                 <Separator />
                 <div className="grid gap-3">
                   <div><Label>Nom</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" /></div>
                   <div><Label>Entreprise</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} className="rounded-xl" /></div>
+                  <div><Label>Contact (téléphone)</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." className="rounded-xl" /></div>
+                  <div><Label>Localisation</Label><Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ville, Pays" className="rounded-xl" /></div>
                 </div>
                 <Button onClick={handleSaveProfile} className="rounded-xl" disabled={saving}>
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

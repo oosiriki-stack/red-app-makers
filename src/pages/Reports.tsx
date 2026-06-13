@@ -1,118 +1,109 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { FileText, Download, Plus } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, Download, Loader2, Calendar } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { generatePdfReport, filterByPeriod, type ReportPeriod, type Mention } from "@/lib/pdfReport";
 
-const sections = ["Mentions", "Sentiment", "Concurrence", "Alertes", "Tendances"];
+const PERIODS: { key: ReportPeriod; label: string; auto?: string }[] = [
+  { key: "daily", label: "Quotidien" },
+  { key: "weekly", label: "Hebdomadaire", auto: "Auto chaque lundi" },
+  { key: "monthly", label: "Mensuel", auto: "Auto le 1er du mois" },
+  { key: "yearly", label: "Annuel" },
+];
 
 export default function Reports() {
-  const [reports, setReports] = useState<{ id: number; title: string; date: string; type: string }[]>([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [period, setPeriod] = useState("weekly");
-  const [selectedSections, setSelectedSections] = useState<string[]>(["Mentions", "Sentiment"]);
+  const { user } = useAuth();
+  const [brand, setBrand] = useState("");
+  const [mentions, setMentions] = useState<Mention[]>([]);
+  const [alertsCount, setAlertsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState<ReportPeriod | null>(null);
 
-  const toggleSection = (s: string) => {
-    setSelectedSections(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: m }, { data: s }, { count }] = await Promise.all([
+        supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }),
+        supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).maybeSingle(),
+        supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
+      ]);
+      setMentions((m as Mention[]) || []);
+      setBrand(s?.brand || "");
+      setAlertsCount(count || 0);
+      setLoading(false);
+    })();
+  }, [user]);
+
+  const generate = async (period: ReportPeriod) => {
+    setGenerating(period);
+    try {
+      const filtered = filterByPeriod(mentions, period);
+      const doc = generatePdfReport({ brand, period, mentions: filtered, alertsCount });
+      doc.save(`focus-rapport-${period}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success(`Rapport ${period} téléchargé`);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setGenerating(null);
+    }
   };
 
-  const handleGenerate = () => {
-    if (!title.trim()) { toast.error("Veuillez saisir un titre"); return; }
-    const periodLabel = period === "daily" ? "Quotidien" : period === "weekly" ? "Hebdomadaire" : "Mensuel";
-    const newReport = {
-      id: Date.now(),
-      title: title.trim(),
-      date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
-      type: periodLabel,
-    };
-    setReports(prev => [newReport, ...prev]);
-    setDialogOpen(false);
-    setTitle("");
-    toast.success(`Rapport "${newReport.title}" créé`);
-  };
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-6 h-6 animate-spin" /></div>;
+
+  const totalsByPeriod = Object.fromEntries(PERIODS.map((p) => [p.key, filterByPeriod(mentions, p.key).length]));
 
   return (
     <AnimatedPage>
       <div className="space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-3xl font-light tracking-tight">Rapports</h1>
-            <p className="text-muted-foreground">Génération et personnalisation de rapports</p>
-          </div>
-          <Button className="rounded-xl" onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" /> Nouveau rapport
-          </Button>
+        <div>
+          <h1 className="text-3xl font-light tracking-tight">Rapports PDF</h1>
+          <p className="text-muted-foreground">Rapports avec graphiques · {brand || "Aucune marque configurée"}</p>
         </div>
 
-        {reports.length === 0 && (
-          <Card className="glass-card rounded-2xl p-8 text-center">
-            <p className="text-muted-foreground">Aucun rapport généré. Créez votre premier rapport.</p>
+        {mentions.length === 0 && (
+          <Card className="glass-card rounded-2xl p-6 text-center text-sm text-muted-foreground">
+            Aucune mention encore collectée. Configurez la surveillance puis lancez un cycle de tracker pour générer des rapports.
           </Card>
         )}
 
-        <div className="space-y-3">
-          {reports.map((r) => (
-            <Card key={r.id} className="glass-card rounded-2xl card-hover">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{r.title}</p>
-                  <p className="text-xs text-muted-foreground">{r.date}</p>
-                </div>
-                <Badge variant="outline" className="rounded-lg">{r.type}</Badge>
+        <div className="grid gap-4 md:grid-cols-2">
+          {PERIODS.map((p) => (
+            <Card key={p.key} className="glass-card rounded-2xl card-hover">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" />{p.label}</span>
+                  <Badge variant="outline" className="rounded-lg">{totalsByPeriod[p.key]} mentions</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Rapport {p.label.toLowerCase()} avec graphiques de sentiment, top sources et 25 mentions.
+                </p>
+                {p.auto && <p className="text-xs text-primary">📅 {p.auto}</p>}
+                <Button onClick={() => generate(p.key)} disabled={generating === p.key} className="w-full rounded-xl">
+                  {generating === p.key ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                  Télécharger PDF
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
-      </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="glass-card rounded-2xl">
-          <DialogHeader><DialogTitle>Nouveau rapport</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Titre du rapport</Label>
-              <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex : Rapport mensuel Mars" className="rounded-xl mt-1" />
-            </div>
-            <div>
-              <Label>Périodicité</Label>
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Quotidien</SelectItem>
-                  <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                  <SelectItem value="monthly">Mensuel</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Sections à inclure</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {sections.map(s => (
-                  <label key={s} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <Checkbox checked={selectedSections.includes(s)} onCheckedChange={() => toggleSection(s)} />
-                    {s}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" className="rounded-xl" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button className="rounded-xl" onClick={handleGenerate}>Générer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Card className="glass-card rounded-2xl">
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="w-4 h-4 text-primary" />Rapports automatiques</CardTitle></CardHeader>
+          <CardContent className="text-sm text-muted-foreground space-y-2">
+            <p>📨 <strong>Hebdomadaire</strong> : envoyé par email tous les lundis matin avec synthèse de la semaine écoulée.</p>
+            <p>📊 <strong>Mensuel complet</strong> : envoyé le 1er de chaque mois avec analyse approfondie, comparaisons et recommandations.</p>
+            <p className="text-xs">Pour activer les envois automatiques, gérez vos préférences dans Paramètres → Notifications.</p>
+          </CardContent>
+        </Card>
+      </div>
     </AnimatedPage>
   );
 }

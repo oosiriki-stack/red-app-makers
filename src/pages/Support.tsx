@@ -11,6 +11,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { LifeBuoy, Loader2, Mail, MessageCircle, Phone } from "lucide-react";
 import { toast } from "sonner";
 
+const SUPPORT_EMAIL = "rpepperco@gmail.com";
+const SUPPORT_PHONE = "+225 0759690001";
+const SUPPORT_WA = "2250759690001";
+
 type Ticket = {
   id: string; subject: string; message: string; status: string;
   admin_reply: string | null; created_at: string;
@@ -36,7 +40,12 @@ export default function Support() {
     const { error } = await supabase.from("support_tickets").insert({ user_id: user.id, subject, message });
     setSending(false);
     if (error) toast.error(error.message);
-    else { toast.success("Demande envoyée. Le support vous répondra rapidement."); setSubject(""); setMessage(""); load(); }
+    else { toast.success("Demande envoyée."); setSubject(""); setMessage(""); load(); }
+  };
+
+  const openWhatsApp = () => {
+    const txt = encodeURIComponent(`Bonjour Focus Support, je suis ${user?.email || "client"}.\n\n`);
+    window.open(`https://wa.me/${SUPPORT_WA}?text=${txt}`, "_blank");
   };
 
   return (
@@ -48,15 +57,15 @@ export default function Support() {
         </div>
 
         <div className="grid sm:grid-cols-3 gap-3">
-          <a href="mailto:contact@focus-app.com" className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform">
-            <Mail className="w-5 h-5 text-primary" /><div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm font-medium">contact@focus-app.com</p></div>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform">
+            <Mail className="w-5 h-5 text-primary" /><div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm font-medium break-all">{SUPPORT_EMAIL}</p></div>
           </a>
-          <a href="tel:+22500000000" className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform">
-            <Phone className="w-5 h-5 text-primary" /><div><p className="text-xs text-muted-foreground">Téléphone</p><p className="text-sm font-medium">+225 00 00 00 00</p></div>
+          <a href={`tel:${SUPPORT_PHONE.replace(/\s/g, "")}`} className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform">
+            <Phone className="w-5 h-5 text-primary" /><div><p className="text-xs text-muted-foreground">Téléphone</p><p className="text-sm font-medium">{SUPPORT_PHONE}</p></div>
           </a>
-          <a href="https://wa.me/22500000000" target="_blank" rel="noreferrer" className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform">
-            <MessageCircle className="w-5 h-5 text-primary" /><div><p className="text-xs text-muted-foreground">WhatsApp</p><p className="text-sm font-medium">Discuter</p></div>
-          </a>
+          <button onClick={openWhatsApp} className="glass-card rounded-2xl p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform text-left">
+            <MessageCircle className="w-5 h-5 text-green-600" /><div><p className="text-xs text-muted-foreground">WhatsApp</p><p className="text-sm font-medium">Discuter maintenant</p></div>
+          </button>
         </div>
 
         <Card className="glass-card rounded-2xl">
