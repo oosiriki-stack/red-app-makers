@@ -70,9 +70,21 @@ export default function Mentions() {
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
-      setMentions((prev) => [row as Mention, ...prev]);
-      if (isSoundEnabled()) playAlertSound(row.sentiment === "negative" ? "warning" : "info");
-      toast.info(`Nouvelle mention de ${row.author}`, { description: (row.content || "").slice(0, 80) });
+      const m = row as Mention;
+      setMentions((prev) => [m, ...prev]);
+      if (isSoundEnabled()) playAlertSound(m.sentiment === "negative" ? "warning" : "info");
+      toast.info(`Nouvelle mention de ${m.author}`, {
+        description: (m.content || "").slice(0, 100),
+        action: { label: "Ouvrir", onClick: () => { setSelected(m); setReply({}); setTimeout(() => generateReplyFor(m, "pro"), 200); } },
+        duration: 8000,
+      });
+      // Auto-ouverture si aucune mention n'est déjà ouverte (réaction automatique)
+      setSelected((cur) => {
+        if (cur) return cur;
+        setReply({});
+        setTimeout(() => generateReplyFor(m, "pro"), 300);
+        return m;
+      });
     },
     onUpdate: (row) => setMentions((prev) => prev.map((m) => (m.id === row.id ? (row as Mention) : m))),
     onDelete: (row) => setMentions((prev) => prev.filter((m) => m.id !== row.id)),
@@ -137,8 +149,7 @@ export default function Mentions() {
     toast.info("Recherche sur Google (URL source non disponible)");
   };
 
-  const generateReply = async (tone: "pro" | "commercial" | "humor") => {
-    if (!selected) return;
+  const generateReplyFor = async (target: Mention, tone: "pro" | "commercial" | "humor") => {
     setGenerating(tone);
     try {
       const prompts = {
@@ -152,7 +163,7 @@ export default function Mentions() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
-          messages: [{ role: "user", content: `Rédige une réponse ${prompts[tone]} à cet avis client :\n\nAuteur: ${selected.author}\nSource: ${selected.source}\nSentiment: ${selected.sentiment}\n\n"${selected.content}"\n\nDonne uniquement le texte de la réponse, sans introduction.` }],
+          messages: [{ role: "user", content: `Rédige une réponse ${prompts[tone]} à cet avis client :\n\nAuteur: ${target.author}\nSource: ${target.source}\nSentiment: ${target.sentiment}\n\n"${target.content}"\n\nDonne uniquement le texte de la réponse, sans introduction.` }],
         }),
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -180,6 +191,11 @@ export default function Mentions() {
     } finally {
       setGenerating(null);
     }
+  };
+
+  const generateReply = (tone: "pro" | "commercial" | "humor") => {
+    if (!selected) return;
+    return generateReplyFor(selected, tone);
   };
 
   const sources = [...new Set(mentions.map((m) => m.source))];
@@ -307,7 +323,14 @@ export default function Mentions() {
                     <div key={t} className="rounded-xl bg-primary/5 p-3 text-sm space-y-2">
                       <p className="text-xs font-medium text-primary capitalize">{t === "pro" ? "Professionnelle" : t === "commercial" ? "Commerciale" : "Humoristique"}</p>
                       <p className="whitespace-pre-wrap">{reply[t]}</p>
-                      <Button size="sm" variant="ghost" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); toast.success("Copié"); }}><Copy className="h-3 w-3 mr-1" />Copier</Button>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" variant="ghost" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); toast.success("Copié"); }}><Copy className="h-3 w-3 mr-1" />Copier</Button>
+                        {selected?.source_url && (
+                          <Button size="sm" className="rounded-lg h-7" onClick={() => { navigator.clipboard.writeText(reply[t]!); window.open(selected.source_url!, "_blank"); toast.success("Réponse copiée · ouverture de la plateforme"); }}>
+                            <ExternalLink className="h-3 w-3 mr-1" />Répondre sur la plateforme
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
