@@ -266,6 +266,20 @@ export default function Settings() {
                   <Input placeholder="Ex: PDG, ministre, dirigeant..." value={person} onChange={(e) => setPerson(e.target.value)} className="rounded-xl mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">Surveille les mentions d'une personnalité publique (nom complet)</p>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <Label>Pays</Label>
+                    <Input placeholder="Ex: Côte d'Ivoire" value={country} onChange={(e) => setCountry(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
+                  <div>
+                    <Label>Ville</Label>
+                    <Input placeholder="Ex: Abidjan" value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
+                  <div>
+                    <Label>Commune</Label>
+                    <Input placeholder="Ex: Cocody" value={commune} onChange={(e) => setCommune(e.target.value)} className="rounded-xl mt-1" />
+                  </div>
+                </div>
                 <Separator />
                 <div>
                   <Label className="mb-3 block">Plateformes à tracker</Label>
