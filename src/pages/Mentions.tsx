@@ -76,14 +76,36 @@ export default function Mentions() {
 
   const handleRefresh = async () => { setRefreshing(true); await fetchMentions(); setRefreshing(false); toast.success("Flux actualisé"); };
 
-  const runTracker = async () => {
+  const runTracker = async (adhoc?: string) => {
     setTracking(true);
-    const { data, error } = await supabase.functions.invoke("track-mentions");
+    const { data: profile } = user ? await supabase.from("profiles").select("name").eq("id", user.id).maybeSingle() : { data: null as any };
+    const requester = (profile?.name?.trim() || user?.email || "Vous").toString();
+    const queryLabel = (adhoc || queryFromUrl || "").trim();
+    const reqToast = queryLabel
+      ? toast.loading(`🔎 Tracker lancé par ${requester}`, { description: `Requête: « ${queryLabel} »` })
+      : toast.loading(`🔎 Tracker lancé par ${requester}`);
+    const { data, error } = await supabase.functions.invoke("track-mentions", {
+      body: queryLabel ? { query: queryLabel } : {},
+    });
     setTracking(false);
+    toast.dismiss(reqToast);
     if (error) return toast.error("Tracker: " + error.message);
     await fetchMentions();
-    toast.success(`${data?.count ?? 0} mention(s) collectée(s)`);
+    toast.success(`${data?.count ?? 0} mention(s) collectée(s)`, {
+      description: queryLabel ? `Requête: « ${queryLabel} » · Émetteur: ${requester}` : `Émetteur: ${requester}`,
+    });
   };
+
+  // Auto-tracker dès qu'une requête est saisie (depuis la barre de recherche)
+  const autoTrackedRef = useState<string>("")[0];
+  useEffect(() => {
+    if (!user || !queryFromUrl) return;
+    const key = `arobase_autotrack_${user.id}_${queryFromUrl}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    runTracker(queryFromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, queryFromUrl]);
 
   const downloadCSV = () => {
     const header = "Date,Heure,Source,Auteur,Sentiment,Contenu,URL\n";
