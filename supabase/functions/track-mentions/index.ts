@@ -109,31 +109,42 @@ Deno.serve(async (req) => {
       )];
     }
 
+    // Annoter chaque mention avec contexte (émetteur + requête)
+    const primaryQuery = queries[0] || "";
+    for (const m of fresh) {
+      (m as any).query = primaryQuery;
+      (m as any).requester = requesterName;
+    }
+
     if (fresh.length) {
       const { error } = await admin.from("mentions").insert(fresh);
       if (error) errors.push("Insert: " + error.message);
     }
 
-    // Génération d'alertes selon volume et sentiment — inclut requête et émetteur
-    const reqLabel = `Requête: « ${queries.join(" / ")} » · Émetteur: ${requesterName}`;
+    // Génération d'alertes structurées (champs dédiés: query/requester/platform)
+    const platformsList = [...new Set(fresh.map((m) => PLATFORM_LABEL[m.source] || m.source))];
+    const platformLabel = platformsList.join(", ") || "Toutes plateformes";
     const negs = fresh.filter((m) => m.sentiment === "negative");
+
+    const alertBase = { user_id: user.id, query: primaryQuery, requester: requesterName, platform: platformLabel };
+
     if (negs.length >= 3) {
       await admin.from("alerts").insert({
-        user_id: user.id, type: "critical",
-        title: `🚨 Pic négatif détecté · ${queries[0]}`,
-        description: `${negs.length} mentions négatives. ${reqLabel}`,
+        ...alertBase, type: "critical", platform: PLATFORM_LABEL[negs[0].source] || negs[0].source,
+        title: `🚨 Pic négatif détecté`,
+        description: `${negs.length} mentions négatives repérées sur ${primaryQuery}.`,
       });
     } else if (negs.length >= 1) {
       await admin.from("alerts").insert({
-        user_id: user.id, type: "warning",
-        title: `Mention négative · ${negs[0].source}`,
-        description: `${(negs[0].content || "").slice(0, 120)}\n${reqLabel}`,
+        ...alertBase, type: "warning", platform: PLATFORM_LABEL[negs[0].source] || negs[0].source,
+        title: `Mention négative détectée`,
+        description: (negs[0].content || "").slice(0, 200),
       });
     } else if (fresh.length > 0) {
       await admin.from("alerts").insert({
-        user_id: user.id, type: "info",
+        ...alertBase, type: "info",
         title: `${fresh.length} nouvelle(s) mention(s)`,
-        description: `Sources: ${[...new Set(fresh.map((m) => m.source))].join(", ")}\n${reqLabel}`,
+        description: `Veille mise à jour avec ${fresh.length} signal(aux) frais.`,
       });
     }
 
