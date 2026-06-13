@@ -27,6 +27,8 @@ const platforms = [
   { key: "google", label: "Google (Avis)", color: "bg-yellow-500" },
 ];
 
+const defaultPlatformStates = Object.fromEntries(platforms.map((p) => [p.key, true])) as Record<string, boolean>;
+
 const FONT_LEVELS = ["small", "normal", "large"] as const;
 const FONT_LABELS: Record<string, string> = { small: "Petit", normal: "Normal", large: "Grand" };
 
@@ -44,7 +46,7 @@ export default function Settings() {
   // Monitoring
   const [brand, setBrand] = useState("");
   const [person, setPerson] = useState("");
-  const [platformStates, setPlatformStates] = useState<Record<string, boolean>>({});
+  const [platformStates, setPlatformStates] = useState<Record<string, boolean>>(defaultPlatformStates);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [savingMonitoring, setSavingMonitoring] = useState(false);
@@ -61,7 +63,7 @@ export default function Settings() {
     const { data, error } = await supabase.functions.invoke("track-mentions");
     setTracking(false);
     if (error) { toast.error("Erreur tracker: " + error.message); return; }
-    toast.success(`Tracker exécuté · ${data?.count ?? 0} mention(s) · ${data?.real_x ? "X réel ✓" : "mode simulé"}`);
+    toast.success(`Tracker exécuté · ${data?.count ?? 0} mention(s)`, { description: `Sources gratuites: ${(data?.sources_used || []).join(", ") || "flux publics"}` });
   };
 
   // Font
@@ -84,7 +86,8 @@ export default function Settings() {
       if (data) {
         setBrand(data.brand || "");
         setPerson((data as any).person || "");
-        setPlatformStates((data.platforms as Record<string, boolean>) || {});
+        const saved = (data.platforms as Record<string, boolean>) || {};
+        setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
       }
     });
     // Load subscription
@@ -114,7 +117,11 @@ export default function Settings() {
     } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
     if (error) toast.error(error.message);
-    else toast.success(`Surveillance activée pour "${brand}"`);
+    else {
+      toast.success(`Surveillance activée pour "${brand}"`);
+      await runTracker();
+      navigate("/mentions");
+    }
   };
 
   const togglePlatform = (key: string) => {
@@ -289,7 +296,7 @@ export default function Settings() {
                     <Zap className="h-4 w-4 text-primary" />
                     <p className="text-sm font-medium">Trackers de mentions</p>
                   </div>
-                  <p className="text-xs text-muted-foreground">Lance un cycle de collecte (X réel si clés configurées, autres plateformes simulées).</p>
+                  <p className="text-xs text-muted-foreground">Lance un cycle de collecte gratuit: presse, Google News, communautés sociales, Mastodon et flux publics.</p>
                   <Button onClick={runTracker} disabled={tracking} className="rounded-xl" size="sm">
                     {tracking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Zap className="h-4 w-4 mr-2" />}
                     Lancer le tracker

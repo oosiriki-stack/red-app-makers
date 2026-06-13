@@ -29,12 +29,13 @@ type SeverityType = "all" | "critical" | "warning" | "info";
 
 export default function Alerts() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [severityFilter, setSeverityFilter] = useState<SeverityType>("all");
   const { user } = useAuth();
 
   const fetchAlerts = async () => {
     if (!user) return;
+    setLoading(true);
     const { data, error } = await supabase.from("alerts").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     else setAlerts(data || []);
@@ -106,7 +107,7 @@ export default function Alerts() {
         </div>
 
         <div className="space-y-3">
-          {loading && <p className="text-center text-muted-foreground py-8">Chargement...</p>}
+          {loading && alerts.length > 0 && <p className="text-center text-xs text-muted-foreground py-2">Synchronisation…</p>}
           {!loading && filtered.length === 0 && (
             <p className="text-center text-muted-foreground py-8">Aucune alerte. Tout est calme ! 🎉</p>
           )}
