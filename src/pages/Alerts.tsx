@@ -128,8 +128,26 @@ export default function Alerts() {
                         {alert.reaction && <Badge variant="outline" className="text-[10px]">{REACTIONS.find((r) => r.key === alert.reaction)?.label}</Badge>}
                       </div>
                       {alert.description && <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>}
-                      <span className="text-xs text-muted-foreground mt-1 block">{new Date(alert.created_at).toLocaleString("fr-FR")}</span>
-                    </div>
+                      {(alert.requester || alert.query || alert.platform) && (
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
+                          <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1">
+                            <User className="h-3 w-3 text-primary shrink-0" />
+                            <span className="text-muted-foreground">Émetteur :</span>
+                            <span className="font-medium truncate">{alert.requester || "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1">
+                            <Search className="h-3 w-3 text-primary shrink-0" />
+                            <span className="text-muted-foreground">Requête :</span>
+                            <span className="font-medium truncate">{alert.query ? `« ${alert.query} »` : "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1">
+                            <Radio className="h-3 w-3 text-primary shrink-0" />
+                            <span className="text-muted-foreground">Plateforme :</span>
+                            <span className="font-medium truncate">{alert.platform || "—"}</span>
+                          </div>
+                        </div>
+                      )}
+                      <span className="text-xs text-muted-foreground mt-1.5 block">{new Date(alert.created_at).toLocaleString("fr-FR")}</span>
                     {!alert.is_read && <Button variant="ghost" size="sm" className="rounded-lg shrink-0" onClick={() => markRead(alert.id)}>Lu</Button>}
                   </div>
                   <div className="flex gap-1.5 mt-3 flex-wrap">
