@@ -39,12 +39,12 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchGoogleNews(q);
           const src = platforms.google ? "google" : "blog";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, it.link));
         } catch (e) { errors.push("GoogleNews: " + e); }
 
         try {
           const items = await fetchGdelt(q);
-          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("GDELT: " + e); }
       }
 
@@ -52,14 +52,14 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchLemmy(q);
           const src = platforms.linkedin ? "linkedin" : "facebook";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("Lemmy: " + e); }
       }
 
       if (platforms.blog) {
         try {
           const items = await fetchHN(q);
-          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("HN: " + e); }
       }
 
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
         try {
           const items = await fetchMastodon(q);
           const src = platforms.x ? "x" : platforms.tiktok ? "tiktok" : "instagram";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement));
+          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("Mastodon: " + e); }
       }
     }
