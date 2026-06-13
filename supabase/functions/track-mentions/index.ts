@@ -113,25 +113,26 @@ Deno.serve(async (req) => {
       if (error) errors.push("Insert: " + error.message);
     }
 
-    // Génération d'alertes selon volume et sentiment
+    // Génération d'alertes selon volume et sentiment — inclut requête et émetteur
+    const reqLabel = `Requête: « ${queries.join(" / ")} » · Émetteur: ${requesterName}`;
     const negs = fresh.filter((m) => m.sentiment === "negative");
     if (negs.length >= 3) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "critical",
-        title: `🚨 Pic négatif détecté pour ${settings.brand}`,
-        description: `${negs.length} mentions négatives collectées sur plusieurs sources. Risque de crise.`,
+        title: `🚨 Pic négatif détecté · ${queries[0]}`,
+        description: `${negs.length} mentions négatives. ${reqLabel}`,
       });
     } else if (negs.length >= 1) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "warning",
         title: `Mention négative · ${negs[0].source}`,
-        description: (negs[0].content || "").slice(0, 160),
+        description: `${(negs[0].content || "").slice(0, 120)}\n${reqLabel}`,
       });
     } else if (fresh.length > 0) {
       await admin.from("alerts").insert({
         user_id: user.id, type: "info",
-        title: `${fresh.length} nouvelle(s) mention(s) pour ${settings.brand}`,
-        description: `Sources: ${[...new Set(fresh.map((m) => m.source))].join(", ")}`,
+        title: `${fresh.length} nouvelle(s) mention(s)`,
+        description: `Sources: ${[...new Set(fresh.map((m) => m.source))].join(", ")}\n${reqLabel}`,
       });
     }
 
