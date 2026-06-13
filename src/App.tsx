@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthGuard } from "@/components/AuthGuard";
+import { useAppUpdate } from "@/hooks/useAppUpdate";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Mentions from "@/pages/Mentions";
