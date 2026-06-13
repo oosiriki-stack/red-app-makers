@@ -48,6 +48,9 @@ export default function Settings() {
   // Monitoring
   const [brand, setBrand] = useState("");
   const [person, setPerson] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [commune, setCommune] = useState("");
   const [platformStates, setPlatformStates] = useState<Record<string, boolean>>(defaultPlatformStates);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
