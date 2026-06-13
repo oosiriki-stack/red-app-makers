@@ -106,9 +106,9 @@ export default function Crisis() {
 
         <Card className="glass-card rounded-2xl">
           <CardContent className="p-4 space-y-3">
-            <div className="grid gap-3 md:grid-cols-2">
-              <div><Label>Marque / Organisation *</Label><Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Ex: Focus SARL" className="rounded-xl" /></div>
-              <div><Label>Type de situation</Label><Input placeholder="Ex: avis viral, bad buzz, fuite, accident..." className="rounded-xl" onChange={(e) => setBrand(brand)} /></div>
+            <div>
+              <Label>Marque / Organisation *</Label>
+              <Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Ex: Focus SARL" className="rounded-xl" />
             </div>
             <div>
               <Label>Description détaillée de la crise *</Label>
