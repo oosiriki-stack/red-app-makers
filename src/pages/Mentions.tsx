@@ -45,6 +45,9 @@ export default function Mentions() {
   const queryFromUrl = searchParams.get("q") || "";
   const [sourceFilter, setSourceFilter] = useState("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
+  const [timeFilter, setTimeFilter] = useState("all");
   const [selected, setSelected] = useState<Mention | null>(null);
   const [interactionsOpen, setInteractionsOpen] = useState<Mention | null>(null);
   const [refreshing, setRefreshing] = useState(false);
