@@ -47,6 +47,8 @@ Deno.serve(async (req) => {
     const collected: any[] = [];
     const errors: string[] = [];
 
+    const APIFY = Deno.env.get("APIFY_TOKEN") || "";
+
     for (const q of queries) {
       if (platforms.blog || platforms.google) {
         try {
@@ -61,12 +63,72 @@ Deno.serve(async (req) => {
         } catch (e) { errors.push("GDELT: " + e); }
       }
 
-      if (platforms.facebook || platforms.linkedin) {
-        try {
-          const items = await fetchLemmy(q);
-          const src = platforms.linkedin ? "linkedin" : "facebook";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
-        } catch (e) { errors.push("Lemmy: " + e); }
+      // === APIFY (réseaux sociaux réels si token configuré) ===
+      if (APIFY) {
+        if (platforms.x) {
+          try {
+            const items = await apifyRun(APIFY, "apidojo~tweet-scraper", { searchTerms: [q], maxItems: 15, sort: "Latest" });
+            for (const it of items) collected.push(toMention(user.id, "x",
+              it.author?.userName || it.author?.name || "X user",
+              it.text || it.fullText || "", safeDate(it.createdAt),
+              (it.likeCount || 0) + (it.retweetCount || 0) + (it.replyCount || 0),
+              it.url));
+          } catch (e) { errors.push("Apify/X: " + e); }
+        }
+        if (platforms.instagram) {
+          try {
+            const items = await apifyRun(APIFY, "apify~instagram-search-scraper", { search: q, searchType: "hashtag", searchLimit: 1, resultsLimit: 15 });
+            for (const it of items) collected.push(toMention(user.id, "instagram",
+              it.ownerUsername || "Instagram",
+              it.caption || it.title || "", safeDate(it.timestamp),
+              (it.likesCount || 0) + (it.commentsCount || 0), it.url));
+          } catch (e) { errors.push("Apify/IG: " + e); }
+        }
+        if (platforms.tiktok) {
+          try {
+            const items = await apifyRun(APIFY, "clockworks~tiktok-scraper", { hashtags: [q.replace(/\s+/g, "")], resultsPerPage: 15, shouldDownloadVideos: false });
+            for (const it of items) collected.push(toMention(user.id, "tiktok",
+              it.authorMeta?.name || "TikTok",
+              it.text || "", safeDate(it.createTimeISO || it.createTime),
+              (it.diggCount || 0) + (it.commentCount || 0) + (it.shareCount || 0),
+              it.webVideoUrl));
+          } catch (e) { errors.push("Apify/TT: " + e); }
+        }
+        if (platforms.facebook) {
+          try {
+            const items = await apifyRun(APIFY, "apify~facebook-posts-scraper", { searchQueries: [q], resultsLimit: 15 });
+            for (const it of items) collected.push(toMention(user.id, "facebook",
+              it.user?.name || it.pageName || "Facebook",
+              it.text || it.message || "", safeDate(it.time || it.timestamp),
+              (it.likesCount || 0) + (it.commentsCount || 0) + (it.sharesCount || 0),
+              it.url || it.postUrl));
+          } catch (e) { errors.push("Apify/FB: " + e); }
+        }
+        if (platforms.linkedin) {
+          try {
+            const items = await apifyRun(APIFY, "apimaestro~linkedin-posts-search-scraper-no-cookies", { keywords: q, totalPosts: 15 });
+            for (const it of items) collected.push(toMention(user.id, "linkedin",
+              it.author?.name || it.authorName || "LinkedIn",
+              it.text || it.content || "", safeDate(it.postedAt || it.timestamp),
+              (it.likes || 0) + (it.comments || 0), it.url || it.postUrl));
+          } catch (e) { errors.push("Apify/LI: " + e); }
+        }
+      } else {
+        // Fallback gratuit si APIFY_TOKEN non configuré
+        if (platforms.facebook || platforms.linkedin) {
+          try {
+            const items = await fetchLemmy(q);
+            const src = platforms.linkedin ? "linkedin" : "facebook";
+            for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
+          } catch (e) { errors.push("Lemmy: " + e); }
+        }
+        if (platforms.x || platforms.tiktok || platforms.instagram) {
+          try {
+            const items = await fetchMastodon(q);
+            const src = platforms.x ? "x" : platforms.tiktok ? "tiktok" : "instagram";
+            for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
+          } catch (e) { errors.push("Mastodon: " + e); }
+        }
       }
 
       if (platforms.blog) {
@@ -74,14 +136,6 @@ Deno.serve(async (req) => {
           const items = await fetchHN(q);
           for (const it of items) collected.push(toMention(user.id, "blog", it.author, it.content, it.date, it.engagement, (it as any).link));
         } catch (e) { errors.push("HN: " + e); }
-      }
-
-      if (platforms.x || platforms.tiktok || platforms.instagram) {
-        try {
-          const items = await fetchMastodon(q);
-          const src = platforms.x ? "x" : platforms.tiktok ? "tiktok" : "instagram";
-          for (const it of items) collected.push(toMention(user.id, src, it.author, it.content, it.date, it.engagement, (it as any).link));
-        } catch (e) { errors.push("Mastodon: " + e); }
       }
     }
 
