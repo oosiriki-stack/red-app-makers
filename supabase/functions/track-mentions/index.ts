@@ -380,3 +380,23 @@ async function fetchMastodon(q: string) {
   return items.filter((x) => x.content);
 }
 function stripHtml(s: string) { return s.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim(); }
+
+// --- Apify: run actor synchronously and get dataset items ---
+async function apifyRun(token: string, actor: string, input: Record<string, unknown>, timeoutMs = 55000) {
+  const url = `https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${token}&timeout=50&memory=512`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      signal: controller.signal,
+    });
+    if (!r.ok) throw new Error(`${actor} HTTP ${r.status}`);
+    const j = await r.json();
+    return Array.isArray(j) ? j : [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
