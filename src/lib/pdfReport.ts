@@ -102,8 +102,14 @@ export function generatePdfReport(opts: {
   period: ReportPeriod;
   mentions: Mention[];
   alertsCount: number;
+  person?: string;
+  country?: string;
+  city?: string;
+  commune?: string;
+  ownerName?: string;
+  ownerEmail?: string;
 }): jsPDF {
-  const { brand, period, mentions, alertsCount } = opts;
+  const { brand, period, mentions, alertsCount, person, country, city, commune, ownerName, ownerEmail } = opts;
   const doc = new jsPDF();
   drawHeader(doc, brand, period);
 
@@ -112,42 +118,99 @@ export function generatePdfReport(opts: {
   const neutral = mentions.filter((m) => m.sentiment === "neutral").length;
   const total = mentions.length;
   const score = total > 0 ? Math.round(((positive - negative) / total) * 50 + 50) : 0;
+  const avgEngagement = total > 0 ? Math.round(mentions.reduce((s, m) => s + (m.engagement || 0), 0) / total) : 0;
+  const topAuthor = (() => {
+    const c: Record<string, number> = {};
+    mentions.forEach((m) => { if (m.author) c[m.author] = (c[m.author] || 0) + 1; });
+    const e = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
+    return e ? `${e[0]} (${e[1]})` : "—";
+  })();
 
-  // Stat blocks
+  // Identité / contexte
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text(`Score e-Réputation: ${score}/100`, 14, 40);
+  doc.text("Contexte de surveillance", 14, 38);
   doc.setFont("helvetica", "normal");
-  doc.text(`Total mentions: ${total}`, 14, 48);
-  doc.text(`Alertes actives: ${alertsCount}`, 80, 48);
-  doc.text(`Positif: ${positive}  ·  Neutre: ${neutral}  ·  Négatif: ${negative}`, 14, 55);
+  doc.setFontSize(9);
+  const locParts = [commune, city, country].filter(Boolean).join(", ") || "Non renseigné";
+  doc.text(`Marque : ${brand || "—"}`, 14, 45);
+  doc.text(`Personne suivie : ${person || "—"}`, 110, 45);
+  doc.text(`Localisation : ${locParts}`, 14, 51);
+  doc.text(`Titulaire : ${ownerName || "—"}${ownerEmail ? " · " + ownerEmail : ""}`, 110, 51);
+
+  // KPI blocks
+  const kpis = [
+    { label: "Score e-Réputation", value: `${score}/100` },
+    { label: "Mentions totales", value: String(total) },
+    { label: "Alertes actives", value: String(alertsCount) },
+    { label: "Engagement moyen", value: String(avgEngagement) },
+  ];
+  kpis.forEach((k, i) => {
+    const x = 14 + i * 46;
+    doc.setDrawColor(229, 161, 0);
+    doc.setFillColor(252, 247, 235);
+    doc.roundedRect(x, 58, 42, 18, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(20, 20, 20);
+    doc.text(k.value, x + 3, 67);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(110);
+    doc.text(k.label, x + 3, 72);
+  });
+  doc.setTextColor(20);
 
   // Charts
-  drawSentimentChart(doc, 14, 70, 180, 8, { positive, neutral, negative });
-
+  drawSentimentChart(doc, 14, 90, 180, 8, { positive, neutral, negative });
   const sourceCounts: Record<string, number> = {};
   mentions.forEach((m) => { sourceCounts[m.source] = (sourceCounts[m.source] || 0) + 1; });
-  drawSourceChart(doc, 14, 105, 180, sourceCounts);
+  drawSourceChart(doc, 14, 125, 180, sourceCounts);
+
+  // Top auteur
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Auteur le plus actif : `, 14, 185);
+  doc.setFont("helvetica", "normal");
+  doc.text(topAuthor, 60, 185);
 
   // Mentions table
   autoTable(doc, {
-    startY: 165,
-    head: [["Date", "Source", "Auteur", "Sentiment", "Extrait"]],
+    startY: 192,
+    head: [["Date & Heure", "Plateforme", "Auteur", "Sentiment", "Extrait", "Lien"]],
     body: mentions.slice(0, 25).map((m) => [
       new Date(m.mention_date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }),
       m.source,
-      (m.author || "").slice(0, 18),
+      (m.author || "—").slice(0, 18),
       m.sentiment,
-      (m.content || "").slice(0, 70),
+      (m.content || "").slice(0, 60),
+      m.source_url ? "Voir" : "—",
     ]),
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [229, 161, 0] },
+    styles: { fontSize: 7.5, cellPadding: 1.8 },
+    headStyles: { fillColor: [229, 161, 0], textColor: 255 },
+    alternateRowStyles: { fillColor: [250, 250, 250] },
     margin: { left: 14, right: 14 },
+    didDrawCell: (data) => {
+      if (data.section === "body" && data.column.index === 5) {
+        const m = mentions[data.row.index];
+        if (m?.source_url) {
+          doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url: m.source_url });
+        }
+      }
+    },
   });
 
-  doc.setFontSize(8);
-  doc.setTextColor(120);
-  doc.text(`Généré par Focus · ${new Date().toLocaleString("fr-FR")}`, 14, 290);
+  // Footer
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(229, 161, 0);
+    doc.line(14, 285, 196, 285);
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(`Focus · Rapport ${PERIOD_LABEL[period]} · ${brand || "—"} · ${locParts}`, 14, 290);
+    doc.text(`Page ${i}/${pageCount} · Généré le ${new Date().toLocaleString("fr-FR")}`, 140, 290);
+  }
 
   return doc;
 }
