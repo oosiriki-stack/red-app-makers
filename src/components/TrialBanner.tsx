@@ -24,8 +24,8 @@ export function TrialBanner() {
       <div className={`${urgent ? "bg-orange-500/15 border-orange-500/30" : "bg-primary/10 border-primary/30"} border-b px-4 py-2 flex items-center gap-2 text-sm`}>
         <Sparkles className={`h-4 w-4 shrink-0 ${urgent ? "text-orange-500" : "text-primary"}`} />
         <span className="flex-1">
-          <strong>Essai Premium · {daysLeft} jour{daysLeft > 1 ? "s" : ""} restant{daysLeft > 1 ? "s" : ""}</strong>
-          <span className="text-muted-foreground ml-2 hidden sm:inline">— accès total à toutes les fonctionnalités Pro.</span>
+          <strong>Version Démo · {daysLeft} jour{daysLeft > 1 ? "s" : ""} restant{daysLeft > 1 ? "s" : ""}</strong>
+          <span className="text-muted-foreground ml-2 hidden sm:inline">— accès limité (Dashboard, Mentions, Alertes). Rapports, FocusGPT, Concurrents & Crise réservés Pro.</span>
         </span>
         <Button size="sm" variant={urgent ? "default" : "outline"} className="rounded-xl" onClick={() => navigate("/pricing")}>Passer Pro</Button>
       </div>
