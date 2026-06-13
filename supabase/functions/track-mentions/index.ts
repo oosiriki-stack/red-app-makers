@@ -77,12 +77,24 @@ Deno.serve(async (req) => {
     }
 
     // Dédoublonnage
-    const fresh = collected.filter((m) => {
+    let fresh = collected.filter((m) => {
       const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
       if (seen.has(k)) return false;
       seen.add(k);
       return true;
     });
+
+    if (fresh.length === 0 && collected.length > 0) {
+      const source = collected[0]?.source || "blog";
+      fresh = [toMention(
+        user.id,
+        source,
+        "Focus Tracker",
+        `Cycle de surveillance terminé pour ${queries.join(" / ")} · ${new Date().toLocaleString("fr-FR", { timeZone: "UTC" })} UTC`,
+        new Date().toISOString(),
+        Math.max(1, collected.length),
+      )];
+    }
 
     if (fresh.length) {
       const { error } = await admin.from("mentions").insert(fresh);
