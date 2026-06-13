@@ -139,9 +139,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (collected.length === 0) {
-      for (const q of queries) collected.push(...fallbackMentions(user.id, q, platforms));
-    }
+    // ⚠️ Aucune donnée simulée: on n'insère QUE des mentions réelles collectées
+    // depuis les sources publiques (Google News, GDELT, Mastodon, Lemmy, HN, Apify).
 
     // Dédoublonnage
     let fresh = collected.filter((m) => {
@@ -151,17 +150,8 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    if (fresh.length === 0 && collected.length > 0) {
-      const source = collected[0]?.source || "blog";
-      fresh = [toMention(
-        user.id,
-        source,
-        "Focus Tracker",
-        `Cycle de surveillance terminé pour ${queries.join(" / ")} · ${new Date().toLocaleString("fr-FR", { timeZone: "UTC" })} UTC`,
-        new Date().toISOString(),
-        Math.max(1, collected.length),
-      )];
-    }
+    // Pas de mention de remplissage si le cycle ne ramène rien de réel
+
 
     // Annoter chaque mention avec contexte (émetteur + requête)
     const primaryQuery = queries[0] || "";
