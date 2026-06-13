@@ -277,6 +277,7 @@ async function fetchHN(q: string) {
     content: h.title || h.story_title || h.comment_text || "",
     date: safeDate(h.created_at),
     engagement: h.points || 0,
+    link: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
   })).filter((x: any) => x.content);
 }
 
