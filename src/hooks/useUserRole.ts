@@ -17,10 +17,11 @@ export function useUserRole() {
     });
   }, [user]);
 
+  const safeRoles = Array.isArray(roles) ? roles : [];
   return {
-    roles,
+    roles: safeRoles,
     loading,
-    isSuperAdmin: roles.includes("super_admin"),
-    isAdmin: roles.includes("admin") || roles.includes("super_admin"),
+    isSuperAdmin: safeRoles.includes("super_admin"),
+    isAdmin: safeRoles.includes("admin") || safeRoles.includes("super_admin"),
   };
 }
