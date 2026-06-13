@@ -47,10 +47,10 @@ function drawHeader(doc: jsPDF, brand: string, period: ReportPeriod) {
 
 function drawSentimentChart(doc: jsPDF, x: number, y: number, w: number, h: number, counts: { positive: number; neutral: number; negative: number }) {
   const total = counts.positive + counts.neutral + counts.negative || 1;
-  const segments = [
-    { label: "Positif", value: counts.positive, color: [34, 197, 94] as const },
-    { label: "Neutre", value: counts.neutral, color: [148, 163, 184] as const },
-    { label: "Négatif", value: counts.negative, color: [239, 68, 68] as const },
+  const segments: Array<{ label: string; value: number; r: number; g: number; b: number }> = [
+    { label: "Positif", value: counts.positive, r: 34, g: 197, b: 94 },
+    { label: "Neutre", value: counts.neutral, r: 148, g: 163, b: 184 },
+    { label: "Négatif", value: counts.negative, r: 239, g: 68, b: 68 },
   ];
 
   doc.setFontSize(12);
@@ -61,17 +61,17 @@ function drawSentimentChart(doc: jsPDF, x: number, y: number, w: number, h: numb
   const segY = y + 4;
   segments.forEach((s) => {
     const segW = (s.value / total) * w;
-    doc.setFillColor(...s.color);
+    doc.setFillColor(s.r, s.g, s.b);
     doc.rect(cursorX, segY, segW, h, "F");
     cursorX += segW;
   });
 
-  let legendY = segY + h + 8;
+  const legendY = segY + h + 8;
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   segments.forEach((s, i) => {
     const cx = x + i * (w / 3);
-    doc.setFillColor(...s.color);
+    doc.setFillColor(s.r, s.g, s.b);
     doc.rect(cx, legendY - 3, 4, 4, "F");
     doc.text(`${s.label}: ${s.value} (${Math.round((s.value / total) * 100)}%)`, cx + 6, legendY);
   });
