@@ -14,7 +14,6 @@ import { useAuth } from "@/hooks/useAuth";
 
 const WAVE_LINK = "https://pay.wave.com/m/M_ci_mZX836uJEiGE/c/ci/";
 const CARD_NUMBER = "4312 5900 9402 6114";
-const CARD_EXPIRY = "09/28";
 
 const plans = [
   { name: "Starter", icon: Zap, planKey: "starter", price: 15000, features: ["500 mentions/mois", "3 sources", "Dashboard", "Alertes email", "Rapport hebdo PDF"] },
@@ -173,7 +172,6 @@ export default function Pricing() {
                     <code className="text-base font-mono bg-background px-3 py-2 rounded-lg flex-1">{CARD_NUMBER}</code>
                     <Button size="icon" variant="outline" className="rounded-xl shrink-0" onClick={() => copy(CARD_NUMBER.replace(/\s/g, ""))}><Copy className="h-4 w-4" /></Button>
                   </div>
-                  <div className="text-sm">Expiration : <strong>{CARD_EXPIRY}</strong></div>
                   <p className="text-xs text-muted-foreground">Effectuez le paiement sur cette carte, puis renseignez les 4 derniers chiffres de votre carte et l'ID de transaction.</p>
                 </div>
               </TabsContent>
