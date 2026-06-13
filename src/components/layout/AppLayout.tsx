@@ -82,6 +82,7 @@ export function AppLayout() {
       </main>
 
       <BottomNav />
+      <MarketingOnboarding />
     </div>
   );
 }
