@@ -198,19 +198,38 @@ export default function Settings() {
                   </div>
                 </div>
                 <Separator />
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Plan actif</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="rounded-lg capitalize">{subscription || "Aucun"}</Badge>
-                    <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
-                      <CreditCard className="h-3 w-3 mr-1" /> Changer
-                    </Button>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Plan actif</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="rounded-lg capitalize">{subscription?.plan || "Aucun"}</Badge>
+                      {subscription?.status && (
+                        <Badge variant={subscription.status === "active" ? "default" : "outline"} className={`rounded-lg ${subscription.status === "active" ? "bg-green-600" : subscription.status === "pending" ? "bg-orange-500 text-white" : ""}`}>
+                          {subscription.status === "active" ? "Validé" : subscription.status === "pending" ? "En attente" : subscription.status === "expired" ? "Expiré" : subscription.status}
+                        </Badge>
+                      )}
+                      <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
+                        <CreditCard className="h-3 w-3 mr-1" />Changer
+                      </Button>
+                    </div>
                   </div>
+                  {subscription?.expires_at && (
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Expire le</span><span>{new Date(subscription.expires_at).toLocaleDateString("fr-FR")}</span>
+                    </div>
+                  )}
+                  {subscription?.status === "active" && (
+                    <Button size="sm" variant="outline" className="rounded-xl w-full" onClick={downloadReceipt}>
+                      <CreditCard className="h-3 w-3 mr-1" />Télécharger le reçu PDF
+                    </Button>
+                  )}
                 </div>
                 <Separator />
                 <div className="grid gap-3">
                   <div><Label>Nom</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" /></div>
                   <div><Label>Entreprise</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} className="rounded-xl" /></div>
+                  <div><Label>Contact (téléphone)</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+225 ..." className="rounded-xl" /></div>
+                  <div><Label>Localisation</Label><Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ville, Pays" className="rounded-xl" /></div>
                 </div>
                 <Button onClick={handleSaveProfile} className="rounded-xl" disabled={saving}>
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
