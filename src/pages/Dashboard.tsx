@@ -141,7 +141,7 @@ export default function Dashboard() {
         </StaggerContainer>
 
         <div className="grid gap-3 lg:grid-cols-3">
-          <motion.div variants={staggerItem} className="lg:col-span-1">
+          <div className="lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
