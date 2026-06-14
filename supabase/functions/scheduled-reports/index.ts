@@ -1,21 +1,18 @@
-// Scheduled reports notifier — runs daily, emits weekly/monthly alerts
-// Protected by CRON_SECRET. The Supabase cron job must send:
-//   Authorization: Bearer <CRON_SECRET>
+// Scheduled reports notifier — runs daily, emits weekly/monthly alerts.
+// Server-only: requires the service-role key as Bearer (never exposed to the browser).
+// This effectively blocks all unauthenticated external invocations.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, SERVICE_KEY);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // ---- Shared-secret auth (cron-only; service-role bypasses RLS) ----
-  const cronSecret = Deno.env.get("CRON_SECRET");
+  // ---- Shared-secret auth (server-only callers; bypasses RLS) ----
   const provided = req.headers.get("Authorization");
-  if (!cronSecret || provided !== `Bearer ${cronSecret}`) {
+  if (provided !== `Bearer ${SERVICE_KEY}`) {
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
