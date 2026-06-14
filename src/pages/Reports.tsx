@@ -71,8 +71,6 @@ export default function Reports() {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-6 h-6 animate-spin" /></div>;
-
   const totalsByPeriod = Object.fromEntries(PERIODS.map((p) => [p.key, filterByPeriod(mentions, p.key).length]));
 
   const chartData = useMemo(() => {
@@ -110,6 +108,8 @@ export default function Reports() {
     for (const m of mentions) acc[(m as any).source || "autre"] = (acc[(m as any).source || "autre"] || 0) + 1;
     return Object.entries(acc).map(([source, count]) => ({ source, count })).sort((a, b) => b.count - a.count).slice(0, 6);
   }, [mentions]);
+
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-6 h-6 animate-spin" /></div>;
 
   return (
     <AnimatedPage>
