@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
+import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
 import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
