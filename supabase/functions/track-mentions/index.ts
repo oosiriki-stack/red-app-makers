@@ -142,15 +142,16 @@ Deno.serve(async (req) => {
     // ⚠️ Aucune donnée simulée: on n'insère QUE des mentions réelles collectées
     // depuis les sources publiques (Google News, GDELT, Mastodon, Lemmy, HN, Apify).
 
-    // Dédoublonnage
+    // Dédoublonnage + cutoff de date (uniquement mentions postées après le début de surveillance)
+    const cutoffMs = (settings as any)?.monitoring_started_at ? new Date((settings as any).monitoring_started_at).getTime() : 0;
     let fresh = collected.filter((m) => {
       const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
       if (seen.has(k)) return false;
+      const t = new Date(m.mention_date).getTime();
+      if (cutoffMs && (!t || t < cutoffMs)) return false;
       seen.add(k);
       return true;
     });
-
-    // Pas de mention de remplissage si le cycle ne ramène rien de réel
 
 
     // Annoter chaque mention avec contexte (émetteur + requête)
