@@ -10,6 +10,10 @@ import {
   CreditCard,
   Target,
   Sparkles,
+  Users,
+  Share2,
+  TrendingUp,
+  PieChart,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -30,12 +34,16 @@ const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Mentions", url: "/mentions", icon: MessageSquare },
   { title: "Alertes", url: "/alerts", icon: Bell },
+  { title: "Influenceurs", url: "/influencers", icon: TrendingUp },
   { title: "Concurrence", url: "/competitors", icon: BarChart3 },
+  { title: "Graphiques", url: "/quick-chart", icon: PieChart },
   { title: "Assistant IA", url: "/ai-assistant", icon: Bot },
   { title: "Rapports", url: "/reports", icon: FileText },
 ];
 
 const secondaryNav = [
+  { title: "Espaces de travail", url: "/workspaces", icon: Users },
+  { title: "Réseaux sociaux", url: "/social-networks", icon: Share2 },
   { title: "Paramètres", url: "/settings", icon: Settings },
   { title: "Tarification", url: "/pricing", icon: CreditCard },
   { title: "Installer", url: "/install", icon: Download },

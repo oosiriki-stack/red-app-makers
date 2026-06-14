@@ -24,6 +24,11 @@ import Register from "@/pages/Register";
 import ResetPassword from "@/pages/ResetPassword";
 import Support from "@/pages/Support";
 import SuperAdmin from "@/pages/SuperAdmin";
+import Workspaces from "@/pages/Workspaces";
+import AcceptInvitation from "@/pages/AcceptInvitation";
+import SocialNetworks from "@/pages/SocialNetworks";
+import Influencers from "@/pages/Influencers";
+import QuickChart from "@/pages/QuickChart";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +47,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/invite/:token" element={<AcceptInvitation />} />
             <Route element={<AuthGuard />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -57,6 +63,10 @@ const App = () => {
                 <Route path="/install" element={<Install />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/super-admin" element={<SuperAdmin />} />
+                <Route path="/workspaces" element={<Workspaces />} />
+                <Route path="/social-networks" element={<SocialNetworks />} />
+                <Route path="/influencers" element={<DemoGate feature="Influenceurs" description="Identifiez les voix qui parlent de votre marque. Disponible dès le plan Starter." redirect><Influencers /></DemoGate>} />
+                <Route path="/quick-chart" element={<DemoGate feature="Graphiques rapides" description="Visualisez vos mentions en un coup d'œil. Disponible dès le plan Starter." redirect><QuickChart /></DemoGate>} />
               </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
