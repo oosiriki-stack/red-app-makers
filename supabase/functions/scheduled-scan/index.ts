@@ -42,9 +42,13 @@ async function processUser(admin: any, APIFY: string, settings: any) {
     const settled = await Promise.all(tasks);
     const collected = settled.flat();
 
+    // Cutoff: only mentions published AFTER the monitoring start date
+    const cutoffMs = settings.monitoring_started_at ? new Date(settings.monitoring_started_at).getTime() : 0;
     const fresh = collected.filter((m: any) => {
       const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
       if (seen.has(k)) return false;
+      const t = new Date(m.mention_date).getTime();
+      if (cutoffMs && (!t || t < cutoffMs)) return false;
       seen.add(k);
       return true;
     });
