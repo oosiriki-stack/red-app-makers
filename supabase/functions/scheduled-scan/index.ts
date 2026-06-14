@@ -27,6 +27,10 @@ async function processUser(admin: any, APIFY: string, settings: any) {
         tasks.push(fetchBingNews(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
         tasks.push(fetchHN(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
       }
+      // Reddit officiel (gratuit, sans clé)
+      tasks.push(fetchReddit(q).then((items) => items.map((it: any) => toMention(userId, "reddit", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
+      if (false) {
+      }
       if (APIFY) {
         if (platforms.x) tasks.push(apifyRun(APIFY, "apidojo~tweet-scraper", { searchTerms: [q], maxItems: 10, sort: "Latest" }).then((items) => items.map((it: any) => toMention(userId, "x", it.author?.userName || "X user", it.text || it.fullText || "", safeDate(it.createdAt), (it.likeCount || 0) + (it.retweetCount || 0), it.url))).catch(() => []));
         if (platforms.instagram) tasks.push(apifyRun(APIFY, "apify~instagram-search-scraper", { search: q, searchType: "hashtag", searchLimit: 1, resultsLimit: 10 }).then((items) => items.map((it: any) => toMention(userId, "instagram", it.ownerUsername || "Instagram", it.caption || "", safeDate(it.timestamp), (it.likesCount || 0) + (it.commentsCount || 0), it.url))).catch(() => []));
