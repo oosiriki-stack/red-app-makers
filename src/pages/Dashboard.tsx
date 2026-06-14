@@ -23,6 +23,11 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "", configured: false });
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { plan, daysLeft, isTrial, isPaid } = useSubscription();
+  const quotaMax = isTrial ? 14 : isPaid ? 30 : 14;
+  const quotaLabel = isTrial ? "jours démo" : isPaid ? "jours actifs" : "jours";
+
+
 
   const fetchDashboard = async () => {
     if (!user) return;
