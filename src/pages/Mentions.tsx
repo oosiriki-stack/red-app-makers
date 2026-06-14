@@ -141,6 +141,31 @@ export default function Mentions() {
     });
   };
 
+  const [aiScoring, setAiScoring] = useState(false);
+  const reScoreAI = async () => {
+    setAiScoring(true);
+    try {
+      const ids = mentions.slice(0, 50).map((m) => m.id);
+      const { data, error } = await supabase.functions.invoke("analyze-sentiment", { body: { ids } });
+      if (error) throw error;
+      toast.success(`IA: ${data?.updated ?? 0} mention(s) re-scorée(s)`);
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur IA"); }
+    finally { setAiScoring(false); }
+  };
+
+  const [redditing, setRedditing] = useState(false);
+  const scanReddit = async () => {
+    setRedditing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reddit-scan", { body: {} });
+      if (error) throw error;
+      toast.success(`Reddit: ${data?.inserted ?? 0} nouvelle(s) discussion(s)`);
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur Reddit"); }
+    finally { setRedditing(false); }
+  };
+
   // Auto-tracker dès qu'une requête est saisie (depuis la barre de recherche)
   const autoTrackedRef = useState<string>("")[0];
   useEffect(() => {
@@ -248,6 +273,8 @@ export default function Mentions() {
           </div>
           <div className="flex gap-1.5 flex-wrap">
             <Button size="sm" className="rounded-xl" onClick={() => runTracker()} disabled={tracking}>{tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}Tracker</Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={scanReddit} disabled={redditing}>{redditing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Radio className="h-4 w-4 mr-1" />}Reddit</Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={reScoreAI} disabled={aiScoring || !mentions.length}>{aiScoring ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}IA score</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
           </div>

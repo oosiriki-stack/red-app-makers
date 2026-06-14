@@ -27,6 +27,8 @@ async function processUser(admin: any, APIFY: string, settings: any) {
         tasks.push(fetchBingNews(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
         tasks.push(fetchHN(q).then((items) => items.map((it: any) => toMention(userId, "blog", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
       }
+      // Reddit officiel (gratuit, sans clé)
+      tasks.push(fetchReddit(q).then((items) => items.map((it: any) => toMention(userId, "reddit", it.author, it.content, it.date, it.engagement, it.link))).catch(() => []));
       if (APIFY) {
         if (platforms.x) tasks.push(apifyRun(APIFY, "apidojo~tweet-scraper", { searchTerms: [q], maxItems: 10, sort: "Latest" }).then((items) => items.map((it: any) => toMention(userId, "x", it.author?.userName || "X user", it.text || it.fullText || "", safeDate(it.createdAt), (it.likeCount || 0) + (it.retweetCount || 0), it.url))).catch(() => []));
         if (platforms.instagram) tasks.push(apifyRun(APIFY, "apify~instagram-search-scraper", { search: q, searchType: "hashtag", searchLimit: 1, resultsLimit: 10 }).then((items) => items.map((it: any) => toMention(userId, "instagram", it.ownerUsername || "Instagram", it.caption || "", safeDate(it.timestamp), (it.likesCount || 0) + (it.commentsCount || 0), it.url))).catch(() => []));
@@ -100,3 +102,13 @@ async function fetchBingNews(q: string) { const r = await fetchWithTimeout(`http
 async function fetchHN(q: string) { const r = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(q)}&hitsPerPage=8`); if (!r.ok) throw new Error(`HN ${r.status}`); const j = await r.json(); return (j.hits || []).map((h: any) => ({ author: h.author || "HN", content: h.title || h.story_title || h.comment_text || "", date: safeDate(h.created_at), engagement: h.points || 0, link: h.url || `https://news.ycombinator.com/item?id=${h.objectID}` })).filter((x: any) => x.content); }
 async function fetchMastodon(q: string) { const tag = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40); if (!tag) return []; const r = await fetchWithTimeout(`https://mastodon.social/tags/${encodeURIComponent(tag)}.rss`); if (!r.ok) throw new Error(`Mastodon ${r.status}`); const xml = await r.text(); const items: any[] = []; for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) { const b = m[1]; const title = stripHtml(decodeXml(pick(b, "title"))); const author = stripHtml(decodeXml(pick(b, "dc:creator") || pick(b, "author") || "Mastodon")); items.push({ author, content: title, date: safeDate(pick(b, "pubDate")), engagement: 0, link: decodeXml(pick(b, "link")) }); if (items.length >= 8) break; } return items.filter((x) => x.content); }
 async function apifyRun(token: string, actor: string, input: Record<string, unknown>, timeoutMs = 55000) { const c = new AbortController(); const tm = setTimeout(() => c.abort(), timeoutMs); try { const r = await fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${token}&timeout=50&memory=512`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input), signal: c.signal }); if (!r.ok) throw new Error(`${actor} HTTP ${r.status}`); const j = await r.json(); return Array.isArray(j) ? j : []; } finally { clearTimeout(tm); } }
+async function fetchReddit(q: string) {
+  const r = await fetchWithTimeout(`https://www.reddit.com/search.json?q=${encodeURIComponent(q)}&sort=new&limit=12`, 10000);
+  if (!r.ok) throw new Error(`Reddit ${r.status}`);
+  const j = await r.json();
+  return (j?.data?.children || []).map((c: any) => {
+    const d = c.data || {};
+    const content = ((d.title || "") + (d.selftext ? "\n\n" + d.selftext : "")).slice(0, 1500);
+    return { author: `u/${d.author || "anon"} · r/${d.subreddit || "all"}`, content, date: new Date((d.created_utc || Date.now() / 1000) * 1000).toISOString(), engagement: (d.score || 0) + (d.num_comments || 0), link: `https://www.reddit.com${d.permalink || ""}` };
+  }).filter((x: any) => x.content);
+}

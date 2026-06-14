@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
+import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
 import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,12 +188,17 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue={defaultTab}>
-          <TabsList className="w-full rounded-xl">
+          <TabsList className="w-full rounded-xl flex-wrap h-auto">
             <TabsTrigger value="profile" className="flex-1 rounded-lg">Profil</TabsTrigger>
             <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
+            <TabsTrigger value="rss" className="flex-1 rounded-lg">RSS Watch</TabsTrigger>
             <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
             <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="rss">
+            <RssWatchManager />
+          </TabsContent>
 
           <TabsContent value="profile">
             <Card className="glass-card rounded-2xl">

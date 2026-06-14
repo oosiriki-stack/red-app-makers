@@ -185,6 +185,45 @@ export type Database = {
         }
         Relationships: []
       }
+      rss_feeds: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          last_fetched_at: string | null
+          last_item_key: string | null
+          source: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          last_fetched_at?: string | null
+          last_item_key?: string | null
+          source?: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_fetched_at?: string | null
+          last_item_key?: string | null
+          source?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       social_handles: {
         Row: {
           created_at: string
