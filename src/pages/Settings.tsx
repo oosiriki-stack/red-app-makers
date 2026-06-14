@@ -16,6 +16,7 @@ import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
+import { DemoGate } from "@/components/DemoGate";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -249,6 +250,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="surveillance">
+            <DemoGate feature="Configuration de la surveillance" description="La création et la modification de la surveillance (marque, plateformes, mots-clés) nécessitent une licence active.">
             <Card className="glass-card rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center justify-between">
@@ -319,6 +321,7 @@ export default function Settings() {
                 </Button>
               </CardContent>
             </Card>
+            </DemoGate>
           </TabsContent>
 
           <TabsContent value="notifications">
