@@ -161,7 +161,7 @@ export default function Dashboard() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
           <div className="lg:col-span-2">
             <RecentMentions />
           </div>
