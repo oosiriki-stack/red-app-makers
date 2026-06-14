@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Heart, Bell, RefreshCw, Loader2, Volume2, Activity } from "lucide-react";
+import { MessageSquare, Heart, Bell, RefreshCw, Loader2, Volume2, Activity, Clock } from "lucide-react";
 import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/AnimatedPage";
 import { ReputationGauge } from "@/components/ReputationGauge";
+import { QuotaGauge } from "@/components/QuotaGauge";
+import { RecentMentions } from "@/components/RecentMentions";
+import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 import { speak, summarizeMentions } from "@/lib/speech";
 
@@ -19,6 +23,11 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "", configured: false });
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { plan, daysLeft, isTrial, isPaid } = useSubscription();
+  const quotaMax = isTrial ? 14 : isPaid ? 30 : 14;
+  const quotaLabel = isTrial ? "jours démo" : isPaid ? "jours actifs" : "jours";
+
+
 
   const fetchDashboard = async () => {
     if (!user) return;
@@ -92,7 +101,8 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex gap-1.5">
-            <Button variant="outline" size="sm" className="rounded-xl" onClick={audioToday}><Volume2 className="h-4 w-4 mr-1" />Écouter</Button>
+            <InviteCollaboratorDialog />
+            <Button variant="outline" size="sm" className="rounded-xl font-semibold" onClick={audioToday}><Volume2 className="h-4 w-4 mr-1" />Écouter</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
               {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             </Button>
@@ -130,10 +140,37 @@ export default function Dashboard() {
           })}
         </StaggerContainer>
 
+        <div className="grid gap-3 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <Card className="glass-card hover-3d h-full rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-primary/10 flex items-center justify-center"><Clock className="h-3.5 w-3.5 text-primary" /></div>
+                  Quota — {plan ?? "—"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center pb-4">
+                <QuotaGauge value={daysLeft} max={quotaMax} size={130} label={quotaLabel} />
+                <Button
+                  size="sm"
+                  variant={isTrial ? "default" : "outline"}
+                  className="rounded-xl mt-3 font-semibold"
+                  onClick={() => navigate("/pricing")}
+                >
+                  {isTrial ? "Activer une licence" : "Gérer mon abonnement"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-2">
+            <RecentMentions />
+          </div>
+        </div>
+
         {!stats.configured && (
           <Card className="glass-card rounded-2xl p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-3">Configurez votre surveillance pour activer le score et collecter des mentions.</p>
-            <Button className="rounded-xl" onClick={() => navigate("/settings?tab=surveillance")}>Configurer maintenant</Button>
+            <p className="text-sm text-muted-foreground mb-3 font-medium">Configurez votre surveillance pour activer le score et collecter des mentions.</p>
+            <Button className="rounded-xl font-semibold" onClick={() => navigate("/settings?tab=surveillance")}>Configurer maintenant</Button>
           </Card>
         )}
       </div>

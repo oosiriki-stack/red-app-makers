@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -101,11 +101,31 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Space Grotesk', -apple-system, 'SF Pro Display', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.022em;
   }
+  h1 { font-weight: 800; letter-spacing: -0.028em; }
+  h2 { font-weight: 700; letter-spacing: -0.024em; }
+  h3 { font-weight: 700; }
+  /* Apple-style: bump muted/small text weight for readability */
+  .text-muted-foreground { font-weight: 500; }
+  small, .text-xs { font-weight: 500; }
+  label, button { font-weight: 600; }
+  /* Override Tailwind font-light → never below medium */
+  .font-light { font-weight: 500 !important; }
+  .font-normal { font-weight: 500 !important; }
+  .font-medium { font-weight: 600 !important; }
+  .font-semibold { font-weight: 700 !important; }
+  .font-bold { font-weight: 800 !important; }
 }
 
 @layer utilities {
