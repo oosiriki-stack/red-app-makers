@@ -1,4 +1,4 @@
-import { LayoutDashboard, MessageSquare, Bell, Bot, BarChart3, MoreHorizontal, FileText, Settings as SettingsIcon, CreditCard, Download, LifeBuoy, ShieldCheck, Target, Radar, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Bell, Bot, BarChart3, MoreHorizontal, FileText, Settings as SettingsIcon, CreditCard, Download, LifeBuoy, ShieldCheck, Target, Radar, AlertTriangle, Users, Share2, TrendingUp, PieChart } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -13,6 +13,10 @@ const primary = [
 ];
 
 const moreItems = [
+  { to: "/workspaces", icon: Users, label: "Espaces" },
+  { to: "/influencers", icon: TrendingUp, label: "Influenceurs" },
+  { to: "/quick-chart", icon: PieChart, label: "Graphiques" },
+  { to: "/social-networks", icon: Share2, label: "Réseaux" },
   { to: "/surveillance", icon: Radar, label: "Surveillance" },
   { to: "/crisis", icon: AlertTriangle, label: "Gérer crise" },
   { to: "/competitors", icon: BarChart3, label: "Concurrence" },
