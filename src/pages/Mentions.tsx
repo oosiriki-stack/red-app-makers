@@ -141,6 +141,31 @@ export default function Mentions() {
     });
   };
 
+  const [aiScoring, setAiScoring] = useState(false);
+  const reScoreAI = async () => {
+    setAiScoring(true);
+    try {
+      const ids = mentions.slice(0, 50).map((m) => m.id);
+      const { data, error } = await supabase.functions.invoke("analyze-sentiment", { body: { ids } });
+      if (error) throw error;
+      toast.success(`IA: ${data?.updated ?? 0} mention(s) re-scorée(s)`);
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur IA"); }
+    finally { setAiScoring(false); }
+  };
+
+  const [redditing, setRedditing] = useState(false);
+  const scanReddit = async () => {
+    setRedditing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reddit-scan", { body: {} });
+      if (error) throw error;
+      toast.success(`Reddit: ${data?.inserted ?? 0} nouvelle(s) discussion(s)`);
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur Reddit"); }
+    finally { setRedditing(false); }
+  };
+
   // Auto-tracker dès qu'une requête est saisie (depuis la barre de recherche)
   const autoTrackedRef = useState<string>("")[0];
   useEffect(() => {
