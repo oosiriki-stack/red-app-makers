@@ -45,14 +45,14 @@ const App = () => {
             <Route element={<AuthGuard />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/mentions" element={<Mentions />} />
-                <Route path="/alerts" element={<Alerts />} />
-                <Route path="/competitors" element={<DemoGate feature="Veille concurrentielle" description="Comparez votre marque à vos concurrents en temps réel. Disponible dès le plan Starter."><Competitors /></DemoGate>} />
-                <Route path="/ai-assistant" element={<DemoGate feature="FocusGPT" description="Assistant IA avancé pour analyser et répondre aux mentions. Disponible dès le plan Pro."><AIAssistant /></DemoGate>} />
-                <Route path="/reports" element={<DemoGate feature="Rapports PDF & Excel" description="Génération de rapports professionnels exportables. Disponible dès le plan Starter."><Reports /></DemoGate>} />
+                <Route path="/mentions" element={<DemoGate feature="Mentions & sentiments" description="L'accès aux mentions, sentiments et posts d'influenceurs nécessite une licence active." redirect><Mentions /></DemoGate>} />
+                <Route path="/alerts" element={<DemoGate feature="Centre d'alertes" description="La consultation et la création d'alertes nécessitent une licence active." redirect><Alerts /></DemoGate>} />
+                <Route path="/competitors" element={<DemoGate feature="Veille concurrentielle" description="Comparez votre marque à vos concurrents en temps réel. Disponible dès le plan Starter." redirect><Competitors /></DemoGate>} />
+                <Route path="/ai-assistant" element={<DemoGate feature="FocusGPT" description="Assistant IA avancé pour analyser et répondre aux mentions. Disponible dès le plan Pro." redirect><AIAssistant /></DemoGate>} />
+                <Route path="/reports" element={<DemoGate feature="Rapports PDF & Excel" description="Génération et téléchargement de rapports professionnels. Disponible dès le plan Starter." redirect><Reports /></DemoGate>} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/surveillance" element={<Navigate to="/settings?tab=surveillance" replace />} />
-                <Route path="/crisis" element={<DemoGate feature="Gestion de crise" description="Module avancé de détection et gestion de crise. Disponible dès le plan Pro."><Crisis /></DemoGate>} />
+                <Route path="/crisis" element={<DemoGate feature="Gestion de crise" description="Module avancé de détection et gestion de crise. Disponible dès le plan Pro." redirect><Crisis /></DemoGate>} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/support" element={<Support />} />
