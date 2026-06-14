@@ -308,6 +308,7 @@ export default function Mentions() {
                     <p className="text-sm mt-1 text-foreground/90 line-clamp-2">{m.content}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
                       <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Radio className="h-3 w-3 text-primary" />Plateforme · <span className="font-medium text-foreground/80">{PLATFORM_LABEL[m.source] || m.source}</span></span>
+                      {m.query && <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Search className="h-3 w-3 text-primary" />Requête · <span className="font-medium text-foreground/80 truncate max-w-[180px]">« {m.query} »</span></span>}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 shrink-0">
@@ -339,11 +340,17 @@ export default function Mentions() {
                   <Button size="sm" variant="outline" className="rounded-xl" onClick={() => openSource(selected)}><ExternalLink className="h-3 w-3 mr-1" />Voir la source</Button>
                 </div>
                 <p className="text-sm bg-muted/50 p-3 rounded-xl">{selected.content}</p>
-                <div className="grid grid-cols-1 gap-2">
+                <div className={`grid gap-2 ${selected.query ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
                   <div className="rounded-xl border border-border/50 bg-background/40 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Radio className="h-3 w-3" />Plateforme</p>
                     <p className="text-sm font-medium mt-1 truncate">{PLATFORM_LABEL[selected.source] || selected.source}</p>
                   </div>
+                  {selected.query && (
+                    <div className="rounded-xl border border-border/50 bg-background/40 p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" />Requête surveillée</p>
+                      <p className="text-sm font-medium mt-1 truncate">« {selected.query} »</p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <Badge className={(sentimentConfig[selected.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral).className}>{(sentimentConfig[selected.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral).label}</Badge>
