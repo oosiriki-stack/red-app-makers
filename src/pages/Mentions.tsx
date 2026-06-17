@@ -316,7 +316,17 @@ export default function Mentions() {
         </div>
 
         <div className="space-y-2">
-          {!loading && displayMentions.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">Aucune mention. Configurez la surveillance et lancez le tracker.</p>}
+          {!loading && displayMentions.length === 0 && (
+            <Card className="glass-card rounded-2xl">
+              <CardContent className="p-8 text-center space-y-3">
+                <p className="text-sm text-muted-foreground">Aucune mention pour l'instant. Lancez un cycle de collecte pour vérifier immédiatement les résultats.</p>
+                <Button onClick={() => runTracker()} disabled={tracking} className="rounded-xl">
+                  {tracking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                  Relancer le tracker maintenant
+                </Button>
+              </CardContent>
+            </Card>
+          )}
           {displayMentions.map((m) => {
             const sc = sentimentConfig[m.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral;
             const avatarText = (m.author || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
