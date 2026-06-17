@@ -60,7 +60,7 @@ export default function SocialNetworks() {
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Mes réseaux sociaux</h1>
-          <p className="text-sm text-muted-foreground mt-1">Déclarez vos comptes officiels. Visibles par vous et le super administrateur uniquement.</p>
+          <p className="text-sm text-muted-foreground mt-1">Déclarez vos comptes officiels. Visibles uniquement par vous.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button className="gap-2"><Plus className="w-4 h-4" /> Ajouter un compte</Button></DialogTrigger>
@@ -86,7 +86,7 @@ export default function SocialNetworks() {
       <Card className="glass-card p-3 border-amber-500/30 bg-amber-500/5">
         <div className="flex items-start gap-3 p-2">
           <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-700 dark:text-amber-300">Ces informations sont stockées de façon sécurisée et accessibles uniquement par vous et le super administrateur du système. Aucune authentification OAuth n'est requise.</p>
+          <p className="text-xs text-amber-700 dark:text-amber-300">Ces informations sont stockées de façon sécurisée et accessibles uniquement par vous. Aucune authentification OAuth n'est requise.</p>
         </div>
       </Card>
 

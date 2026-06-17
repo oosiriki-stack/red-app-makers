@@ -82,7 +82,7 @@ export default function Pricing() {
         if (error) throw error;
       }
 
-      toast.success("Paiement soumis ✅", { description: "Validation par le Super Administrateur sous 24h. Vous recevrez une notification." });
+      toast.success("Paiement soumis ✅", { description: "Validation par notre équipe sous 24h. Vous recevrez une notification." });
       setSelectedPlan(null);
       setTxId(""); setPayerName(""); setPayerPhone(""); setCardLast4(""); setProofFile(null);
       const { data: refreshed } = await supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle();
@@ -199,7 +199,7 @@ export default function Pricing() {
           </DialogContent>
         </Dialog>
 
-        <p className="text-center text-xs text-muted-foreground">Validation manuelle Super Admin sous 24h · Reçu PDF envoyé par email après validation</p>
+        <p className="text-center text-xs text-muted-foreground">Validation manuelle par notre équipe sous 24h · Reçu PDF envoyé par email après validation</p>
       </div>
     </AnimatedPage>
   );
