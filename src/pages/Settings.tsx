@@ -197,7 +197,9 @@ export default function Settings() {
           </TabsList>
 
           <TabsContent value="rss">
-            <RssWatchManager />
+            <DemoGate feature="RSS Watch" description="L'ingestion d'alertes Google et de flux RSS personnalisés nécessite une licence active.">
+              <RssWatchManager />
+            </DemoGate>
           </TabsContent>
 
           <TabsContent value="profile">
