@@ -34,10 +34,28 @@ Deno.serve(async (req) => {
       return json({ error: "Configurez une marque ou une personne à surveiller" }, 400);
     }
 
-    const baseQueries = adhocQuery
-      ? [adhocQuery]
-      : [settings?.brand, (settings as any)?.person].filter(Boolean).map((q) => String(q).trim()).filter(Boolean);
-    const queries = baseQueries;
+    // === Construction de requêtes PRÉCISES basées sur la configuration utilisateur ===
+    const brand = String(settings?.brand || "").trim();
+    const person = String((settings as any)?.person || "").trim();
+    const keywords: string[] = Array.isArray((settings as any)?.keywords) ? (settings as any).keywords.filter(Boolean) : [];
+    const locTerms = [(settings as any)?.commune, (settings as any)?.city, (settings as any)?.country]
+      .map((v) => String(v || "").trim()).filter(Boolean);
+
+    const buildQueries = () => {
+      if (adhocQuery) return [adhocQuery];
+      const subjects = [brand, person].filter(Boolean);
+      const out: string[] = [];
+      for (const s of subjects) {
+        // Requête principale: sujet entre guillemets pour matcher exactement
+        out.push(`"${s}"`);
+        // Combinaisons sujet + mot-clé pour précision sémantique
+        for (const kw of keywords.slice(0, 5)) out.push(`"${s}" "${kw}"`);
+        // Combinaison sujet + localisation (pertinence géographique)
+        for (const loc of locTerms.slice(0, 2)) out.push(`"${s}" "${loc}"`);
+      }
+      return [...new Set(out)].slice(0, 10);
+    };
+    const queries = buildQueries();
     const platforms = enabledPlatforms((settings?.platforms || {}) as Record<string, boolean>);
 
     // Récupère mentions déjà existantes pour éviter doublons (par contenu+source)
