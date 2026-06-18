@@ -311,7 +311,16 @@ export default function Mentions() {
             <p className="text-xs md:text-sm text-muted-foreground">
               {displayMentions.length} résultat{displayMentions.length > 1 ? "s" : ""}
               {queryFromUrl && <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>}
-              {!queryFromUrl && displayMentions.length > 0 && (
+              {priorityActive && (
+                <span className="inline-flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  Surveillance prioritaire · {Math.floor(priorityRemaining / 60)}:{String(priorityRemaining % 60).padStart(2, "0")}
+                </span>
+              )}
+              {!priorityActive && !queryFromUrl && displayMentions.length > 0 && (
                 <span className="inline-flex items-center gap-1 ml-2">
                   <Activity className="h-3 w-3 text-green-500 animate-pulse" />
                   Cycle de surveillance activé
