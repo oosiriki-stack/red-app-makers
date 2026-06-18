@@ -83,19 +83,50 @@ export default function Mentions() {
 
   useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl, dateFilter, nameFilter]);
 
-  // Fenêtre prioritaire post-activation surveillance : re-fetch toutes les 15s
-  // pendant ~2 min pour garantir l'affichage des premières réactions même si
-  // le canal temps-réel est bloqué (réseaux mobiles, proxies stricts).
+  // Fenêtre prioritaire post-activation surveillance : indicateur visuel,
+  // re-fetch toutes les 15s pendant ~2 min, puis bilan de la fenêtre.
+  const [priorityActive, setPriorityActive] = useState(false);
+  const [priorityRemaining, setPriorityRemaining] = useState(0);
   useEffect(() => {
     if (!user) return;
     let until = 0;
     try { until = Number(localStorage.getItem("arobase_priority_until") || 0); } catch {}
-    if (!until || Date.now() > until) return;
-    const interval = setInterval(() => {
-      if (Date.now() > until) { clearInterval(interval); return; }
-      fetchMentions();
-    }, 15_000);
-    return () => clearInterval(interval);
+    if (!until || Date.now() > until) { setPriorityActive(false); return; }
+    setPriorityActive(true);
+    const baseline = mentions.length;
+    const baselineAt = Date.now();
+    const tick = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+      setPriorityRemaining(remaining);
+      if (Date.now() > until) {
+        clearInterval(tick);
+        clearInterval(poll);
+        setPriorityActive(false);
+        try { localStorage.removeItem("arobase_priority_until"); } catch {}
+        // Bilan : nombre de réactions arrivées pendant la fenêtre
+        supabase
+          .from("mentions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .gte("mention_date", new Date(baselineAt).toISOString())
+          .then(({ count }) => {
+            const n = count ?? 0;
+            if (n > 0) {
+              toast.success(`✅ ${n} réaction(s) détectée(s) durant la fenêtre prioritaire`, {
+                description: "La surveillance continue normalement en arrière-plan.",
+                duration: 8000,
+              });
+            } else {
+              toast.info("Aucune réaction durant la fenêtre prioritaire", {
+                description: "La surveillance reste active — vous serez notifié dès qu'une mention apparaît.",
+                duration: 8000,
+              });
+            }
+          });
+      }
+    }, 1000);
+    const poll = setInterval(() => { if (Date.now() <= until) fetchMentions(); }, 15_000);
+    return () => { clearInterval(tick); clearInterval(poll); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -112,6 +143,7 @@ export default function Mentions() {
       }
     });
   }, [mentions, timeFilter]);
+
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
@@ -279,7 +311,16 @@ export default function Mentions() {
             <p className="text-xs md:text-sm text-muted-foreground">
               {displayMentions.length} résultat{displayMentions.length > 1 ? "s" : ""}
               {queryFromUrl && <span> pour « {queryFromUrl} » <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setSearchParams({})}>Effacer</Button></span>}
-              {!queryFromUrl && displayMentions.length > 0 && (
+              {priorityActive && (
+                <span className="inline-flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  Surveillance prioritaire · {Math.floor(priorityRemaining / 60)}:{String(priorityRemaining % 60).padStart(2, "0")}
+                </span>
+              )}
+              {!priorityActive && !queryFromUrl && displayMentions.length > 0 && (
                 <span className="inline-flex items-center gap-1 ml-2">
                   <Activity className="h-3 w-3 text-green-500 animate-pulse" />
                   Cycle de surveillance activé
