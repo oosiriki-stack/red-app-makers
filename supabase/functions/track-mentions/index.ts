@@ -160,9 +160,38 @@ Deno.serve(async (req) => {
     // ⚠️ Aucune donnée simulée: on n'insère QUE des mentions réelles collectées
     // depuis les sources publiques (Google News, GDELT, Mastodon, Lemmy, HN, Apify).
 
-    // Dédoublonnage + cutoff de date (uniquement mentions postées après le début de surveillance)
+    // === Filtre de PERTINENCE strict + dédoublonnage + cutoff de date ===
+    const norm = (s: string) => (s || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // sans accents
+    const subjectTerms = [brand, person].filter(Boolean).map(norm);
+    const keywordTerms = keywords.map(norm);
+    const locTermsNorm = locTerms.map(norm);
+    const isRelevant = (content: string): boolean => {
+      if (adhocQuery) {
+        // Mode requête manuelle: la requête doit apparaître
+        return norm(content).includes(norm(adhocQuery));
+      }
+      if (!subjectTerms.length) return true;
+      const c = norm(content);
+      // Le sujet (marque OU personne) DOIT apparaître
+      const hasSubject = subjectTerms.some((s) => c.includes(s));
+      if (!hasSubject) return false;
+      // Si des mots-clés sont définis, au moins un doit matcher (sinon on accepte le sujet seul)
+      if (keywordTerms.length) {
+        const hasKw = keywordTerms.some((k) => c.includes(k));
+        // Si une localisation est aussi définie, on accepte si l'une des deux matche
+        if (!hasKw && locTermsNorm.length) {
+          return locTermsNorm.some((l) => c.includes(l));
+        }
+        return hasKw;
+      }
+      return true;
+    };
+
     const cutoffMs = (settings as any)?.monitoring_started_at ? new Date((settings as any).monitoring_started_at).getTime() : 0;
     let fresh = collected.filter((m) => {
+      if (!isRelevant(m.content || "")) return false;
       const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
       if (seen.has(k)) return false;
       const t = new Date(m.mention_date).getTime();
