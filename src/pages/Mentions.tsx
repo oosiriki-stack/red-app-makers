@@ -83,21 +83,66 @@ export default function Mentions() {
 
   useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl, dateFilter, nameFilter]);
 
-  // Fenêtre prioritaire post-activation surveillance : re-fetch toutes les 15s
-  // pendant ~2 min pour garantir l'affichage des premières réactions même si
-  // le canal temps-réel est bloqué (réseaux mobiles, proxies stricts).
+  // Fenêtre prioritaire post-activation surveillance : indicateur visuel,
+  // re-fetch toutes les 15s pendant ~2 min, puis bilan de la fenêtre.
+  const [priorityActive, setPriorityActive] = useState(false);
+  const [priorityRemaining, setPriorityRemaining] = useState(0);
   useEffect(() => {
     if (!user) return;
     let until = 0;
     try { until = Number(localStorage.getItem("arobase_priority_until") || 0); } catch {}
-    if (!until || Date.now() > until) return;
-    const interval = setInterval(() => {
-      if (Date.now() > until) { clearInterval(interval); return; }
-      fetchMentions();
-    }, 15_000);
-    return () => clearInterval(interval);
+    if (!until || Date.now() > until) { setPriorityActive(false); return; }
+    setPriorityActive(true);
+    const baseline = mentions.length;
+    const baselineAt = Date.now();
+    const tick = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+      setPriorityRemaining(remaining);
+      if (Date.now() > until) {
+        clearInterval(tick);
+        clearInterval(poll);
+        setPriorityActive(false);
+        try { localStorage.removeItem("arobase_priority_until"); } catch {}
+        // Bilan : nombre de réactions arrivées pendant la fenêtre
+        supabase
+          .from("mentions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .gte("mention_date", new Date(baselineAt).toISOString())
+          .then(({ count }) => {
+            const n = count ?? 0;
+            if (n > 0) {
+              toast.success(`✅ ${n} réaction(s) détectée(s) durant la fenêtre prioritaire`, {
+                description: "La surveillance continue normalement en arrière-plan.",
+                duration: 8000,
+              });
+            } else {
+              toast.info("Aucune réaction durant la fenêtre prioritaire", {
+                description: "La surveillance reste active — vous serez notifié dès qu'une mention apparaît.",
+                duration: 8000,
+              });
+            }
+          });
+      }
+    }, 1000);
+    const poll = setInterval(() => { if (Date.now() <= until) fetchMentions(); }, 15_000);
+    return () => { clearInterval(tick); clearInterval(poll); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const displayMentions = useMemo(() => {
+    if (timeFilter === "all") return mentions;
+    return mentions.filter((m) => {
+      const hour = new Date(m.mention_date).getHours();
+      switch (timeFilter) {
+        case "morning": return hour >= 6 && hour < 12;
+        case "afternoon": return hour >= 12 && hour < 18;
+        case "evening": return hour >= 18 && hour < 22;
+        case "night": return hour >= 22 || hour < 6;
+        default: return true;
+      }
+    });
+  }, [mentions, timeFilter]);
 
   const displayMentions = useMemo(() => {
     if (timeFilter === "all") return mentions;
