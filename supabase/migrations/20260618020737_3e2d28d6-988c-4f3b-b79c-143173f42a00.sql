@@ -1,0 +1,1 @@
+ALTER TABLE public.monitoring_settings ADD COLUMN IF NOT EXISTS keywords TEXT[] NOT NULL DEFAULT '{}';

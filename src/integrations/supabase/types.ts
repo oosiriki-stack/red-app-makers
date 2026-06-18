@@ -118,6 +118,7 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          keywords: string[]
           monitoring_started_at: string
           person: string | null
           platforms: Json
@@ -131,6 +132,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          keywords?: string[]
           monitoring_started_at?: string
           person?: string | null
           platforms?: Json
@@ -144,6 +146,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
+          keywords?: string[]
           monitoring_started_at?: string
           person?: string | null
           platforms?: Json
