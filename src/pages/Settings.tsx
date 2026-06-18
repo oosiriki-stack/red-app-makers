@@ -98,6 +98,7 @@ export default function Settings() {
         setCommune((data as any).commune || "");
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
+        if (Array.isArray((data as any).keywords)) setKeywords((data as any).keywords as string[]);
       }
     });
     supabase.from("subscriptions").select("*").eq("user_id", user.id).single().then(({ data }) => {
@@ -144,6 +145,8 @@ export default function Settings() {
       city: city || null,
       commune: commune || null,
       platforms: platformStates,
+      keywords,
+      monitoring_started_at: new Date().toISOString(),
     } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
     if (error) { toast.error(error.message); return; }

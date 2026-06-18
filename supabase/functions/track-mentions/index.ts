@@ -34,10 +34,28 @@ Deno.serve(async (req) => {
       return json({ error: "Configurez une marque ou une personne à surveiller" }, 400);
     }
 
-    const baseQueries = adhocQuery
-      ? [adhocQuery]
-      : [settings?.brand, (settings as any)?.person].filter(Boolean).map((q) => String(q).trim()).filter(Boolean);
-    const queries = baseQueries;
+    // === Construction de requêtes PRÉCISES basées sur la configuration utilisateur ===
+    const brand = String(settings?.brand || "").trim();
+    const person = String((settings as any)?.person || "").trim();
+    const keywords: string[] = Array.isArray((settings as any)?.keywords) ? (settings as any).keywords.filter(Boolean) : [];
+    const locTerms = [(settings as any)?.commune, (settings as any)?.city, (settings as any)?.country]
+      .map((v) => String(v || "").trim()).filter(Boolean);
+
+    const buildQueries = () => {
+      if (adhocQuery) return [adhocQuery];
+      const subjects = [brand, person].filter(Boolean);
+      const out: string[] = [];
+      for (const s of subjects) {
+        // Requête principale: sujet entre guillemets pour matcher exactement
+        out.push(`"${s}"`);
+        // Combinaisons sujet + mot-clé pour précision sémantique
+        for (const kw of keywords.slice(0, 5)) out.push(`"${s}" "${kw}"`);
+        // Combinaison sujet + localisation (pertinence géographique)
+        for (const loc of locTerms.slice(0, 2)) out.push(`"${s}" "${loc}"`);
+      }
+      return [...new Set(out)].slice(0, 10);
+    };
+    const queries = buildQueries();
     const platforms = enabledPlatforms((settings?.platforms || {}) as Record<string, boolean>);
 
     // Récupère mentions déjà existantes pour éviter doublons (par contenu+source)
@@ -142,9 +160,38 @@ Deno.serve(async (req) => {
     // ⚠️ Aucune donnée simulée: on n'insère QUE des mentions réelles collectées
     // depuis les sources publiques (Google News, GDELT, Mastodon, Lemmy, HN, Apify).
 
-    // Dédoublonnage + cutoff de date (uniquement mentions postées après le début de surveillance)
+    // === Filtre de PERTINENCE strict + dédoublonnage + cutoff de date ===
+    const norm = (s: string) => (s || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // sans accents
+    const subjectTerms = [brand, person].filter(Boolean).map(norm);
+    const keywordTerms = keywords.map(norm);
+    const locTermsNorm = locTerms.map(norm);
+    const isRelevant = (content: string): boolean => {
+      if (adhocQuery) {
+        // Mode requête manuelle: la requête doit apparaître
+        return norm(content).includes(norm(adhocQuery));
+      }
+      if (!subjectTerms.length) return true;
+      const c = norm(content);
+      // Le sujet (marque OU personne) DOIT apparaître
+      const hasSubject = subjectTerms.some((s) => c.includes(s));
+      if (!hasSubject) return false;
+      // Si des mots-clés sont définis, au moins un doit matcher (sinon on accepte le sujet seul)
+      if (keywordTerms.length) {
+        const hasKw = keywordTerms.some((k) => c.includes(k));
+        // Si une localisation est aussi définie, on accepte si l'une des deux matche
+        if (!hasKw && locTermsNorm.length) {
+          return locTermsNorm.some((l) => c.includes(l));
+        }
+        return hasKw;
+      }
+      return true;
+    };
+
     const cutoffMs = (settings as any)?.monitoring_started_at ? new Date((settings as any).monitoring_started_at).getTime() : 0;
     let fresh = collected.filter((m) => {
+      if (!isRelevant(m.content || "")) return false;
       const k = `${m.source}::${(m.content || "").slice(0, 100)}`;
       if (seen.has(k)) return false;
       const t = new Date(m.mention_date).getTime();
