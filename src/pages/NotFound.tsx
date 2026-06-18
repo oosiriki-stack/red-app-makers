@@ -8,6 +8,12 @@ const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
+    // Si on tombe ici avec un hash OAuth (access_token), Supabase a déjà
+    // capté la session — rediriger immédiatement vers le dashboard.
+    if (typeof window !== "undefined" && window.location.hash.includes("access_token")) {
+      window.location.replace("/dashboard" + window.location.hash);
+      return;
+    }
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
@@ -29,7 +35,7 @@ const NotFound = () => {
             <ArrowLeft className="h-4 w-4 mr-2" /> Retour
           </Button>
           <Button asChild>
-            <Link to="/"><Home className="h-4 w-4 mr-2" /> Dashboard</Link>
+            <Link to="/dashboard"><Home className="h-4 w-4 mr-2" /> Dashboard</Link>
           </Button>
         </div>
       </motion.div>
