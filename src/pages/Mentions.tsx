@@ -144,19 +144,6 @@ export default function Mentions() {
     });
   }, [mentions, timeFilter]);
 
-  const displayMentions = useMemo(() => {
-    if (timeFilter === "all") return mentions;
-    return mentions.filter((m) => {
-      const hour = new Date(m.mention_date).getHours();
-      switch (timeFilter) {
-        case "morning": return hour >= 6 && hour < 12;
-        case "afternoon": return hour >= 12 && hour < 18;
-        case "evening": return hour >= 18 && hour < 22;
-        case "night": return hour >= 22 || hour < 6;
-        default: return true;
-      }
-    });
-  }, [mentions, timeFilter]);
 
   useRealtimeTable("mentions", user?.id, {
     onInsert: (row) => {
