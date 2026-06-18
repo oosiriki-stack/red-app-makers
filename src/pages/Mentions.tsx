@@ -83,6 +83,22 @@ export default function Mentions() {
 
   useEffect(() => { fetchMentions(); }, [user, sourceFilter, sentimentFilter, queryFromUrl, dateFilter, nameFilter]);
 
+  // Fenêtre prioritaire post-activation surveillance : re-fetch toutes les 15s
+  // pendant ~2 min pour garantir l'affichage des premières réactions même si
+  // le canal temps-réel est bloqué (réseaux mobiles, proxies stricts).
+  useEffect(() => {
+    if (!user) return;
+    let until = 0;
+    try { until = Number(localStorage.getItem("arobase_priority_until") || 0); } catch {}
+    if (!until || Date.now() > until) return;
+    const interval = setInterval(() => {
+      if (Date.now() > until) { clearInterval(interval); return; }
+      fetchMentions();
+    }, 15_000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const displayMentions = useMemo(() => {
     if (timeFilter === "all") return mentions;
     return mentions.filter((m) => {

@@ -146,12 +146,25 @@ export default function Settings() {
       platforms: platformStates,
     } as any, { onConflict: "user_id" });
     setSavingMonitoring(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(`Surveillance activée pour "${brand}"`);
-      await runTracker();
-      navigate("/mentions");
-    }
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Surveillance activée pour "${brand}"`, {
+      description: "Cycle prioritaire lancé · résultats automatiques sous 2 minutes",
+    });
+    // Premier cycle immédiat
+    runTracker();
+    // Cycles automatiques sous 2 minutes pour garantir l'affichage rapide
+    // d'une éventuelle réaction (les inserts arrivent en temps réel sur /mentions).
+    const schedule = [30_000, 60_000, 90_000, 120_000];
+    schedule.forEach((delay) => {
+      setTimeout(() => {
+        supabase.functions.invoke("track-mentions").catch(() => {});
+      }, delay);
+    });
+    // Marqueur pour que la page Mentions sache qu'on est en fenêtre prioritaire
+    try {
+      localStorage.setItem("arobase_priority_until", String(Date.now() + 130_000));
+    } catch {}
+    navigate("/mentions");
   };
 
   const togglePlatform = (key: string) => {
