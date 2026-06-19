@@ -225,6 +225,18 @@ export default function Mentions() {
     finally { setAiScoring(false); }
   };
 
+  const [enriching, setEnriching] = useState(false);
+  const enrichAI = async () => {
+    setEnriching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enrich-mention", { body: { user_id: user?.id, limit: 30 } });
+      if (error) throw error;
+      toast.success(`IA: ${data?.enriched ?? 0} mention(s) enrichie(s)`, { description: "Émotions, thèmes et entités détectés" });
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur enrichissement IA"); }
+    finally { setEnriching(false); }
+  };
+
   const [redditing, setRedditing] = useState(false);
   const scanReddit = async () => {
     setRedditing(true);
