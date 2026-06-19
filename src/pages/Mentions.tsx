@@ -38,6 +38,29 @@ type Mention = {
   interactions: any;
   query: string | null;
   requester: string | null;
+  emotion?: string | null;
+  is_sarcastic?: boolean | null;
+  theme?: string | null;
+  entities?: any;
+};
+
+const EMOTION_LABEL: Record<string, { label: string; cls: string }> = {
+  colere: { label: "😠 Colère", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+  satisfaction: { label: "😊 Satisfaction", cls: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+  inquietude: { label: "😟 Inquiétude", cls: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
+  enthousiasme: { label: "🎉 Enthousiasme", cls: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+  tristesse: { label: "😢 Tristesse", cls: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400" },
+  neutre: { label: "Neutre", cls: "bg-muted text-muted-foreground" },
+};
+
+const THEME_LABEL: Record<string, string> = {
+  prix: "💰 Prix",
+  service_client: "🎧 Service client",
+  qualite_produit: "📦 Qualité",
+  delais: "⏱️ Délais",
+  experience_utilisateur: "✨ UX",
+  communication: "📣 Communication",
+  autre: "Autre",
 };
 
 export default function Mentions() {
