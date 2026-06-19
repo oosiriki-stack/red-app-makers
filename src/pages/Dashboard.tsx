@@ -84,7 +84,7 @@ export default function Dashboard() {
     { key: "alerts", label: "Alertes", icon: Bell, value: stats.alerts.toString(), sub: "non lues", link: "/alerts" },
   ];
 
-  void RiskScoreCard;
+  
 
   return (
     <AnimatedPage>
@@ -141,6 +141,7 @@ export default function Dashboard() {
               </motion.div>
             );
           })}
+          <motion.div variants={staggerItem}><RiskScoreCard /></motion.div>
         </StaggerContainer>
 
         <div className="grid gap-3 lg:grid-cols-3">
