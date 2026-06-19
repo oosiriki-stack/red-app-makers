@@ -433,6 +433,15 @@ export default function Mentions() {
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
                       <Badge className={`text-[10px] border-0 rounded-md py-0 ${sc.className}`}>{sc.label}</Badge>
+                      {m.emotion && m.emotion !== "neutre" && EMOTION_LABEL[m.emotion] && (
+                        <Badge className={`text-[10px] border-0 rounded-md py-0 ${EMOTION_LABEL[m.emotion].cls}`}>{EMOTION_LABEL[m.emotion].label}</Badge>
+                      )}
+                      {m.theme && m.theme !== "autre" && THEME_LABEL[m.theme] && (
+                        <Badge variant="outline" className="text-[10px] rounded-md py-0">{THEME_LABEL[m.theme]}</Badge>
+                      )}
+                      {m.is_sarcastic && (
+                        <Badge variant="outline" className="text-[10px] rounded-md py-0 border-purple-500/50 text-purple-600 dark:text-purple-400">🎭 Sarcasme</Badge>
+                      )}
                       <span className="text-muted-foreground ml-auto">{d.toLocaleDateString("fr-FR")} · {d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                     <p className="text-sm mt-1 text-foreground/90 line-clamp-2">{m.content}</p>
