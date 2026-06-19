@@ -59,21 +59,56 @@ export type Database = {
         }
         Relationships: []
       }
+      anomaly_baselines: {
+        Row: {
+          created_at: string
+          id: string
+          negative_count: number
+          risk_score: number
+          total_count: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          negative_count?: number
+          risk_score?: number
+          total_count?: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          negative_count?: number
+          risk_score?: number
+          total_count?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       mentions: {
         Row: {
           author: string
           avatar: string | null
           content: string
           created_at: string
+          emotion: string | null
           engagement: number | null
+          enriched_at: string | null
+          entities: Json | null
           id: string
           interactions: Json | null
+          is_sarcastic: boolean | null
           mention_date: string
           query: string | null
           requester: string | null
           sentiment: string
           source: string
           source_url: string | null
+          theme: string | null
           user_id: string
         }
         Insert: {
@@ -81,15 +116,20 @@ export type Database = {
           avatar?: string | null
           content?: string
           created_at?: string
+          emotion?: string | null
           engagement?: number | null
+          enriched_at?: string | null
+          entities?: Json | null
           id?: string
           interactions?: Json | null
+          is_sarcastic?: boolean | null
           mention_date?: string
           query?: string | null
           requester?: string | null
           sentiment?: string
           source: string
           source_url?: string | null
+          theme?: string | null
           user_id: string
         }
         Update: {
@@ -97,15 +137,20 @@ export type Database = {
           avatar?: string | null
           content?: string
           created_at?: string
+          emotion?: string | null
           engagement?: number | null
+          enriched_at?: string | null
+          entities?: Json | null
           id?: string
           interactions?: Json | null
+          is_sarcastic?: boolean | null
           mention_date?: string
           query?: string | null
           requester?: string | null
           sentiment?: string
           source?: string
           source_url?: string | null
+          theme?: string | null
           user_id?: string
         }
         Relationships: []
