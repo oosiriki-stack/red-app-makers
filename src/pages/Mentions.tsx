@@ -367,6 +367,7 @@ export default function Mentions() {
             <Button size="sm" className="rounded-xl" onClick={() => runTracker()} disabled={tracking}>{tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}Relancer le tracker</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={scanReddit} disabled={redditing}>{redditing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Radio className="h-4 w-4 mr-1" />}Reddit</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={reScoreAI} disabled={aiScoring || !mentions.length}>{aiScoring ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}IA score</Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={enrichAI} disabled={enriching || !mentions.length}>{enriching ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}Enrichir IA</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
           </div>
