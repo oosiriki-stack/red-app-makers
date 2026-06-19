@@ -8,6 +8,7 @@ import { ReputationGauge } from "@/components/ReputationGauge";
 import { QuotaGauge } from "@/components/QuotaGauge";
 import { RecentMentions } from "@/components/RecentMentions";
 import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
+import { RiskScoreCard } from "@/components/RiskScoreCard";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -82,6 +83,8 @@ export default function Dashboard() {
     { key: "sentiment", label: "Sentiment", icon: Heart, value: stats.configured && stats.mentions > 0 ? `${stats.positivePercent}%` : "—", sub: "positif", link: "/mentions" },
     { key: "alerts", label: "Alertes", icon: Bell, value: stats.alerts.toString(), sub: "non lues", link: "/alerts" },
   ];
+
+  void RiskScoreCard;
 
   return (
     <AnimatedPage>
