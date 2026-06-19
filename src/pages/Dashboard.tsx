@@ -8,6 +8,7 @@ import { ReputationGauge } from "@/components/ReputationGauge";
 import { QuotaGauge } from "@/components/QuotaGauge";
 import { RecentMentions } from "@/components/RecentMentions";
 import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
+import { RiskScoreCard } from "@/components/RiskScoreCard";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -83,6 +84,8 @@ export default function Dashboard() {
     { key: "alerts", label: "Alertes", icon: Bell, value: stats.alerts.toString(), sub: "non lues", link: "/alerts" },
   ];
 
+  
+
   return (
     <AnimatedPage>
       <div className="space-y-5">
@@ -138,6 +141,7 @@ export default function Dashboard() {
               </motion.div>
             );
           })}
+          <motion.div variants={staggerItem}><RiskScoreCard /></motion.div>
         </StaggerContainer>
 
         <div className="grid gap-3 lg:grid-cols-3">

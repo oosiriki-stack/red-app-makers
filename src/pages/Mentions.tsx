@@ -38,6 +38,29 @@ type Mention = {
   interactions: any;
   query: string | null;
   requester: string | null;
+  emotion?: string | null;
+  is_sarcastic?: boolean | null;
+  theme?: string | null;
+  entities?: any;
+};
+
+const EMOTION_LABEL: Record<string, { label: string; cls: string }> = {
+  colere: { label: "😠 Colère", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+  satisfaction: { label: "😊 Satisfaction", cls: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+  inquietude: { label: "😟 Inquiétude", cls: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
+  enthousiasme: { label: "🎉 Enthousiasme", cls: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+  tristesse: { label: "😢 Tristesse", cls: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400" },
+  neutre: { label: "Neutre", cls: "bg-muted text-muted-foreground" },
+};
+
+const THEME_LABEL: Record<string, string> = {
+  prix: "💰 Prix",
+  service_client: "🎧 Service client",
+  qualite_produit: "📦 Qualité",
+  delais: "⏱️ Délais",
+  experience_utilisateur: "✨ UX",
+  communication: "📣 Communication",
+  autre: "Autre",
 };
 
 export default function Mentions() {
@@ -202,6 +225,18 @@ export default function Mentions() {
     finally { setAiScoring(false); }
   };
 
+  const [enriching, setEnriching] = useState(false);
+  const enrichAI = async () => {
+    setEnriching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enrich-mention", { body: { user_id: user?.id, limit: 30 } });
+      if (error) throw error;
+      toast.success(`IA: ${data?.enriched ?? 0} mention(s) enrichie(s)`, { description: "Émotions, thèmes et entités détectés" });
+      await fetchMentions();
+    } catch (e: any) { toast.error(e.message || "Erreur enrichissement IA"); }
+    finally { setEnriching(false); }
+  };
+
   const [redditing, setRedditing] = useState(false);
   const scanReddit = async () => {
     setRedditing(true);
@@ -332,6 +367,7 @@ export default function Mentions() {
             <Button size="sm" className="rounded-xl" onClick={() => runTracker()} disabled={tracking}>{tracking ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}Relancer le tracker</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={scanReddit} disabled={redditing}>{redditing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Radio className="h-4 w-4 mr-1" />}Reddit</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={reScoreAI} disabled={aiScoring || !mentions.length}>{aiScoring ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}IA score</Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={enrichAI} disabled={enriching || !mentions.length}>{enriching ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}Enrichir IA</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
           </div>
@@ -397,6 +433,15 @@ export default function Mentions() {
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
                       <Badge className={`text-[10px] border-0 rounded-md py-0 ${sc.className}`}>{sc.label}</Badge>
+                      {m.emotion && m.emotion !== "neutre" && EMOTION_LABEL[m.emotion] && (
+                        <Badge className={`text-[10px] border-0 rounded-md py-0 ${EMOTION_LABEL[m.emotion].cls}`}>{EMOTION_LABEL[m.emotion].label}</Badge>
+                      )}
+                      {m.theme && m.theme !== "autre" && THEME_LABEL[m.theme] && (
+                        <Badge variant="outline" className="text-[10px] rounded-md py-0">{THEME_LABEL[m.theme]}</Badge>
+                      )}
+                      {m.is_sarcastic && (
+                        <Badge variant="outline" className="text-[10px] rounded-md py-0 border-purple-500/50 text-purple-600 dark:text-purple-400">🎭 Sarcasme</Badge>
+                      )}
                       <span className="text-muted-foreground ml-auto">{d.toLocaleDateString("fr-FR")} · {d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                     <p className="text-sm mt-1 text-foreground/90 line-clamp-2">{m.content}</p>

@@ -1,72 +1,80 @@
 
+# Plan — Cahier des charges @robase
 
-# Phase 6 — Refonte Visuelle Jaune Apple + Mobile-First + Taille de Police Ajustable
+Tout ne peut pas être livré en un seul tour : certaines fonctionnalités exigent des intégrations payantes (SMS, Slack/Teams, WhatsApp Business, MFA), d'autres juste de l'UI + une edge function. Je propose **7 lots** ordonnés par priorité. Validez ceux à lancer (tous ou par étapes).
 
-## Objectif
-Transformer le theme de l'application du rouge au jaune/or, appliquer un design Apple encore plus epure, optimiser l'experience mobile, et ajouter un controle de taille de police dans les parametres.
+## État actuel (déjà en place)
+- Collecte mentions (Apify, Google News, Bing, HN, Reddit, Mastodon, RSS) — `scheduled-scan`, `track-mentions`
+- Sentiment positif/négatif/neutre (lexique FR) + alertes basiques (info/warning/critical)
+- Dashboard score réputation, mentions, alertes, gauge
+- Rapports exports CSV/PDF/Excel
+- FocusGPT (recommandations IA contextualisées)
+- Auth email + Google, rôles (`user_roles`), workspaces, RLS
+- Notifications in-app + email (transac)
+- Tableau de bord, paramètres, onboarding, PWA
 
----
+## Lots à livrer
 
-## 1. Refonte Couleur : Rouge → Jaune/Or
+### Lot 1 — Analyse IA enrichie (priorité haute)
+- **Émotions secondaires** (colère, satisfaction, inquiétude, enthousiasme) via Lovable AI Gateway (gemini-3-flash)
+- **Détection sarcasme/ironie** adaptée nouchi, camfranglais, wolof
+- **NER** : extraction marques, personnes, lieux, organisations
+- **Classification thématique** auto : prix, service client, qualité produit, délais, UX
+- Nouvelles colonnes `mentions`: `emotion`, `is_sarcastic`, `entities jsonb`, `theme`
+- Edge function `enrich-mention` appelée après chaque insert (trigger ou batch)
+- Filtres + badges visuels dans `Mentions.tsx`
 
-Modifier `src/index.css` pour remplacer toutes les references `primary` (rouge `0 72%`) par un jaune/or Apple (`45 93% 47%` — similaire au jaune systeme Apple). Mettre a jour :
-- Les variables CSS light et dark (--primary, --ring, --accent, --sidebar-primary, etc.)
-- Les gradients (.text-gradient-red → .text-gradient-gold, .auth-gradient-bg, .glow-red → .glow-gold)
-- Les orbs sur les pages auth
+### Lot 2 — Détection de crise & anomalies (priorité haute)
+- Edge function `detect-anomalies` (cron 15 min) : z-score sur volume négatif vs baseline 7j
+- Pic inhabituel → alerte `critical` + push notification + email
+- **Tendances & sujets émergents** : clustering mots-clés (TF-IDF) sur 24h, affichés sur `Crisis.tsx`
+- Score de risque réputationnel temps réel (0–100) sur Dashboard
 
-## 2. Design Apple Renforce
+### Lot 3 — Sources africaines locales
+- Connecteurs RSS pré-remplis : Jeune Afrique, Abidjan.net, Senego, Koaci, Wakat Séra, Linfodrome, Seneweb…
+- Scraping groupes Facebook publics ivoiriens/sénégalais via Apify (`facebook-groups-scraper`)
+- WhatsApp Business : nécessite numéro vérifié + Meta Business — je scaffold l'edge function `whatsapp-webhook` et la config UI; l'activation réelle dépend du compte Meta du client
+- Page **Sources** dans Settings pour activer/désactiver chaque source
 
-- **Sidebar** : fond plus epure, espacement plus genereux, police plus fine
-- **Header** : hauteur augmentee a `h-16`, espacement respire, icones plus legeres
-- **Cards** : ombres encore plus subtiles, bordures quasi invisibles, padding augmente
-- **Boutons** : coins plus arrondis (rounded-2xl partout), poids de police `medium`
-- Ajuster `tailwind.config.ts` : `--radius: 1.25rem`
+### Lot 4 — Notifications multi-canaux
+- **Email** : déjà ok
+- **SMS** : via connecteur **GatewayAPI** (Lovable). Tableau préférences canal par type d'alerte
+- **Slack** : webhook entrant (URL configurable dans Settings) + edge function `notify-slack`
+- **Microsoft Teams** : via connecteur Lovable Teams (Graph API)
+- **Push in-app** : déjà ok
 
-## 3. Vue Mobile Optimisee
+### Lot 5 — Sécurité renforcée
+- **MFA** (TOTP) via `supabase.auth.mfa` + page `Settings → Sécurité`
+- **Journalisation actions** (`audit_logs` : user_id, action, target, ip, ua, created_at) avec triggers sur tables sensibles
+- **HIBP check** activé sur signup
+- Vue admin `SuperAdmin.tsx` pour consulter les audits
 
-- **AppLayout** : padding reduit sur mobile (`p-3` au lieu de `p-4`)
-- **Dashboard** : grille stat cards en `grid-cols-2` sur mobile au lieu de 1
-- **Sidebar** : overlay mobile avec animation slide-in (deja supporte par shadcn mais verifier le comportement)
-- **Header** : avatar et icones plus compacts sur mobile
-- **Toutes les pages** : max-width responsive, textes tronques si besoin
+### Lot 6 — Recommandations IA contextualisées
+- Bouton « Recommandation IA » sur chaque mention/alerte négative → réponse rédigée prête à publier (ton ajustable, déjà partiellement présent dans FocusGPT)
+- Synthèse hebdo automatique (cron) : « 3 actions prioritaires cette semaine »
 
-## 4. Controle de Taille de Police
+### Lot 7 — UX & polish
+- Tutoriel guidé première connexion (`MarketingOnboarding` étendu)
+- Onglet **Thèmes** sur Dashboard (camemberts par catégorie)
+- Heatmap géographique des mentions (déjà `GeoHeatmap` — connecter aux vraies données)
+- Export rapport exécutif PDF avec recommandations IA
 
-Ajouter dans `Settings.tsx` (onglet Profil ou nouveau onglet Accessibilite) :
-- Un slider (3 niveaux : Petit / Normal / Grand) qui modifie une classe CSS sur `<html>`
-- Persistance dans localStorage (`arobase_font_size`)
-- Application dans `App.tsx` ou `main.tsx` au chargement
-- Niveaux : `text-sm` (14px base), normal (16px), `text-lg` (18px base)
+## Détails techniques
 
-## 5. Coherence Couleur dans les Pages
+| Lot | Tables / migrations | Edge functions | Connecteurs requis |
+|---|---|---|---|
+| 1 | `mentions` + colonnes emotion/entities/theme/sarcasm | `enrich-mention` (LOVABLE_API_KEY) | — |
+| 2 | `anomaly_baselines` | `detect-anomalies` (cron) | — |
+| 3 | `rss_feeds` seed, `whatsapp_config` | `whatsapp-webhook` | Apify (déjà) |
+| 4 | `notification_channels`, `notification_prefs` | `notify-sms`, `notify-slack`, `notify-teams` | GatewayAPI, Microsoft Teams |
+| 5 | `audit_logs`, triggers | — | — (Supabase MFA natif) |
+| 6 | — | `weekly-digest` (cron) | — |
+| 7 | — | — | — |
 
-Mettre a jour les references explicites au rouge dans :
-- `AppSidebar.tsx` : `.glow-red-subtle` → `.glow-gold-subtle`
-- `Login.tsx`, `Register.tsx` : gradient auth, couleurs des orbs
-- `Pricing.tsx` : gradient barre populaire, badges
-- `Dashboard.tsx` : badges plateformes
-- `ReputationGauge.tsx` : couleur de l'arc du gauge
+## Estimation
+- Lot 1 + 2 : ~1 session (le plus à fort impact)
+- Lot 3 + 4 : dépend des connecteurs à activer (je vous guiderai)
+- Lot 5 + 6 + 7 : sessions courtes chacune
 
-## 6. Note sur les API Reseaux Sociaux
-
-Les API reelles des reseaux sociaux (X, Facebook, Instagram, etc.) necessitent des cles API et un backend. L'app fonctionne actuellement avec des donnees simulees. Pour activer de vraies API, il faudrait connecter Supabase/Cloud et configurer des edge functions avec les cles appropriees. Cette phase prepare l'architecture mais garde la simulation active.
-
----
-
-## Details techniques
-
-| Fichier | Modifications |
-|---|---|
-| `src/index.css` | Refonte complete des variables couleur (rouge → jaune/or), nouveaux gradients, glow gold |
-| `tailwind.config.ts` | Radius augmente |
-| `src/components/layout/AppSidebar.tsx` | Classes glow gold, espacement Apple |
-| `src/components/layout/AppHeader.tsx` | Hauteur 16, espacement mobile |
-| `src/components/layout/AppLayout.tsx` | Padding mobile reduit |
-| `src/pages/Login.tsx` | Gradient jaune, orbs dores |
-| `src/pages/Register.tsx` | Idem Login |
-| `src/pages/Settings.tsx` | Slider taille de police + persistance |
-| `src/pages/Dashboard.tsx` | Badges couleur or |
-| `src/pages/Pricing.tsx` | Gradient et badges or |
-| `src/components/ReputationGauge.tsx` | Arc couleur or |
-| `src/main.tsx` | Restauration taille de police au chargement |
-
+## Question
+**Lancez-vous l'intégralité des 7 lots à la suite (long, plusieurs réponses), ou je commence par les Lots 1 + 2 (analyse IA + crise) qui apportent le plus de valeur immédiate ?**
