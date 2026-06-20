@@ -37,7 +37,7 @@ const mainNav = [
   { title: "Influenceurs", url: "/influencers", icon: TrendingUp },
   { title: "Concurrence", url: "/competitors", icon: BarChart3 },
   { title: "Graphiques", url: "/quick-chart", icon: PieChart },
-  { title: "Assistant IA", url: "/ai-assistant", icon: Bot },
+  { title: "FOCUS GPT", url: "/ai-assistant", icon: Bot },
   { title: "Rapports", url: "/reports", icon: FileText },
 ];
 
