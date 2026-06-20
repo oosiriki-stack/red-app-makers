@@ -140,8 +140,9 @@ export default function AIAssistant() {
             <Bot className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-light tracking-tight flex items-center gap-2">FocusGPT <Sparkles className="w-4 h-4 text-primary" /></h1>
-            <p className="text-[11px] text-muted-foreground">Assistant IA · Lovable AI</p>
+            <h1 className="text-xl md:text-2xl font-light tracking-tight flex items-center gap-2">FOCUS GPT <Sparkles className="w-4 h-4 text-primary" /></h1>
+            <p className="text-[11px] text-muted-foreground">IA propriétaire FOCUS · Réponses contextuelles & recommandations</p>
+
           </div>
         </div>
 
