@@ -152,6 +152,44 @@ export default function Dashboard() {
           <motion.div variants={staggerItem}><RiskScoreCard /></motion.div>
         </StaggerContainer>
 
+        {/* Répartition des sentiments */}
+        <Card className="glass-card rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+              <Heart className="h-3.5 w-3.5 text-primary" />
+              Répartition des sentiments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            {stats.mentions === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Aucune mention collectée pour le moment.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-500">{stats.positive}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Positif · {stats.positivePercent}%</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-muted-foreground">{stats.neutral}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Neutre · {stats.neutralPercent}%</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-500">{stats.negative}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Négatif · {stats.negativePercent}%</p>
+                  </div>
+                </div>
+                <div className="flex h-2 rounded-full overflow-hidden bg-muted">
+                  <div className="bg-green-500 transition-all" style={{ width: `${stats.positivePercent}%` }} />
+                  <div className="bg-muted-foreground/50 transition-all" style={{ width: `${stats.neutralPercent}%` }} />
+                  <div className="bg-red-500 transition-all" style={{ width: `${stats.negativePercent}%` }} />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
