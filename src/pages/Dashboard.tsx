@@ -21,7 +21,7 @@ import { speak, summarizeMentions } from "@/lib/speech";
 export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "", configured: false });
+  const [stats, setStats] = useState({ mentions: 0, positive: 0, neutral: 0, negative: 0, positivePercent: 0, neutralPercent: 0, negativePercent: 0, alerts: 0, brand: "", configured: false });
   const navigate = useNavigate();
   const { user } = useAuth();
   const { plan, daysLeft, isTrial, isPaid } = useSubscription();
@@ -32,24 +32,32 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     if (!user) return;
-    const [mRes, pRes, aRes, sRes] = await Promise.all([
+    const [mRes, pRes, nuRes, neRes, aRes, sRes] = await Promise.all([
       supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "positive"),
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "neutral"),
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "negative"),
       supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
       supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).maybeSingle(),
     ]);
     const total = mRes.count ?? 0;
     const positive = pRes.count ?? 0;
+    const neutral = nuRes.count ?? 0;
+    const negative = neRes.count ?? 0;
     const brand = sRes.data?.brand || "";
     setStats({
       mentions: total,
+      positive, neutral, negative,
       positivePercent: total > 0 ? Math.round((positive / total) * 100) : 0,
+      neutralPercent: total > 0 ? Math.round((neutral / total) * 100) : 0,
+      negativePercent: total > 0 ? Math.round((negative / total) * 100) : 0,
       alerts: aRes.count ?? 0,
       brand,
       configured: Boolean(brand),
     });
     if (!brand) setShowOnboarding(true);
   };
+
 
   useEffect(() => { fetchDashboard(); }, [user]);
 
