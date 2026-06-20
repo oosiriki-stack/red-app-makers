@@ -1,80 +1,70 @@
+# Plan d'exécution
 
-# Plan — Cahier des charges @robase
+Votre demande couvre ~25 sujets distincts. Pour livrer du code qui marche réellement (et non un patchwork), je propose de découper en **6 vagues**. Chaque vague est livrée et testable avant de passer à la suivante.
 
-Tout ne peut pas être livré en un seul tour : certaines fonctionnalités exigent des intégrations payantes (SMS, Slack/Teams, WhatsApp Business, MFA), d'autres juste de l'UI + une edge function. Je propose **7 lots** ordonnés par priorité. Validez ceux à lancer (tous ou par étapes).
+---
 
-## État actuel (déjà en place)
-- Collecte mentions (Apify, Google News, Bing, HN, Reddit, Mastodon, RSS) — `scheduled-scan`, `track-mentions`
-- Sentiment positif/négatif/neutre (lexique FR) + alertes basiques (info/warning/critical)
-- Dashboard score réputation, mentions, alertes, gauge
-- Rapports exports CSV/PDF/Excel
-- FocusGPT (recommandations IA contextualisées)
-- Auth email + Google, rôles (`user_roles`), workspaces, RLS
-- Notifications in-app + email (transac)
-- Tableau de bord, paramètres, onboarding, PWA
+## Vague 1 — Correctifs critiques + CSS badge (immédiat)
 
-## Lots à livrer
+1. **CSS global** : masquer `#lovable-badge` dans `src/index.css`.
+2. **Bug sentiments Dashboard** : les compteurs positif/neutre/négatif n'affichent rien → corriger la requête / mapping sur `mentions.sentiment`.
+3. **OAuth Google / Apple 404 sur mobile** : vérifier `redirect_uri`, configurer le provider Apple côté Lovable Cloud, et ajouter la gestion correcte de `lovable.auth.signInWithOAuth` avec retour mobile.
+4. **Renommer "requête" → "surveillance"** partout dans Alertes & Mentions.
 
-### Lot 1 — Analyse IA enrichie (priorité haute)
-- **Émotions secondaires** (colère, satisfaction, inquiétude, enthousiasme) via Lovable AI Gateway (gemini-3-flash)
-- **Détection sarcasme/ironie** adaptée nouchi, camfranglais, wolof
-- **NER** : extraction marques, personnes, lieux, organisations
-- **Classification thématique** auto : prix, service client, qualité produit, délais, UX
-- Nouvelles colonnes `mentions`: `emotion`, `is_sarcastic`, `entities jsonb`, `theme`
-- Edge function `enrich-mention` appelée après chaque insert (trigger ou batch)
-- Filtres + badges visuels dans `Mentions.tsx`
+## Vague 2 — Lot 3 : Sources africaines & scraping
 
-### Lot 2 — Détection de crise & anomalies (priorité haute)
-- Edge function `detect-anomalies` (cron 15 min) : z-score sur volume négatif vs baseline 7j
-- Pic inhabituel → alerte `critical` + push notification + email
-- **Tendances & sujets émergents** : clustering mots-clés (TF-IDF) sur 24h, affichés sur `Crisis.tsx`
-- Score de risque réputationnel temps réel (0–100) sur Dashboard
+- Seed RSS feeds africains (Abidjan.net, Senego, Koaci, Jeune Afrique, Financial Afrik, etc.) dans table `rss_feeds`.
+- Edge function `fetch-rss` (cron 30 min) qui pousse dans `mentions`.
+- Scrapers Facebook Groups / TikTok comments / WhatsApp Business via **Apify** (token déjà présent) — actors publics dédiés.
+- Page Settings → onglet **Sources** pour activer/désactiver chaque source.
 
-### Lot 3 — Sources africaines locales
-- Connecteurs RSS pré-remplis : Jeune Afrique, Abidjan.net, Senego, Koaci, Wakat Séra, Linfodrome, Seneweb…
-- Scraping groupes Facebook publics ivoiriens/sénégalais via Apify (`facebook-groups-scraper`)
-- WhatsApp Business : nécessite numéro vérifié + Meta Business — je scaffold l'edge function `whatsapp-webhook` et la config UI; l'activation réelle dépend du compte Meta du client
-- Page **Sources** dans Settings pour activer/désactiver chaque source
+## Vague 3 — Lot 4 : Notifications multi-canal
 
-### Lot 4 — Notifications multi-canaux
-- **Email** : déjà ok
-- **SMS** : via connecteur **GatewayAPI** (Lovable). Tableau préférences canal par type d'alerte
-- **Slack** : webhook entrant (URL configurable dans Settings) + edge function `notify-slack`
-- **Microsoft Teams** : via connecteur Lovable Teams (Graph API)
-- **Push in-app** : déjà ok
+- **SMS** via GatewayAPI (connector).
+- **Slack** via webhook URL (champ utilisateur).
+- **MS Teams** via webhook.
+- **WhatsApp** via Meta Cloud API (nécessite `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_ID`).
+- **Email** via Resend (déjà disponible).
+- Table `notification_channels` + UI Settings → Notifications avec toggle par canal + test d'envoi.
 
-### Lot 5 — Sécurité renforcée
-- **MFA** (TOTP) via `supabase.auth.mfa` + page `Settings → Sécurité`
-- **Journalisation actions** (`audit_logs` : user_id, action, target, ip, ua, created_at) avec triggers sur tables sensibles
-- **HIBP check** activé sur signup
-- Vue admin `SuperAdmin.tsx` pour consulter les audits
+## Vague 4 — Lot 5 : Sécurité (RBAC, MFA, audit, chiffrement)
 
-### Lot 6 — Recommandations IA contextualisées
-- Bouton « Recommandation IA » sur chaque mention/alerte négative → réponse rédigée prête à publier (ton ajustable, déjà partiellement présent dans FocusGPT)
-- Synthèse hebdo automatique (cron) : « 3 actions prioritaires cette semaine »
+- MFA TOTP (`supabase.auth.mfa`).
+- HIBP password check (activable via `configure_auth`).
+- Table `audit_logs` + triggers sur tables sensibles + page `SuperAdmin → Journal`.
+- RBAC déjà en place via `user_roles` → étendre aux rôles workspace (`owner`, `admin`, `analyst`, `viewer`).
+- Bannière sécurité : "Données chiffrées AES-256 au repos, TLS 1.3 en transit" (Lovable Cloud le fournit nativement, à documenter).
+- Auth sociale **LinkedIn** + **Facebook** : non supportés nativement Lovable Cloud → je vous expliquerai la limite et proposerai une alternative (Supabase direct provider config requise).
 
-### Lot 7 — UX & polish
-- Tutoriel guidé première connexion (`MarketingOnboarding` étendu)
-- Onglet **Thèmes** sur Dashboard (camemberts par catégorie)
-- Heatmap géographique des mentions (déjà `GeoHeatmap` — connecter aux vraies données)
-- Export rapport exécutif PDF avec recommandations IA
+## Vague 5 — Gating par formule (Starter / Business / Premium / Entreprise)
 
-## Détails techniques
+- Mettre à jour `subscriptions.plan` enum : `trial | starter | business | premium | enterprise`.
+- Créer `plan_limits` (marques max, users max, mentions/mois, features booléennes : alertes IA, analyse concurrentielle, API, langues africaines, crise, support prioritaire).
+- Hook `usePlanAccess()` qui lit le plan actif et expose `canAddBrand()`, `hasFeature('competitive')`, etc.
+- Bloquer UI + enforcement DB (RLS sur création de `monitoring_settings`).
+- Wave : 4 liens (mensuel + annuel × 4 plans) → mise à jour `Pricing.tsx`.
 
-| Lot | Tables / migrations | Edge functions | Connecteurs requis |
-|---|---|---|---|
-| 1 | `mentions` + colonnes emotion/entities/theme/sarcasm | `enrich-mention` (LOVABLE_API_KEY) | — |
-| 2 | `anomaly_baselines` | `detect-anomalies` (cron) | — |
-| 3 | `rss_feeds` seed, `whatsapp_config` | `whatsapp-webhook` | Apify (déjà) |
-| 4 | `notification_channels`, `notification_prefs` | `notify-sms`, `notify-slack`, `notify-teams` | GatewayAPI, Microsoft Teams |
-| 5 | `audit_logs`, triggers | — | — (Supabase MFA natif) |
-| 6 | — | `weekly-digest` (cron) | — |
-| 7 | — | — | — |
+## Vague 6 — Mises à jour produit (textes, modules, comportements)
 
-## Estimation
-- Lot 1 + 2 : ~1 session (le plus à fort impact)
-- Lot 3 + 4 : dépend des connecteurs à activer (je vous guiderai)
-- Lot 5 + 6 + 7 : sessions courtes chacune
+- **Dashboard** : refonte hero (score global + volume + barres pic).
+- **Centre d'alertes** : alerte structurée auto (contexte + analyse IA + recommandations) avec objectif <15 min — afficher TTR.
+- **Explorateur de mentions** : score d'impact propriétaire = `f(audience, engagement, |sentiment|)`.
+- **Analyse comparative** : nouveau module `/competitors` avec benchmarking thématique.
+- **Rapports auto** : edge function `generate-report` → PDF + PPTX (sectoriels gratuits aussi).
+- **Pause auto surveillance précédente** : trigger DB + notif SuperAdmin + dossier "Archivées" visible côté user.
+- **Pipeline FOCUS** : page `/pipeline` qui illustre les 8 étapes + 4 piliers (Surveiller / Comprendre / Anticiper / Décider).
+- **Alertes intelligentes** : règles configurables (mots-clés + sentiment + seuil volume) + détection ML (déjà en place avec `detect-anomalies`).
+- **FOCUS GPT** : intégrer une option "ChatGPT gratuit" — note : OpenAI n'expose pas d'API gratuite ; je vais utiliser **Lovable AI Gateway gratuit** (Gemini Flash) et l'étiqueter "FOCUS GPT" dans l'UI. Si vous voulez vraiment ChatGPT, il faudra une clé OpenAI payante.
 
-## Question
-**Lancez-vous l'intégralité des 7 lots à la suite (long, plusieurs réponses), ou je commence par les Lots 1 + 2 (analyse IA + crise) qui apportent le plus de valeur immédiate ?**
+---
+
+## Points qui nécessitent votre décision avant de coder
+
+1. **Apple Sign-In** : avez-vous un compte Apple Developer (99 $/an) ? Sans ça, impossible techniquement.
+2. **LinkedIn / Facebook auth** : Lovable Cloud ne les supporte pas en managé. Voulez-vous (a) qu'on les retire, (b) qu'on bascule vers Supabase externe ?
+3. **WhatsApp notifs** : OK pour créer compte Meta Business + me fournir `WHATSAPP_TOKEN` ?
+4. **SMS GatewayAPI** : OK pour connecter le connecteur (vous aurez à coller la clé) ?
+5. **"FOCUS GPT gratuit"** : OK pour utiliser Lovable AI Gateway (Gemini, gratuit pour vous) badgé "FOCUS GPT" ?
+6. **Ordre** : on attaque dans l'ordre Vague 1 → 6, ou vous voulez prioriser autrement (ex : gating formules d'abord) ?
+
+Répondez simplement « OK plan, vague 1 » (ou « tout en séquence ») et je démarre.
