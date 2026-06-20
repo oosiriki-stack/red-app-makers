@@ -198,7 +198,7 @@ export default function Mentions() {
     const requester = (profile?.name?.trim() || user?.email || "Vous").toString();
     const queryLabel = (adhoc || queryFromUrl || "").trim();
     const reqToast = queryLabel
-      ? toast.loading(`🔎 Tracker lancé par ${requester}`, { description: `Requête: « ${queryLabel} »` })
+      ? toast.loading(`🔎 Tracker lancé par ${requester}`, { description: `Surveillance: « ${queryLabel} »` })
       : toast.loading(`🔎 Tracker lancé par ${requester}`);
     const { data, error } = await supabase.functions.invoke("track-mentions", {
       body: queryLabel ? { query: queryLabel } : {},
@@ -208,7 +208,7 @@ export default function Mentions() {
     if (error) return toast.error("Tracker: " + error.message);
     await fetchMentions();
     toast.success(`${data?.count ?? 0} mention(s) collectée(s)`, {
-      description: queryLabel ? `Requête: « ${queryLabel} » · Émetteur: ${requester}` : `Émetteur: ${requester}`,
+      description: queryLabel ? `Surveillance: « ${queryLabel} » · Émetteur: ${requester}` : `Émetteur: ${requester}`,
     });
   };
 
@@ -249,7 +249,7 @@ export default function Mentions() {
     finally { setRedditing(false); }
   };
 
-  // Auto-tracker dès qu'une requête est saisie (depuis la barre de recherche)
+  // Auto-tracker dès qu'une surveillance est saisie (depuis la barre de recherche)
   const autoTrackedRef = useState<string>("")[0];
   useEffect(() => {
     if (!user || !queryFromUrl) return;
@@ -447,7 +447,7 @@ export default function Mentions() {
                     <p className="text-sm mt-1 text-foreground/90 line-clamp-2">{m.content}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
                       <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Radio className="h-3 w-3 text-primary" />Plateforme · <span className="font-medium text-foreground/80">{PLATFORM_LABEL[m.source] || m.source}</span></span>
-                      {m.query && <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Search className="h-3 w-3 text-primary" />Requête · <span className="font-medium text-foreground/80 truncate max-w-[180px]">« {m.query} »</span></span>}
+                      {m.query && <span className="inline-flex items-center gap-1 rounded-md bg-muted/50 px-1.5 py-0.5"><Search className="h-3 w-3 text-primary" />Surveillance · <span className="font-medium text-foreground/80 truncate max-w-[180px]">« {m.query} »</span></span>}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 shrink-0">
@@ -486,7 +486,7 @@ export default function Mentions() {
                   </div>
                   {selected.query && (
                     <div className="rounded-xl border border-border/50 bg-background/40 p-3">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" />Requête surveillée</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" />Surveillance surveillée</p>
                       <p className="text-sm font-medium mt-1 truncate">« {selected.query} »</p>
                     </div>
                   )}

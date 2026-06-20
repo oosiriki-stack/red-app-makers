@@ -132,7 +132,7 @@ export default function Alerts() {
                         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
                           <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1">
                             <Search className="h-3 w-3 text-primary shrink-0" />
-                            <span className="text-muted-foreground">Requête :</span>
+                            <span className="text-muted-foreground">Surveillance :</span>
                             <span className="font-medium truncate">{alert.query ? `« ${alert.query} »` : "—"}</span>
                           </div>
                           <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1">

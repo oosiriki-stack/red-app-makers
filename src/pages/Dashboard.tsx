@@ -21,7 +21,7 @@ import { speak, summarizeMentions } from "@/lib/speech";
 export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [stats, setStats] = useState({ mentions: 0, positivePercent: 0, alerts: 0, brand: "", configured: false });
+  const [stats, setStats] = useState({ mentions: 0, positive: 0, neutral: 0, negative: 0, positivePercent: 0, neutralPercent: 0, negativePercent: 0, alerts: 0, brand: "", configured: false });
   const navigate = useNavigate();
   const { user } = useAuth();
   const { plan, daysLeft, isTrial, isPaid } = useSubscription();
@@ -32,24 +32,32 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     if (!user) return;
-    const [mRes, pRes, aRes, sRes] = await Promise.all([
+    const [mRes, pRes, nuRes, neRes, aRes, sRes] = await Promise.all([
       supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "positive"),
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "neutral"),
+      supabase.from("mentions").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("sentiment", "negative"),
       supabase.from("alerts").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
       supabase.from("monitoring_settings").select("brand").eq("user_id", user.id).maybeSingle(),
     ]);
     const total = mRes.count ?? 0;
     const positive = pRes.count ?? 0;
+    const neutral = nuRes.count ?? 0;
+    const negative = neRes.count ?? 0;
     const brand = sRes.data?.brand || "";
     setStats({
       mentions: total,
+      positive, neutral, negative,
       positivePercent: total > 0 ? Math.round((positive / total) * 100) : 0,
+      neutralPercent: total > 0 ? Math.round((neutral / total) * 100) : 0,
+      negativePercent: total > 0 ? Math.round((negative / total) * 100) : 0,
       alerts: aRes.count ?? 0,
       brand,
       configured: Boolean(brand),
     });
     if (!brand) setShowOnboarding(true);
   };
+
 
   useEffect(() => { fetchDashboard(); }, [user]);
 
@@ -143,6 +151,44 @@ export default function Dashboard() {
           })}
           <motion.div variants={staggerItem}><RiskScoreCard /></motion.div>
         </StaggerContainer>
+
+        {/* Répartition des sentiments */}
+        <Card className="glass-card rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+              <Heart className="h-3.5 w-3.5 text-primary" />
+              Répartition des sentiments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            {stats.mentions === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Aucune mention collectée pour le moment.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-500">{stats.positive}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Positif · {stats.positivePercent}%</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-muted-foreground">{stats.neutral}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Neutre · {stats.neutralPercent}%</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-500">{stats.negative}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Négatif · {stats.negativePercent}%</p>
+                  </div>
+                </div>
+                <div className="flex h-2 rounded-full overflow-hidden bg-muted">
+                  <div className="bg-green-500 transition-all" style={{ width: `${stats.positivePercent}%` }} />
+                  <div className="bg-muted-foreground/50 transition-all" style={{ width: `${stats.neutralPercent}%` }} />
+                  <div className="bg-red-500 transition-all" style={{ width: `${stats.negativePercent}%` }} />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
 
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
