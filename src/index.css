@@ -281,3 +281,13 @@
 .notification-pulse {
   animation: notification-pulse 2s ease-in-out infinite;
 }
+
+/* Hide Lovable badge globally */
+#lovable-badge,
+[id="lovable-badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
