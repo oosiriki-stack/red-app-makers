@@ -30,6 +30,7 @@ import AcceptInvitation from "@/pages/AcceptInvitation";
 import SocialNetworks from "@/pages/SocialNetworks";
 import Influencers from "@/pages/Influencers";
 import QuickChart from "@/pages/QuickChart";
+import Pipeline from "@/pages/Pipeline";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
