@@ -14,6 +14,7 @@ import {
   Share2,
   TrendingUp,
   PieChart,
+  Workflow,
   Lock,
 } from "lucide-react";
 import { usePlanAccess, type FeatureKey } from "@/hooks/usePlanAccess";
