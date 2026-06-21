@@ -16,9 +16,22 @@ const WAVE_LINK = "https://pay.wave.com/m/M_ci_mZX836uJEiGE/c/ci/";
 const CARD_NUMBER = "4312 5900 9402 6114";
 
 const plans = [
-  { name: "Starter", icon: Zap, planKey: "starter", price: 15000, features: ["500 mentions/mois", "3 sources", "Dashboard", "Alertes email", "Rapport hebdo PDF"] },
-  { name: "Pro", icon: Sparkles, planKey: "pro", price: 25000, popular: true, features: ["Mentions illimitées", "Toutes sources", "FocusGPT avancé", "Rapports J/S/M/A PDF", "Alertes temps réel", "Support prioritaire"] },
-  { name: "Entreprise", icon: Building2, planKey: "enterprise", price: 0, features: ["Tout Pro", "API dédiée", "SLA 99,9%", "Support 24/7", "SSO", "Account manager"] },
+  { name: "Starter", icon: Zap, planKey: "starter", price: 25000, features: [
+    "500 mentions/mois", "3 sources surveillées", "Tableau de bord temps réel",
+    "Alertes email", "Rapports hebdo PDF/Excel", "Veille concurrentielle (3 concurrents)",
+    "Module Influenceurs", "Réseaux sociaux & graphiques",
+  ] },
+  { name: "Pro", icon: Sparkles, planKey: "pro", price: 50000, popular: true, features: [
+    "Mentions illimitées", "Toutes sources (RSS, FB, TikTok, WhatsApp)",
+    "FOCUS GPT — IA propriétaire", "Rapports J/S/M/A automatiques",
+    "Alertes temps réel (SMS, WhatsApp, Slack, Teams)",
+    "Gestion de crise & détection précoce", "Support prioritaire",
+  ] },
+  { name: "Entreprise", icon: Building2, planKey: "enterprise", price: 0, features: [
+    "Tout Pro inclus", "API dédiée & webhooks", "SLA 99,9% garanti",
+    "Support 24/7 & Account manager", "SSO (SAML/OAuth)",
+    "Workspaces multi-équipes", "Audit & journalisation avancée",
+  ] },
 ];
 
 export default function Pricing() {
