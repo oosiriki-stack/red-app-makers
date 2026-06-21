@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthGuard } from "@/components/AuthGuard";
 import { DemoGate } from "@/components/DemoGate";
+import { PlanGate } from "@/components/PlanGate";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -54,19 +55,19 @@ const App = () => {
                 <Route path="/mentions" element={<DemoGate feature="Mentions & sentiments" description="L'accès aux mentions, sentiments et posts d'influenceurs nécessite une licence active." redirect><Mentions /></DemoGate>} />
                 <Route path="/alerts" element={<DemoGate feature="Centre d'alertes" description="La consultation et la création d'alertes nécessitent une licence active." redirect><Alerts /></DemoGate>} />
                 <Route path="/competitors" element={<DemoGate feature="Veille concurrentielle" description="Comparez votre marque à vos concurrents en temps réel. Disponible dès le plan Starter." redirect><Competitors /></DemoGate>} />
-                <Route path="/ai-assistant" element={<DemoGate feature="FocusGPT" description="Assistant IA avancé pour analyser et répondre aux mentions. Disponible dès le plan Pro." redirect><AIAssistant /></DemoGate>} />
-                <Route path="/reports" element={<DemoGate feature="Rapports PDF & Excel" description="Génération et téléchargement de rapports professionnels. Disponible dès le plan Starter." redirect><Reports /></DemoGate>} />
+                <Route path="/ai-assistant" element={<DemoGate feature="FOCUS GPT" description="Assistant IA propriétaire FOCUS — disponible dès le plan Pro." redirect><PlanGate feature="ai_assistant" title="FOCUS GPT — Plan Pro requis"><AIAssistant /></PlanGate></DemoGate>} />
+                <Route path="/reports" element={<DemoGate feature="Rapports PDF & Excel" description="Génération et téléchargement de rapports professionnels. Disponible dès le plan Starter." redirect><PlanGate feature="reports" title="Rapports — Plan Starter requis"><Reports /></PlanGate></DemoGate>} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/surveillance" element={<Navigate to="/settings?tab=surveillance" replace />} />
-                <Route path="/crisis" element={<DemoGate feature="Gestion de crise" description="Module avancé de détection et gestion de crise. Disponible dès le plan Pro." redirect><Crisis /></DemoGate>} />
+                <Route path="/crisis" element={<DemoGate feature="Gestion de crise" description="Module avancé de détection et gestion de crise. Disponible dès le plan Pro." redirect><PlanGate feature="crisis" title="Gestion de crise — Plan Pro requis"><Crisis /></PlanGate></DemoGate>} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/super-admin" element={<SuperAdmin />} />
                 <Route path="/workspaces" element={<Workspaces />} />
-                <Route path="/social-networks" element={<SocialNetworks />} />
-                <Route path="/influencers" element={<DemoGate feature="Influenceurs" description="Identifiez les voix qui parlent de votre marque. Disponible dès le plan Starter." redirect><Influencers /></DemoGate>} />
-                <Route path="/quick-chart" element={<DemoGate feature="Graphiques rapides" description="Visualisez vos mentions en un coup d'œil. Disponible dès le plan Starter." redirect><QuickChart /></DemoGate>} />
+                <Route path="/social-networks" element={<PlanGate feature="social_networks" title="Réseaux sociaux — Plan Starter requis"><SocialNetworks /></PlanGate>} />
+                <Route path="/influencers" element={<DemoGate feature="Influenceurs" description="Identifiez les voix qui parlent de votre marque. Disponible dès le plan Starter." redirect><PlanGate feature="influencers" title="Influenceurs — Plan Starter requis"><Influencers /></PlanGate></DemoGate>} />
+                <Route path="/quick-chart" element={<DemoGate feature="Graphiques rapides" description="Visualisez vos mentions en un coup d'œil. Disponible dès le plan Starter." redirect><PlanGate feature="quick_chart" title="Graphiques rapides — Plan Starter requis"><QuickChart /></PlanGate></DemoGate>} />
               </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
