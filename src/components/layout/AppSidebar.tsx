@@ -14,6 +14,7 @@ import {
   Share2,
   TrendingUp,
   PieChart,
+  Workflow,
   Lock,
 } from "lucide-react";
 import { usePlanAccess, type FeatureKey } from "@/hooks/usePlanAccess";
@@ -46,6 +47,7 @@ const mainNav: Array<{ title: string; url: string; icon: any; feature?: FeatureK
 const secondaryNav: Array<{ title: string; url: string; icon: any; feature?: FeatureKey }> = [
   { title: "Espaces de travail", url: "/workspaces", icon: Users },
   { title: "Réseaux sociaux", url: "/social-networks", icon: Share2, feature: "social_networks" },
+  { title: "Pipeline FOCUS", url: "/pipeline", icon: Workflow },
   { title: "Paramètres", url: "/settings", icon: Settings },
   { title: "Tarification", url: "/pricing", icon: CreditCard },
   { title: "Installer", url: "/install", icon: Download },

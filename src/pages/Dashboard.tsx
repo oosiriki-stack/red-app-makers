@@ -202,16 +202,29 @@ export default function Dashboard() {
                   Quota — {plan ?? "—"}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col items-center pb-4">
-                <QuotaGauge value={daysLeft} max={quotaMax} size={130} label={quotaLabel} />
-                <Button
-                  size="sm"
-                  variant={isTrial ? "default" : "outline"}
-                  className="rounded-xl mt-3 font-semibold"
-                  onClick={() => navigate("/pricing")}
-                >
-                  {isTrial ? "Activer une licence" : "Gérer mon abonnement"}
-                </Button>
+              <CardContent className="pb-4">
+                {/* Mobile: gauge à gauche, infos à droite. Desktop: centré */}
+                <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2">
+                  <div className="shrink-0 md:hidden">
+                    <QuotaGauge value={daysLeft} max={quotaMax} size={92} label={quotaLabel} />
+                  </div>
+                  <div className="hidden md:block">
+                    <QuotaGauge value={daysLeft} max={quotaMax} size={130} label={quotaLabel} />
+                  </div>
+                  <div className="flex-1 min-w-0 md:w-full">
+                    <p className="md:hidden text-[11px] text-muted-foreground font-medium mb-2 leading-tight">
+                      {isTrial ? "Période démo en cours" : "Abonnement actif"}
+                    </p>
+                    <Button
+                      size="sm"
+                      variant={isTrial ? "default" : "outline"}
+                      className="rounded-xl md:mt-3 font-semibold w-full md:w-auto text-xs md:text-sm"
+                      onClick={() => navigate("/pricing")}
+                    >
+                      {isTrial ? "Activer une licence" : "Gérer mon abonnement"}
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
