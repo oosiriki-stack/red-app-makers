@@ -91,36 +91,36 @@ export function RecentMentions() {
       </CardHeader>
       <CardContent className="space-y-2">
         {recent.map((m) => (
-          <div key={m.id} className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-muted/50 transition-colors">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="text-xs bg-muted font-bold">
+          <div key={m.id} className="group flex items-start gap-2.5 md:gap-3 p-2 md:p-2.5 rounded-xl hover:bg-muted/50 transition-colors">
+            <Avatar className="h-8 w-8 md:h-9 md:w-9 shrink-0">
+              <AvatarFallback className="text-[10px] md:text-xs bg-muted font-bold">
                 {m.avatar || m.author.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold truncate">{m.author}</span>
-                <Badge variant="outline" className="text-[10px] shrink-0 font-semibold">{m.source}</Badge>
-                <Badge className={`text-[10px] border-0 shrink-0 font-semibold ${sentimentColors[m.sentiment as keyof typeof sentimentColors] || sentimentColors.neutral}`}>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs md:text-sm font-bold truncate max-w-[120px] md:max-w-none">{m.author}</span>
+                <Badge variant="outline" className="text-[9px] md:text-[10px] shrink-0 font-semibold px-1.5 py-0">{m.source}</Badge>
+                <Badge className={`text-[9px] md:text-[10px] border-0 shrink-0 font-semibold px-1.5 py-0 ${sentimentColors[m.sentiment as keyof typeof sentimentColors] || sentimentColors.neutral}`}>
                   {sentimentLabel[m.sentiment as keyof typeof sentimentLabel] ?? m.sentiment}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground truncate mt-0.5 font-medium">{m.content}</p>
-              <div className="flex gap-1.5 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <p className="text-[11px] md:text-xs text-muted-foreground line-clamp-2 md:truncate mt-0.5 font-medium">{m.content}</p>
+              <div className="flex gap-1.5 mt-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="rounded-lg h-6 px-2 text-[11px] gap-1 font-semibold"
+                  className="rounded-lg h-6 px-2 text-[10px] md:text-[11px] gap-1 font-semibold"
                   disabled={creating === m.id}
                   onClick={() => createAlert(m)}
                 >
-                  <BellPlus className="h-3 w-3" />Créer une alerte
+                  <BellPlus className="h-3 w-3" /><span className="hidden xs:inline sm:inline">Alerte</span>
                 </Button>
                 {m.source_url && (
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="rounded-lg h-6 px-2 text-[11px] gap-1 font-semibold"
+                    className="rounded-lg h-6 px-2 text-[10px] md:text-[11px] gap-1 font-semibold"
                     onClick={() => window.open(m.source_url!, "_blank")}
                   >
                     <ExternalLink className="h-3 w-3" />Voir
