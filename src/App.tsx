@@ -69,6 +69,7 @@ const App = () => {
                 <Route path="/social-networks" element={<PlanGate feature="social_networks" title="Réseaux sociaux — Plan Starter requis"><SocialNetworks /></PlanGate>} />
                 <Route path="/influencers" element={<DemoGate feature="Influenceurs" description="Identifiez les voix qui parlent de votre marque. Disponible dès le plan Starter." redirect><PlanGate feature="influencers" title="Influenceurs — Plan Starter requis"><Influencers /></PlanGate></DemoGate>} />
                 <Route path="/quick-chart" element={<DemoGate feature="Graphiques rapides" description="Visualisez vos mentions en un coup d'œil. Disponible dès le plan Starter." redirect><PlanGate feature="quick_chart" title="Graphiques rapides — Plan Starter requis"><QuickChart /></PlanGate></DemoGate>} />
+                <Route path="/pipeline" element={<Pipeline />} />
               </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
