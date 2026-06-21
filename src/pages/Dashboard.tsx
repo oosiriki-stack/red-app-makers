@@ -96,36 +96,39 @@ export default function Dashboard() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-5">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight">{greeting}</h1>
-            <p className="text-xs md:text-sm text-muted-foreground">
+      <div className="space-y-4 md:space-y-5">
+        <div className="flex items-start justify-between flex-wrap gap-2">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-3xl font-light tracking-tight truncate">{greeting}</h1>
+            <p className="text-[11px] md:text-sm text-muted-foreground mt-0.5">
               {stats.brand ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <Activity className="h-3 w-3 text-green-500 animate-pulse" />
-                  Cycle de surveillance activé — {stats.brand}
+                  <Activity className="h-3 w-3 text-green-500 animate-pulse shrink-0" />
+                  <span className="truncate">Surveillance active — {stats.brand}</span>
                 </span>
               ) : (
                 "Configurez la surveillance pour activer les données"
               )}
             </p>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 shrink-0">
             <InviteCollaboratorDialog />
-            <Button variant="outline" size="sm" className="rounded-xl font-semibold" onClick={audioToday}><Volume2 className="h-4 w-4 mr-1" />Écouter</Button>
-            <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>
+            <Button variant="outline" size="sm" className="rounded-xl font-semibold px-2 md:px-3" onClick={audioToday}>
+              <Volume2 className="h-4 w-4 md:mr-1" />
+              <span className="hidden md:inline">Écouter</span>
+            </Button>
+            <Button variant="outline" size="sm" className="rounded-xl px-2 md:px-3" onClick={handleRefresh} disabled={refreshing}>
               {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             </Button>
           </div>
         </div>
 
-        <StaggerContainer className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <StaggerContainer className="grid gap-2.5 md:gap-3 grid-cols-2 lg:grid-cols-4">
           <motion.div variants={staggerItem} className="col-span-2 lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
               <CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground">Score e-Réputation</CardTitle></CardHeader>
               <CardContent className="flex flex-col items-center pb-4">
-                <ReputationGauge score={reputationScore} size={120} />
+                <ReputationGauge score={reputationScore} size={110} />
                 {!stats.configured && <p className="text-[10px] text-muted-foreground mt-2 text-center">Configurez la surveillance pour activer</p>}
               </CardContent>
             </Card>
@@ -142,8 +145,8 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">{stat.sub}</p>
+                    <div className="text-xl md:text-2xl font-bold">{stat.value}</div>
+                    <p className="text-[11px] md:text-xs text-muted-foreground">{stat.sub}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -165,18 +168,18 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground text-center py-4">Aucune mention collectée pour le moment.</p>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="grid grid-cols-3 gap-2 md:gap-3 mb-3">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-500">{stats.positive}</div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Positif · {stats.positivePercent}%</p>
+                    <div className="text-lg md:text-2xl font-bold text-green-500">{stats.positive}</div>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-wider">Positif · {stats.positivePercent}%</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-muted-foreground">{stats.neutral}</div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Neutre · {stats.neutralPercent}%</p>
+                    <div className="text-lg md:text-2xl font-bold text-muted-foreground">{stats.neutral}</div>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-wider">Neutre · {stats.neutralPercent}%</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-500">{stats.negative}</div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Négatif · {stats.negativePercent}%</p>
+                    <div className="text-lg md:text-2xl font-bold text-red-500">{stats.negative}</div>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-wider">Négatif · {stats.negativePercent}%</p>
                   </div>
                 </div>
                 <div className="flex h-2 rounded-full overflow-hidden bg-muted">
