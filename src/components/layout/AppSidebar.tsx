@@ -14,7 +14,9 @@ import {
   Share2,
   TrendingUp,
   PieChart,
+  Lock,
 } from "lucide-react";
+import { usePlanAccess, type FeatureKey } from "@/hooks/usePlanAccess";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -30,20 +32,20 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainNav = [
+const mainNav: Array<{ title: string; url: string; icon: any; feature?: FeatureKey }> = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Mentions", url: "/mentions", icon: MessageSquare },
-  { title: "Alertes", url: "/alerts", icon: Bell },
-  { title: "Influenceurs", url: "/influencers", icon: TrendingUp },
-  { title: "Concurrence", url: "/competitors", icon: BarChart3 },
-  { title: "Graphiques", url: "/quick-chart", icon: PieChart },
-  { title: "FOCUS GPT", url: "/ai-assistant", icon: Bot },
-  { title: "Rapports", url: "/reports", icon: FileText },
+  { title: "Mentions", url: "/mentions", icon: MessageSquare, feature: "mentions" },
+  { title: "Alertes", url: "/alerts", icon: Bell, feature: "alerts" },
+  { title: "Influenceurs", url: "/influencers", icon: TrendingUp, feature: "influencers" },
+  { title: "Concurrence", url: "/competitors", icon: BarChart3, feature: "competitors" },
+  { title: "Graphiques", url: "/quick-chart", icon: PieChart, feature: "quick_chart" },
+  { title: "FOCUS GPT", url: "/ai-assistant", icon: Bot, feature: "ai_assistant" },
+  { title: "Rapports", url: "/reports", icon: FileText, feature: "reports" },
 ];
 
-const secondaryNav = [
+const secondaryNav: Array<{ title: string; url: string; icon: any; feature?: FeatureKey }> = [
   { title: "Espaces de travail", url: "/workspaces", icon: Users },
-  { title: "Réseaux sociaux", url: "/social-networks", icon: Share2 },
+  { title: "Réseaux sociaux", url: "/social-networks", icon: Share2, feature: "social_networks" },
   { title: "Paramètres", url: "/settings", icon: Settings },
   { title: "Tarification", url: "/pricing", icon: CreditCard },
   { title: "Installer", url: "/install", icon: Download },
@@ -53,23 +55,31 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
-  const renderItem = (item: typeof mainNav[number]) => (
-    <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild tooltip={item.title} className="!p-0 !h-auto hover:!bg-transparent data-[active=true]:!bg-transparent">
-        <NavLink
-          to={item.url}
-          end={item.url === "/dashboard"}
-          className="nav-item"
-          activeClassName="nav-item-active"
-        >
-          <span className="nav-icon">
-            <item.icon className="h-[18px] w-[18px]" strokeWidth={2} />
-          </span>
-          {!collapsed && <span className="truncate">{item.title}</span>}
-        </NavLink>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  );
+  const { hasAccess, loading } = usePlanAccess();
+
+  const renderItem = (item: typeof mainNav[number]) => {
+    const locked = !loading && item.feature ? !hasAccess(item.feature) : false;
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild tooltip={item.title} className="!p-0 !h-auto hover:!bg-transparent data-[active=true]:!bg-transparent">
+          <NavLink
+            to={item.url}
+            end={item.url === "/dashboard"}
+            className="nav-item"
+            activeClassName="nav-item-active"
+          >
+            <span className="nav-icon">
+              <item.icon className="h-[18px] w-[18px]" strokeWidth={2} />
+            </span>
+            {!collapsed && <span className="truncate flex-1">{item.title}</span>}
+            {!collapsed && locked && (
+              <Lock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+            )}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="glass-sidebar border-r border-border/40">
