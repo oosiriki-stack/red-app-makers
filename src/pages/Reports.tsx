@@ -131,10 +131,10 @@ export default function Reports() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Rapports PDF</h1>
-          <p className="text-muted-foreground">Rapports avec graphiques · {brand || "Aucune marque configurée"}</p>
+          <h1 className="text-2xl md:text-3xl font-light tracking-tight">Rapports auto · PDF & PPTX</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">Génération automatique · {brand || "Aucune marque configurée"}</p>
         </div>
 
         {mentions.length > 0 && (
@@ -215,18 +215,28 @@ export default function Reports() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-xs text-muted-foreground">
-                  Rapport {p.label.toLowerCase()} avec graphiques de sentiment, top sources et 25 mentions.
+                  Rapport {p.label.toLowerCase()} avec graphiques de sentiment, top sources, mentions à fort impact et recommandations IA.
                 </p>
                 {p.auto && <p className="text-xs text-primary">📅 {p.auto}</p>}
-                <Button
-                  onClick={() => generate(p.key)}
-                  disabled={generating === p.key || mentions.length === 0 || totalsByPeriod[p.key] === 0}
-                  className="w-full rounded-xl"
-                  title={mentions.length === 0 ? "Aucune mention collectée" : totalsByPeriod[p.key] === 0 ? "Aucune mention sur cette période" : undefined}
-                >
-                  {generating === p.key ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-                  {mentions.length === 0 ? "Aucune mention" : totalsByPeriod[p.key] === 0 ? "Aucune mention sur la période" : "Télécharger PDF"}
-                </Button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Button
+                    onClick={() => generate(p.key)}
+                    disabled={generating === p.key || mentions.length === 0 || totalsByPeriod[p.key] === 0}
+                    className="w-full rounded-xl"
+                  >
+                    {generating === p.key ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                    PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => generatePptx(p.key)}
+                    disabled={generatingPptx === p.key || mentions.length === 0 || totalsByPeriod[p.key] === 0}
+                    className="w-full rounded-xl"
+                  >
+                    {generatingPptx === p.key ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Presentation className="w-4 h-4 mr-2" />}
+                    PPTX
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

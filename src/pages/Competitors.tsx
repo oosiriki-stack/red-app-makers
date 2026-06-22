@@ -112,10 +112,10 @@ export default function Competitors() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Analyse Concurrentielle</h1>
-          <p className="text-muted-foreground">Comparez votre e-réputation à celle de vos concurrents</p>
+          <h1 className="text-2xl md:text-3xl font-light tracking-tight">Analyse Concurrentielle</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">Comparez votre e-réputation à celle de vos concurrents</p>
         </div>
 
         {!brand && (
@@ -155,7 +155,7 @@ export default function Competitors() {
 
         {brand && competitors.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
               <Card className="glass-card rounded-2xl">
                 <CardContent className="p-4">
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><Trophy className="w-3.5 h-3.5 text-primary" />Leader actuel</div>
