@@ -90,8 +90,16 @@ Deno.serve(async (req) => {
 
 function json(b: any, s = 200) { return new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
 function enabledPlatforms(p: Record<string, boolean>) { const any = DEFAULT_PLATFORMS.some((k) => p[k]); const out: Record<string, boolean> = {}; for (const k of DEFAULT_PLATFORMS) out[k] = any ? Boolean(p[k]) : true; return out; }
-function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number, source_url?: string) { return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date, source_url: source_url || null }; }
+function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number, source_url?: string) { const sentiment = detectSentiment(content); return { user_id, source, author, avatar: null, content, sentiment, engagement, mention_date: date, source_url: source_url || null, impact_score: computeImpact(source, engagement, sentiment, content) }; }
 function detectSentiment(t: string) { const x = (t || "").toLowerCase(); const neg = ["nul","horrible","déçu","decu","arnaque","scandale","honte","mauvais","pire","pourri","boycott","fraude","catastrophe","problème","bug","panne","plainte"]; const pos = ["bravo","génial","genial","super","excellent","merci","top","parfait","incroyable","j'adore","jadore","recommande","qualité","innovant"]; if (neg.some((w) => x.includes(w))) return "negative"; if (pos.some((w) => x.includes(w))) return "positive"; return "neutral"; }
+function computeImpact(source: string, engagement: number, sentiment: string, content: string) {
+  const audienceWeight: Record<string, number> = { x: 25, facebook: 22, instagram: 22, tiktok: 28, linkedin: 18, google: 30, blog: 18, reddit: 15 };
+  const audience = audienceWeight[source] ?? 15;
+  const eng = Math.min(40, Math.round(Math.log2(1 + (engagement || 0)) * 6));
+  const intensity = sentiment === "negative" ? 30 : sentiment === "positive" ? 15 : 8;
+  const lengthBonus = Math.min(5, Math.round((content || "").length / 200));
+  return Math.max(0, Math.min(100, audience + eng + intensity + lengthBonus));
+}
 async function fetchWithTimeout(u: string, t = 9000) { const c = new AbortController(); const tm = setTimeout(() => c.abort(), t); try { return await fetch(u, { headers: { "User-Agent": UA, "Accept": "application/json, application/rss+xml, text/xml, */*" }, signal: c.signal }); } finally { clearTimeout(tm); } }
 function safeDate(d?: string) { const x = d ? new Date(d) : new Date(); return Number.isNaN(x.getTime()) ? new Date().toISOString() : x.toISOString(); }
 function decodeXml(s: string) { return (s || "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">"); }
