@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Loader2, Calendar, TrendingUp, BarChart3, PieChart as PieIcon } from "lucide-react";
+import { FileText, Download, Loader2, Calendar, TrendingUp, BarChart3, PieChart as PieIcon, Presentation } from "lucide-react";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePdfReport, filterByPeriod, type ReportPeriod, type Mention } from "@/lib/pdfReport";
+import { generatePptxReport } from "@/lib/pptxReport";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, BarChart, Bar, Legend } from "recharts";
 
 const PERIODS: { key: ReportPeriod; label: string; auto?: string }[] = [
@@ -27,6 +28,23 @@ export default function Reports() {
   const [alertsCount, setAlertsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<ReportPeriod | null>(null);
+  const [generatingPptx, setGeneratingPptx] = useState<ReportPeriod | null>(null);
+
+  const generatePptx = async (period: ReportPeriod) => {
+    setGeneratingPptx(period);
+    try {
+      generatePptxReport({
+        brand: brand || "Surveillance",
+        period,
+        mentions: filterByPeriod(mentions, period),
+        alertsCount,
+        ownerName: profile?.name,
+        ownerEmail: user?.email ?? undefined,
+      });
+      toast.success(`Présentation ${period} téléchargée`);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setGeneratingPptx(null); }
+  };
 
   useEffect(() => {
     if (!user) return;
