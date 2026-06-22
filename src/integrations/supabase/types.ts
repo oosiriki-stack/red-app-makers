@@ -100,6 +100,7 @@ export type Database = {
           enriched_at: string | null
           entities: Json | null
           id: string
+          impact_score: number | null
           interactions: Json | null
           is_sarcastic: boolean | null
           mention_date: string
@@ -121,6 +122,7 @@ export type Database = {
           enriched_at?: string | null
           entities?: Json | null
           id?: string
+          impact_score?: number | null
           interactions?: Json | null
           is_sarcastic?: boolean | null
           mention_date?: string
@@ -142,6 +144,7 @@ export type Database = {
           enriched_at?: string | null
           entities?: Json | null
           id?: string
+          impact_score?: number | null
           interactions?: Json | null
           is_sarcastic?: boolean | null
           mention_date?: string
@@ -165,8 +168,10 @@ export type Database = {
           id: string
           keywords: string[]
           monitoring_started_at: string
+          paused_at: string | null
           person: string | null
           platforms: Json
+          previous_brand: string | null
           updated_at: string
           user_id: string
         }
@@ -179,8 +184,10 @@ export type Database = {
           id?: string
           keywords?: string[]
           monitoring_started_at?: string
+          paused_at?: string | null
           person?: string | null
           platforms?: Json
+          previous_brand?: string | null
           updated_at?: string
           user_id: string
         }
@@ -193,8 +200,10 @@ export type Database = {
           id?: string
           keywords?: string[]
           monitoring_started_at?: string
+          paused_at?: string | null
           person?: string | null
           platforms?: Json
+          previous_brand?: string | null
           updated_at?: string
           user_id?: string
         }
