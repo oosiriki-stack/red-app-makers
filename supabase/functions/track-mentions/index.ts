@@ -264,7 +264,14 @@ function enabledPlatforms(platforms: Record<string, boolean>) {
 }
 
 function toMention(user_id: string, source: string, author: string, content: string, date: string, engagement: number, source_url?: string) {
-  return { user_id, source, author, avatar: null, content, sentiment: detectSentiment(content), engagement, mention_date: date, source_url: source_url || null };
+  const sentiment = detectSentiment(content);
+  const audienceWeight: Record<string, number> = { x: 25, facebook: 22, instagram: 22, tiktok: 28, linkedin: 18, google: 30, blog: 18, reddit: 15 };
+  const audience = audienceWeight[source] ?? 15;
+  const eng = Math.min(40, Math.round(Math.log2(1 + (engagement || 0)) * 6));
+  const intensity = sentiment === "negative" ? 30 : sentiment === "positive" ? 15 : 8;
+  const lengthBonus = Math.min(5, Math.round((content || "").length / 200));
+  const impact_score = Math.max(0, Math.min(100, audience + eng + intensity + lengthBonus));
+  return { user_id, source, author, avatar: null, content, sentiment, engagement, mention_date: date, source_url: source_url || null, impact_score };
 }
 
 function detectSentiment(text: string): string {

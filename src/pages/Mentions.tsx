@@ -42,6 +42,14 @@ type Mention = {
   is_sarcastic?: boolean | null;
   theme?: string | null;
   entities?: any;
+  impact_score?: number | null;
+};
+
+const impactStyle = (score: number) => {
+  if (score >= 75) return { label: "🔥 Impact critique", cls: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+  if (score >= 55) return { label: "⚡ Impact élevé", cls: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" };
+  if (score >= 35) return { label: "Impact moyen", cls: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+  return { label: "Impact faible", cls: "bg-muted text-muted-foreground" };
 };
 
 const EMOTION_LABEL: Record<string, { label: string; cls: string }> = {
@@ -441,6 +449,9 @@ export default function Mentions() {
                       )}
                       {m.is_sarcastic && (
                         <Badge variant="outline" className="text-[10px] rounded-md py-0 border-purple-500/50 text-purple-600 dark:text-purple-400">🎭 Sarcasme</Badge>
+                      )}
+                      {typeof m.impact_score === "number" && m.impact_score > 0 && (
+                        <Badge className={`text-[10px] border-0 rounded-md py-0 ${impactStyle(m.impact_score).cls}`} title={`Score d'impact : ${m.impact_score}/100`}>{impactStyle(m.impact_score).label} · {m.impact_score}</Badge>
                       )}
                       <span className="text-muted-foreground ml-auto">{d.toLocaleDateString("fr-FR")} · {d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
