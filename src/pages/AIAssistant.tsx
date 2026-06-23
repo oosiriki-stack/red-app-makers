@@ -107,8 +107,13 @@ export default function AIAssistant() {
         }
       }
     } catch (e: any) {
-      toast.error(e.message || "Erreur FocusGPT");
-      setMessages((m) => m.slice(0, -1));
+      const msg = e?.message || "Erreur FocusGPT";
+      const isCredits = /crédits|402/i.test(msg);
+      const fallback = isCredits
+        ? "⚠️ **Crédits IA épuisés**\n\nLe quota d'IA du workspace est atteint. L'administrateur doit recharger des crédits pour réactiver FocusGPT.\n\nEn attendant, vous pouvez consulter vos mentions et alertes normalement."
+        : `⚠️ ${msg}`;
+      setMessages((m) => { const c = [...m]; c[c.length - 1] = { role: "assistant", content: fallback }; return c; });
+      if (!isCredits) toast.error(msg);
     } finally {
       setStreaming(false);
     }
