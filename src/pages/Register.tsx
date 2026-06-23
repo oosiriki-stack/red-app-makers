@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { AtSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Register() {
