@@ -80,9 +80,13 @@ export default function AIAssistant() {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({ messages: next, context }),
       });
-      if (!res.ok || !res.body) {
+      const ctype = res.headers.get("content-type") || "";
+      if (ctype.includes("application/json")) {
         const err = await res.json().catch(() => ({ error: "Erreur" }));
         throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      if (!res.ok || !res.body) {
+        throw new Error(`HTTP ${res.status}`);
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
