@@ -156,17 +156,29 @@ export default function Settings() {
     // Premier cycle immédiat
     runTracker();
     // Cycles automatiques sous 2 minutes pour garantir l'affichage rapide
-    // d'une éventuelle réaction (les inserts arrivent en temps réel sur /mentions).
     const schedule = [30_000, 60_000, 90_000, 120_000];
     schedule.forEach((delay) => {
       setTimeout(() => {
         supabase.functions.invoke("track-mentions").catch(() => {});
       }, delay);
     });
+    // Après 30s : pré-remplir le fil avec des mentions simulées sur 30 jours
+    setTimeout(() => {
+      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id } })
+        .then(({ data }: any) => {
+          if (data?.ok) {
+            toast.success(`📡 ${data.inserted} mentions chargées`, {
+              description: `Fil d'actualité enrichi sur ${data.platforms?.length || 0} plateformes (30 derniers jours)`,
+            });
+          }
+        })
+        .catch(() => {});
+    }, 30_000);
     // Marqueur pour que la page Mentions sache qu'on est en fenêtre prioritaire
     try {
       localStorage.setItem("arobase_priority_until", String(Date.now() + 130_000));
     } catch {}
+
     navigate("/mentions");
   };
 
