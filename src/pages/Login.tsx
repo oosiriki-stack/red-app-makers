@@ -20,7 +20,6 @@ export default function Login() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // Si déjà connecté (ex: retour OAuth Google/Apple), rediriger
   useEffect(() => {
     if (!authLoading && user) {
       navigate("/dashboard", { replace: true });
