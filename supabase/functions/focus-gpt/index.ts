@@ -63,9 +63,9 @@ ${context ? `\nContexte utilisateur: ${context}` : ""}`;
       }),
     });
 
-    if (response.status === 429) return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (response.status === 402) return new Response(JSON.stringify({ error: "Crédits IA épuisés. Contactez le support." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!response.ok) return new Response(JSON.stringify({ error: `AI gateway error ${response.status}` }), { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (response.status === 429) return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant.", fallback: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (response.status === 402) return new Response(JSON.stringify({ error: "Crédits IA épuisés. Rechargez depuis Settings → Plans & credits.", fallback: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!response.ok) return new Response(JSON.stringify({ error: `AI gateway error ${response.status}`, fallback: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
   } catch (e) {
