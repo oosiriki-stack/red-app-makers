@@ -13,11 +13,12 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
+import { LOCALES, useLocale } from "@/lib/locale";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -221,6 +222,7 @@ export default function Settings() {
             <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
             <TabsTrigger value="rss" className="flex-1 rounded-lg">RSS Watch</TabsTrigger>
             <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
+            <TabsTrigger value="langue" className="flex-1 rounded-lg">Langue locale</TabsTrigger>
             <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
           </TabsList>
 
@@ -428,6 +430,10 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
+
+          <TabsContent value="langue">
+            <LocaleSettingsCard />
+          </TabsContent>
 
           <TabsContent value="accessibilite">
             <Card className="glass-card rounded-2xl">
