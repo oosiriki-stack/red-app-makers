@@ -89,12 +89,13 @@ export default function Mentions() {
   const [generating, setGenerating] = useState<string | null>(null);
   const { user } = useAuth();
   const { isTrial, isPaid } = useSubscription();
-  const demoLimit = isTrial && !isPaid ? 10 : 1000;
+  const trialLocked = isTrial && !isPaid; // accès limité à 3 mentions visibles, le reste flouté
+  const FREE_PREVIEW = 3;
 
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
-    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(demoLimit);
+    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(1000);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);

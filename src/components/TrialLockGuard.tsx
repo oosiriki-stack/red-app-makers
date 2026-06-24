@@ -30,7 +30,7 @@ export function TrialLockGuard({ children }: { children: ReactNode }) {
           </div>
           <h2 className="text-xl font-medium">Période d'essai terminée</h2>
           <p className="text-sm text-muted-foreground">
-            Votre essai gratuit de 14 jours est terminé. Activez un plan pour continuer à utiliser Focus.
+            Votre essai gratuit de 7 jours est terminé. Activez un plan pour continuer à utiliser Focus.
           </p>
           <Button className="rounded-xl w-full" onClick={() => navigate("/pricing")}>Voir les plans</Button>
         </Card>
