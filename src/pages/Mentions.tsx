@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ const THEME_LABEL: Record<string, string> = {
 
 export default function Mentions() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const queryFromUrl = searchParams.get("q") || "";
   const [sourceFilter, setSourceFilter] = useState("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
@@ -89,12 +91,13 @@ export default function Mentions() {
   const [generating, setGenerating] = useState<string | null>(null);
   const { user } = useAuth();
   const { isTrial, isPaid } = useSubscription();
-  const demoLimit = isTrial && !isPaid ? 10 : 1000;
+  const trialLocked = isTrial && !isPaid; // accès limité à 3 mentions visibles, le reste flouté
+  const FREE_PREVIEW = 3;
 
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
-    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(demoLimit);
+    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(1000);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);
@@ -428,15 +431,16 @@ export default function Mentions() {
               </CardContent>
             </Card>
           )}
-          {displayMentions.map((m) => {
+          {displayMentions.map((m, idx) => {
             const sc = sentimentConfig[m.sentiment as keyof typeof sentimentConfig] || sentimentConfig.neutral;
             const avatarText = (m.author || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
             const d = new Date(m.mention_date);
+            const isLocked = trialLocked && idx >= FREE_PREVIEW;
             return (
-              <Card key={m.id} className="glass-card rounded-2xl card-hover">
-                <CardContent className="p-4 flex items-start gap-3">
+              <Card key={m.id} className="glass-card rounded-2xl card-hover relative overflow-hidden">
+                <CardContent className={`p-4 flex items-start gap-3 ${isLocked ? "blur-md select-none pointer-events-none" : ""}`}>
                   <Avatar className="h-9 w-9"><AvatarFallback className="bg-muted text-xs">{avatarText}</AvatarFallback></Avatar>
-                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setSelected(m); setReply({}); }}>
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { if (isLocked) return; setSelected(m); setReply({}); }}>
                     <div className="flex items-center gap-1.5 flex-wrap text-xs">
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
@@ -470,9 +474,27 @@ export default function Mentions() {
                     </Button>
                   </div>
                 </CardContent>
+                {isLocked && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[2px]">
+                    <Button size="sm" className="rounded-xl gap-1.5 shadow-lg" onClick={() => navigate("/pricing")}>
+                      <Lock className="h-3.5 w-3.5" />Débloquer avec une licence
+                    </Button>
+                  </div>
+                )}
               </Card>
             );
           })}
+          {trialLocked && displayMentions.length > FREE_PREVIEW && (
+            <Card className="glass-card rounded-2xl border-primary/30">
+              <CardContent className="p-5 text-center space-y-2">
+                <p className="text-sm font-medium">🔒 {displayMentions.length - FREE_PREVIEW} mention(s) supplémentaire(s) verrouillée(s)</p>
+                <p className="text-xs text-muted-foreground">Votre essai gratuit vous permet de voir 3 mentions. Activez une licence pour accéder à l'intégralité du flux, aux réponses IA et aux exports.</p>
+                <Button className="rounded-xl mt-2" onClick={() => navigate("/pricing")}>
+                  <Lock className="h-4 w-4 mr-1.5" />Activer ma licence
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Mention detail with AI replies */}

@@ -13,11 +13,12 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
+import { LOCALES, useLocale } from "@/lib/locale";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -221,6 +222,7 @@ export default function Settings() {
             <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
             <TabsTrigger value="rss" className="flex-1 rounded-lg">RSS Watch</TabsTrigger>
             <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
+            <TabsTrigger value="langue" className="flex-1 rounded-lg">Langue locale</TabsTrigger>
             <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
           </TabsList>
 
@@ -429,6 +431,10 @@ export default function Settings() {
           </TabsContent>
 
 
+          <TabsContent value="langue">
+            <LocaleSettingsCard />
+          </TabsContent>
+
           <TabsContent value="accessibilite">
             <Card className="glass-card rounded-2xl">
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><Type className="h-4 w-4" /> Taille de la police</CardTitle></CardHeader>
@@ -450,5 +456,38 @@ export default function Settings() {
         </Tabs>
       </div>
     </AnimatedPage>
+  );
+}
+
+function LocaleSettingsCard() {
+  const [locale, setLoc] = useLocale();
+  return (
+    <Card className="glass-card rounded-2xl">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Languages className="h-4 w-4" /> Langue locale
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Choisissez la langue locale dans laquelle vous souhaitez recevoir vos résumés audio, alertes et réponses IA. Idéal pour mieux engager vos audiences africaines.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {LOCALES.map((l) => (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => { setLoc(l.code); toast.success(`Langue : ${l.label}`); }}
+              className={`text-sm px-3 py-2.5 rounded-xl border transition ${locale === l.code ? "border-primary bg-primary/10 text-primary font-medium" : "border-border/60 hover:border-primary/50 hover:bg-muted/40"}`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-foreground italic">
+          Les contenus générés par l'IA (réponses, résumés vocaux, alertes) seront progressivement adaptés à la langue sélectionnée.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
