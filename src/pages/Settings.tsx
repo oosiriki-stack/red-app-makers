@@ -458,3 +458,36 @@ export default function Settings() {
     </AnimatedPage>
   );
 }
+
+function LocaleSettingsCard() {
+  const [locale, setLoc] = useLocale();
+  return (
+    <Card className="glass-card rounded-2xl">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Languages className="h-4 w-4" /> Langue locale
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Choisissez la langue locale dans laquelle vous souhaitez recevoir vos résumés audio, alertes et réponses IA. Idéal pour mieux engager vos audiences africaines.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {LOCALES.map((l) => (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => { setLoc(l.code); toast.success(`Langue : ${l.label}`); }}
+              className={`text-sm px-3 py-2.5 rounded-xl border transition ${locale === l.code ? "border-primary bg-primary/10 text-primary font-medium" : "border-border/60 hover:border-primary/50 hover:bg-muted/40"}`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-foreground italic">
+          Les contenus générés par l'IA (réponses, résumés vocaux, alertes) seront progressivement adaptés à la langue sélectionnée.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
