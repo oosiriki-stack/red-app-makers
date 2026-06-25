@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
-import { LOCALES, useLocale } from "@/lib/locale";
+// LOCALES / useLocale temporairement retirés : module Langue locale en cours de développement
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
