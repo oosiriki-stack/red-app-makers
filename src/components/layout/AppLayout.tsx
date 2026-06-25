@@ -1,6 +1,6 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
-import { Bell, Moon, Sun, Search, Target } from "lucide-react";
+import { Bell, Moon, Sun, Search, Target, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
