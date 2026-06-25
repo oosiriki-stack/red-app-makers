@@ -17,6 +17,7 @@ import { TrialLockGuard } from "@/components/TrialLockGuard";
 export function AppLayout() {
   useNotifications();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const [dark, setDark] = useState(() => localStorage.getItem("arobase_dark") === "true");
   const [initials, setInitials] = useState("U");
@@ -36,6 +37,19 @@ export function AppLayout() {
     refreshUnread();
   }, [user]);
 
+  // Top-up automatique : injecte un flot continu de mentions/alertes uniques toutes les 90s
+  useEffect(() => {
+    if (!user) return;
+    const tick = () => {
+      let competitors: string[] = [];
+      try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
+      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors } }).catch(() => {});
+    };
+    const id = setInterval(tick, 90_000);
+    const first = setTimeout(tick, 15_000);
+    return () => { clearInterval(id); clearTimeout(first); };
+  }, [user]);
+
   useRealtimeTable("alerts", user?.id, {
     onInsert: () => refreshUnread(),
     onUpdate: () => refreshUnread(),
@@ -47,6 +61,8 @@ export function AppLayout() {
     document.documentElement.classList.toggle("dark");
     localStorage.setItem("arobase_dark", String(next));
   };
+
+  const showBack = !["/", "/dashboard"].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
