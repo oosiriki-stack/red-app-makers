@@ -82,12 +82,15 @@ export default function Login() {
             </div>
             <div>
               <Label className="text-foreground">Mot de passe</Label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground backdrop-blur-sm" />
+              <PasswordInput placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground backdrop-blur-sm" />
             </div>
             <Button type="submit" className="w-full font-semibold text-base h-11" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Se connecter
             </Button>
+
+            <SocialLoginButtons />
+
 
 
             <p className="text-sm text-center text-muted-foreground">
