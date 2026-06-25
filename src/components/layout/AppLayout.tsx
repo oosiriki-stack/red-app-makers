@@ -102,7 +102,7 @@ export function AppLayout() {
 
       <TrialBanner />
 
-      <main className="flex-1 p-3 md:p-6 pb-32 overflow-auto">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 md:pt-6 pb-28 md:pb-32 overflow-auto">
         <div className="max-w-6xl mx-auto w-full">
           <TrialLockGuard>
             <Outlet />
