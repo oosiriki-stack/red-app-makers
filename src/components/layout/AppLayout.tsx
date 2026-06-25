@@ -66,14 +66,19 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-40 h-14 px-4 flex items-center gap-3 border-b border-border/40 glass-header">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-md shadow-primary/30">
+      <header className="sticky top-0 z-40 h-14 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border-b border-border/40 glass-header">
+        {showBack && (
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        )}
+        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-md shadow-primary/30 shrink-0">
             <Target className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
           </div>
-          <span className="font-bold tracking-tight text-gradient-red hidden sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
+          <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")}><Search className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</Button>
           <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
