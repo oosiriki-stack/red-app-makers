@@ -90,13 +90,17 @@ export default function Register() {
             </div>
             <div>
               <Label className="text-foreground/80">Mot de passe *</Label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
+              <PasswordInput placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
               <p className="text-xs text-muted-foreground mt-1">Minimum 6 caractères</p>
             </div>
             <Button type="submit" className="w-full font-semibold text-base h-11" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Créer mon compte
             </Button>
+
+            <SocialLoginButtons />
+
+
 
             <p className="text-sm text-center text-muted-foreground">
               Déjà un compte ?{" "}
