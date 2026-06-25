@@ -9,6 +9,8 @@ import { AtSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PasswordInput } from "@/components/PasswordInput";
+import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 
 export default function Login() {
   const [email, setEmail] = useState("");
