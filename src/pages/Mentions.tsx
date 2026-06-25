@@ -97,7 +97,7 @@ export default function Mentions() {
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
-    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(1000);
+    let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(5000);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
     if (queryFromUrl) query = query.or(`content.ilike.%${queryFromUrl}%,author.ilike.%${queryFromUrl}%`);
