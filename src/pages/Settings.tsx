@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
-import { LOCALES, useLocale } from "@/lib/locale";
+// LOCALES / useLocale temporairement retirés : module Langue locale en cours de développement
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -460,7 +460,6 @@ export default function Settings() {
 }
 
 function LocaleSettingsCard() {
-  const [locale, setLoc] = useLocale();
   return (
     <Card className="glass-card rounded-2xl">
       <CardHeader>
@@ -469,25 +468,18 @@ function LocaleSettingsCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Choisissez la langue locale dans laquelle vous souhaitez recevoir vos résumés audio, alertes et réponses IA. Idéal pour mieux engager vos audiences africaines.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {LOCALES.map((l) => (
-            <button
-              key={l.code}
-              type="button"
-              onClick={() => { setLoc(l.code); toast.success(`Langue : ${l.label}`); }}
-              className={`text-sm px-3 py-2.5 rounded-xl border transition ${locale === l.code ? "border-primary bg-primary/10 text-primary font-medium" : "border-border/60 hover:border-primary/50 hover:bg-muted/40"}`}
-            >
-              {l.label}
-            </button>
-          ))}
+        <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-center space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Languages className="w-7 h-7 text-primary" />
+          </div>
+          <p className="text-base font-semibold">🛠️ Module en cours de développement</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            La gestion des langues locales (Wolof, Bambara, Lingala, Swahili, Haoussa, Yoruba, Fon…) sera disponible prochainement pour adapter automatiquement vos résumés IA et alertes.
+          </p>
+          <Badge variant="outline" className="rounded-lg text-[11px] uppercase tracking-wider">Bientôt disponible</Badge>
         </div>
-        <p className="text-[11px] text-muted-foreground italic">
-          Les contenus générés par l'IA (réponses, résumés vocaux, alertes) seront progressivement adaptés à la langue sélectionnée.
-        </p>
       </CardContent>
     </Card>
   );
 }
+

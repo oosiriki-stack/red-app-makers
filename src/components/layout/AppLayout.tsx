@@ -1,6 +1,6 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
-import { Bell, Moon, Sun, Search, Target } from "lucide-react";
+import { Bell, Moon, Sun, Search, Target, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +17,7 @@ import { TrialLockGuard } from "@/components/TrialLockGuard";
 export function AppLayout() {
   useNotifications();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const [dark, setDark] = useState(() => localStorage.getItem("arobase_dark") === "true");
   const [initials, setInitials] = useState("U");
@@ -36,6 +37,19 @@ export function AppLayout() {
     refreshUnread();
   }, [user]);
 
+  // Top-up automatique : injecte un flot continu de mentions/alertes uniques toutes les 90s
+  useEffect(() => {
+    if (!user) return;
+    const tick = () => {
+      let competitors: string[] = [];
+      try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
+      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors } }).catch(() => {});
+    };
+    const id = setInterval(tick, 90_000);
+    const first = setTimeout(tick, 15_000);
+    return () => { clearInterval(id); clearTimeout(first); };
+  }, [user]);
+
   useRealtimeTable("alerts", user?.id, {
     onInsert: () => refreshUnread(),
     onUpdate: () => refreshUnread(),
@@ -48,16 +62,23 @@ export function AppLayout() {
     localStorage.setItem("arobase_dark", String(next));
   };
 
+  const showBack = !["/", "/dashboard"].includes(location.pathname);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-40 h-14 px-4 flex items-center gap-3 border-b border-border/40 glass-header">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-md shadow-primary/30">
+      <header className="sticky top-0 z-40 h-14 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border-b border-border/40 glass-header">
+        {showBack && (
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        )}
+        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-md shadow-primary/30 shrink-0">
             <Target className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
           </div>
-          <span className="font-bold tracking-tight text-gradient-red hidden sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
+          <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")}><Search className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</Button>
           <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
@@ -81,7 +102,7 @@ export function AppLayout() {
 
       <TrialBanner />
 
-      <main className="flex-1 p-3 md:p-6 pb-32 overflow-auto">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 md:pt-6 pb-28 md:pb-32 overflow-auto">
         <div className="max-w-6xl mx-auto w-full">
           <TrialLockGuard>
             <Outlet />
