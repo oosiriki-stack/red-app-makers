@@ -398,6 +398,25 @@ export default function Mentions() {
             <Button variant="outline" size="sm" className="rounded-xl" onClick={enrichAI} disabled={enriching || !mentions.length}>{enriching ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}Enrichir IA</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-xl text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" disabled={!mentions.length}>
+                  <Trash2 className="h-4 w-4 mr-1" />Tout supprimer
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="glass-card rounded-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer toutes les mentions ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action supprimera définitivement les {mentions.length} mentions de votre flux. Cette opération est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Annuler</AlertDialogCancel>
+                  <AlertDialogAction className="rounded-xl bg-red-600 hover:bg-red-700" onClick={deleteAll}>Tout supprimer</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
