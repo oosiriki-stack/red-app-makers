@@ -508,6 +508,9 @@ export default function Mentions() {
                     <Button size="sm" variant="ghost" className="rounded-lg h-7 px-2 text-primary" onClick={(e) => { e.stopPropagation(); openSource(m); }}>
                       <ExternalLink className="h-3 w-3 mr-1" />Voir
                     </Button>
+                    <Button size="sm" variant="ghost" className="rounded-lg h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20" title="Supprimer cette mention" onClick={(e) => { e.stopPropagation(); deleteOne(m.id); }}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </CardContent>
                 {isLocked && (
