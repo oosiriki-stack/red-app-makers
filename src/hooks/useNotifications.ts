@@ -35,11 +35,11 @@ export function useNotifications() {
           const body = `${m.author || "—"} · ${m.source || ""}: ${(m.content || "").slice(0, 90)}`;
           const sev = m.sentiment === "negative" ? "critical" : m.sentiment === "neutral" ? "info" : "warning";
 
-          toast(`@robase — Nouvelle mention`, { description: body });
+          toast(`@focus — Nouvelle mention`, { description: body });
           if (isSoundEnabled()) playAlertSound(sev as any);
 
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-            new Notification("@robase — Nouvelle mention", {
+            new Notification("@focus — Nouvelle mention", {
               body,
               icon: "/favicon.svg",
               tag: `mention-${m.id}`,
@@ -66,7 +66,7 @@ export function useNotifications() {
           toast(a.title || "Alerte", { description: a.description });
           if (isSoundEnabled()) playAlertSound(sev as any);
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-            new Notification(a.title || "@robase — Alerte", {
+            new Notification(a.title || "@focus — Alerte", {
               body: a.description || "",
               icon: "/favicon.svg",
               tag: `alert-${a.id}`,

@@ -69,8 +69,8 @@ export default function Workspaces() {
     if (error) return toast.error(error.message);
     const link = `${window.location.origin}/invite/${(data as Invitation).token}`;
     await navigator.clipboard.writeText(link).catch(() => {});
-    const subject = encodeURIComponent(`Invitation à rejoindre ${active.name} sur @robase`);
-    const body = encodeURIComponent(`Bonjour,\n\nVous êtes invité(e) à rejoindre l'espace de travail "${active.name}" sur @robase.\n\nAcceptez l'invitation : ${link}\n\nCe lien expire dans 7 jours.`);
+    const subject = encodeURIComponent(`Invitation à rejoindre ${active.name} sur @focus`);
+    const body = encodeURIComponent(`Bonjour,\n\nVous êtes invité(e) à rejoindre l'espace de travail "${active.name}" sur @focus.\n\nAcceptez l'invitation : ${link}\n\nCe lien expire dans 7 jours.`);
     window.open(`mailto:${inviteEmail.trim()}?subject=${subject}&body=${body}`, "_blank");
     toast.success("Lien d'invitation copié et email pré-rempli");
     setInviteOpen(false); setInviteEmail(""); setInviteRole("member");

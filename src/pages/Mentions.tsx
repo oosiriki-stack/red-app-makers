@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity, CalendarDays, UserCircle } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity, CalendarDays, UserCircle, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -260,6 +261,22 @@ export default function Mentions() {
     finally { setRedditing(false); }
   };
 
+  const deleteOne = async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("mentions").delete().eq("id", id).eq("user_id", user.id);
+    if (error) return toast.error(error.message);
+    setMentions((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Mention supprimée");
+  };
+
+  const deleteAll = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("mentions").delete().eq("user_id", user.id);
+    if (error) return toast.error(error.message);
+    setMentions([]);
+    toast.success("Toutes les mentions ont été supprimées");
+  };
+
   // Auto-tracker dès qu'une surveillance est saisie (depuis la barre de recherche)
   const autoTrackedRef = useState<string>("")[0];
   useEffect(() => {
@@ -381,6 +398,25 @@ export default function Mentions() {
             <Button variant="outline" size="sm" className="rounded-xl" onClick={enrichAI} disabled={enriching || !mentions.length}>{enriching ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}Enrichir IA</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={handleRefresh} disabled={refreshing}>{refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
             <Button variant="outline" size="sm" className="rounded-xl" onClick={downloadCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-xl text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" disabled={!mentions.length}>
+                  <Trash2 className="h-4 w-4 mr-1" />Tout supprimer
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="glass-card rounded-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer toutes les mentions ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action supprimera définitivement les {mentions.length} mentions de votre flux. Cette opération est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Annuler</AlertDialogCancel>
+                  <AlertDialogAction className="rounded-xl bg-red-600 hover:bg-red-700" onClick={deleteAll}>Tout supprimer</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
@@ -471,6 +507,9 @@ export default function Mentions() {
                     </Button>
                     <Button size="sm" variant="ghost" className="rounded-lg h-7 px-2 text-primary" onClick={(e) => { e.stopPropagation(); openSource(m); }}>
                       <ExternalLink className="h-3 w-3 mr-1" />Voir
+                    </Button>
+                    <Button size="sm" variant="ghost" className="rounded-lg h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20" title="Supprimer cette mention" onClick={(e) => { e.stopPropagation(); deleteOne(m.id); }}>
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </CardContent>
