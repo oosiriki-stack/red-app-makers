@@ -17,6 +17,7 @@ import { ShieldCheck, Users, CreditCard, MessageSquare, Loader2, CheckCircle2, X
 import { toast } from "sonner";
 import { generatePaymentReceipt } from "@/lib/pdfReport";
 import { UsageMap } from "@/components/UsageMap";
+import { FakeUsersAdminMap } from "@/components/FakeUsersAdminMap";
 
 type Row = {
   id: string; name: string | null; company: string | null;
@@ -236,6 +237,7 @@ export default function SuperAdmin() {
         </div>
 
         <UsageMap />
+        {isSuperAdmin && <FakeUsersAdminMap />}
 
         <Tabs defaultValue="pending">
           <TabsList className="rounded-xl flex-wrap h-auto">
