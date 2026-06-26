@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 const LS_KEY = "focus_competitors_v1";
 
+type Sample = { content: string; author: string; source: string; sentiment: string };
 type Stat = {
   name: string;
   isMe: boolean;
@@ -20,6 +21,8 @@ type Stat = {
   negative: number;
   neutral: number;
   score: number;
+  topSources: { source: string; count: number }[];
+  samples: Sample[];
 };
 
 export default function Competitors() {
@@ -83,7 +86,11 @@ export default function Competitors() {
       const neutral = matches.filter((m) => m.sentiment === "neutral").length;
       const total = matches.length;
       const score = total > 0 ? Math.round(((positive - negative) / total) * 50 + 50) : 0;
-      return { name, isMe: name === brand, total, positive, negative, neutral, score };
+      const srcMap = new Map<string, number>();
+      matches.forEach((m) => srcMap.set(m.source, (srcMap.get(m.source) || 0) + 1));
+      const topSources = Array.from(srcMap.entries()).map(([source, count]) => ({ source, count })).sort((a, b) => b.count - a.count).slice(0, 3);
+      const samples: Sample[] = matches.slice(0, 3).map((m) => ({ content: m.content, author: m.author, source: m.source, sentiment: m.sentiment }));
+      return { name, isMe: name === brand, total, positive, negative, neutral, score, topSources, samples };
     });
   }, [brand, competitors, mentions]);
 
