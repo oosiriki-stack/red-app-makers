@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity, CalendarDays, UserCircle } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Minus, ExternalLink, Download, RefreshCw, Loader2, Volume2, Sparkles, Copy, User, Search, Radio, Activity, CalendarDays, UserCircle, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -258,6 +259,22 @@ export default function Mentions() {
       await fetchMentions();
     } catch (e: any) { toast.error(e.message || "Erreur Reddit"); }
     finally { setRedditing(false); }
+  };
+
+  const deleteOne = async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("mentions").delete().eq("id", id).eq("user_id", user.id);
+    if (error) return toast.error(error.message);
+    setMentions((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Mention supprimée");
+  };
+
+  const deleteAll = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("mentions").delete().eq("user_id", user.id);
+    if (error) return toast.error(error.message);
+    setMentions([]);
+    toast.success("Toutes les mentions ont été supprimées");
   };
 
   // Auto-tracker dès qu'une surveillance est saisie (depuis la barre de recherche)
