@@ -13,7 +13,7 @@ export function InviteCollaboratorDialog({ trigger }: { trigger?: React.ReactNod
   const [open, setOpen] = useState(false);
   const [emails, setEmails] = useState("");
   const [message, setMessage] = useState(
-    "Bonjour,\n\nJe t'invite à collaborer sur mon espace e-réputation @robase. Tu pourras consulter les mentions, alertes et rapports.\n\nÀ bientôt."
+    "Bonjour,\n\nJe t'invite à collaborer sur mon espace e-réputation @focus. Tu pourras consulter les mentions, alertes et rapports.\n\nÀ bientôt."
   );
 
   const send = () => {
@@ -22,7 +22,7 @@ export function InviteCollaboratorDialog({ trigger }: { trigger?: React.ReactNod
     const invalid = list.filter((e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
     if (invalid.length) return toast.error(`Email invalide : ${invalid[0]}`);
 
-    const subject = encodeURIComponent("Invitation à collaborer sur @robase");
+    const subject = encodeURIComponent("Invitation à collaborer sur @focus");
     const body = encodeURIComponent(
       `${message}\n\n— Connectez-vous : ${window.location.origin}/register\n\nInvitation envoyée par ${user?.email || ""}`
     );
