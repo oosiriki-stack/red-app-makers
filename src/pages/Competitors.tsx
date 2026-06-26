@@ -242,6 +242,29 @@ export default function Competitors() {
                         <span>{s.neutral} neutres</span>
                         <span>{s.negative} nég.</span>
                       </div>
+                      {s.topSources.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          <span className="text-[10px] text-muted-foreground">Sources actives :</span>
+                          {s.topSources.map((src) => (
+                            <Badge key={src.source} variant="outline" className="text-[10px] rounded-md py-0">{src.source} · {src.count}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      {s.samples.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {s.samples.map((sm, k) => (
+                            <div key={k} className="text-[11px] rounded-lg bg-muted/40 px-2 py-1.5">
+                              <span className="font-semibold">{sm.author}</span>
+                              <span className="text-muted-foreground"> · {sm.source} · </span>
+                              <span className={sm.sentiment === "positive" ? "text-green-600" : sm.sentiment === "negative" ? "text-red-600" : "text-muted-foreground"}>{sm.sentiment === "positive" ? "👍" : sm.sentiment === "negative" ? "👎" : "•"}</span>
+                              <p className="line-clamp-2 mt-0.5">{sm.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {s.total === 0 && !s.isMe && (
+                        <p className="text-[11px] text-muted-foreground italic mt-2">Aucune mention détectée. Le tracker enrichira automatiquement ce concurrent lors du prochain cycle.</p>
+                      )}
                     </div>
                   ))}
                 </div>
