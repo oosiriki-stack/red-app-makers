@@ -75,8 +75,7 @@ export default function Reports() {
         alertsCount,
         person: settings?.person,
         country: settings?.country,
-        city: settings?.city,
-        commune: settings?.commune,
+
         ownerName: profile?.name,
         ownerEmail: user?.email,
       });

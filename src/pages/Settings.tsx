@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
@@ -50,14 +50,14 @@ export default function Settings() {
 
   // Monitoring
   const [brand, setBrand] = useState("");
+  const [sector, setSector] = useState("");
   const [person, setPerson] = useState("");
   const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [commune, setCommune] = useState("");
   const [platformStates, setPlatformStates] = useState<Record<string, boolean>>(defaultPlatformStates);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [savingMonitoring, setSavingMonitoring] = useState(false);
+
 
   // Notifications
   const [notifCritical, setNotifCritical] = useState(true);
@@ -93,15 +93,15 @@ export default function Settings() {
     supabase.from("monitoring_settings").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) {
         setBrand(data.brand || "");
+        setSector((data as any).sector || "");
         setPerson((data as any).person || "");
         setCountry((data as any).country || "");
-        setCity((data as any).city || "");
-        setCommune((data as any).commune || "");
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
         if (Array.isArray((data as any).keywords)) setKeywords((data as any).keywords as string[]);
       }
     });
+
     supabase.from("subscriptions").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) setSubscription(data);
     });
@@ -141,14 +141,14 @@ export default function Settings() {
     const { error } = await supabase.from("monitoring_settings").upsert({
       user_id: user.id,
       brand,
+      sector: sector || null,
       person: person || null,
       country: country || null,
-      city: city || null,
-      commune: commune || null,
       platforms: platformStates,
       keywords,
       monitoring_started_at: new Date().toISOString(),
     } as any, { onConflict: "user_id" });
+
     setSavingMonitoring(false);
     if (error) { toast.error(error.message); return; }
     toast.success(`Surveillance activée pour "${brand}"`, {
@@ -246,32 +246,8 @@ export default function Settings() {
                   </div>
                 </div>
                 <Separator />
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Plan actif</span>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="rounded-lg capitalize">{subscription?.plan || "Aucun"}</Badge>
-                      {subscription?.status && (
-                        <Badge variant={subscription.status === "active" ? "default" : "outline"} className={`rounded-lg ${subscription.status === "active" ? "bg-green-600" : subscription.status === "pending" ? "bg-orange-500 text-white" : ""}`}>
-                          {subscription.status === "active" ? "Validé" : subscription.status === "pending" ? "En attente" : subscription.status === "expired" ? "Expiré" : subscription.status}
-                        </Badge>
-                      )}
-                      <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => navigate("/pricing")}>
-                        <CreditCard className="h-3 w-3 mr-1" />Changer
-                      </Button>
-                    </div>
-                  </div>
-                  {subscription?.expires_at && (
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Expire le</span><span>{new Date(subscription.expires_at).toLocaleDateString("fr-FR")}</span>
-                    </div>
-                  )}
-                  {subscription?.status === "active" && (
-                    <Button size="sm" variant="outline" className="rounded-xl w-full" onClick={downloadReceipt}>
-                      <CreditCard className="h-3 w-3 mr-1" />Télécharger le reçu PDF
-                    </Button>
-                  )}
-                </div>
+                <PlanActiveCard subscription={subscription} onChange={() => navigate("/pricing")} onReceipt={downloadReceipt} />
+
                 <Separator />
                 <div className="grid gap-3">
                   <div><Label>Nom</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" /></div>
@@ -302,24 +278,20 @@ export default function Settings() {
                   <Input placeholder="Ex: Nike, Apple, Ma Startup..." value={brand} onChange={(e) => setBrand(e.target.value)} className="rounded-xl mt-1" />
                 </div>
                 <div>
+                  <Label>Secteur d'activité</Label>
+                  <Input placeholder="Ex: Banque, Télécoms, E-commerce, Santé..." value={sector} onChange={(e) => setSector(e.target.value)} className="rounded-xl mt-1" />
+                  <p className="text-xs text-muted-foreground mt-1">Permet d'affiner les mentions et alertes selon votre industrie.</p>
+                </div>
+                <div>
                   <Label>Personne à surveiller (optionnel)</Label>
                   <Input placeholder="Ex: PDG, ministre, dirigeant..." value={person} onChange={(e) => setPerson(e.target.value)} className="rounded-xl mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">Surveille les mentions d'une personnalité publique (nom complet)</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <Label>Pays</Label>
-                    <Input placeholder="Ex: Côte d'Ivoire" value={country} onChange={(e) => setCountry(e.target.value)} className="rounded-xl mt-1" />
-                  </div>
-                  <div>
-                    <Label>Ville</Label>
-                    <Input placeholder="Ex: Abidjan" value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl mt-1" />
-                  </div>
-                  <div>
-                    <Label>Commune</Label>
-                    <Input placeholder="Ex: Cocody" value={commune} onChange={(e) => setCommune(e.target.value)} className="rounded-xl mt-1" />
-                  </div>
+                <div>
+                  <Label>Pays</Label>
+                  <Input placeholder="Ex: Côte d'Ivoire" value={country} onChange={(e) => setCountry(e.target.value)} className="rounded-xl mt-1" />
                 </div>
+
                 <Separator />
                 <div>
                   <Label className="mb-3 block">Plateformes à tracker</Label>
@@ -482,4 +454,84 @@ function LocaleSettingsCard() {
     </Card>
   );
 }
+
+function PlanActiveCard({ subscription, onChange, onReceipt }: { subscription: any; onChange: () => void; onReceipt: () => void; }) {
+  const plan = subscription?.plan || "Aucun";
+  const status = subscription?.status as string | undefined;
+  const isTrial = plan === "trial";
+  const planLabel = isTrial ? "Essai gratuit" : plan;
+
+  // Calcul jours restants + total pour la jauge
+  const expiresAt = subscription?.expires_at ? new Date(subscription.expires_at) : null;
+  const startAt = subscription?.start_date ? new Date(subscription.start_date) : (subscription?.validated_at ? new Date(subscription.validated_at) : null);
+  const now = Date.now();
+  const totalMs = expiresAt && startAt ? Math.max(1, expiresAt.getTime() - startAt.getTime()) : (isTrial ? 7 * 86400000 : 30 * 86400000);
+  const remainMs = expiresAt ? Math.max(0, expiresAt.getTime() - now) : 0;
+  const daysLeft = Math.ceil(remainMs / 86400000);
+  const pct = Math.max(0, Math.min(100, Math.round((remainMs / totalMs) * 100)));
+
+  const tone = status !== "active" ? "muted" : daysLeft <= 3 ? "danger" : daysLeft <= 7 ? "warn" : "ok";
+  const gradient = tone === "danger"
+    ? "from-red-500 to-rose-600"
+    : tone === "warn"
+    ? "from-amber-400 to-orange-500"
+    : tone === "ok"
+    ? "from-emerald-500 to-teal-600"
+    : "from-muted-foreground/40 to-muted-foreground/60";
+
+  return (
+    <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-muted/30 p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Plan actif</p>
+          </div>
+          <p className="text-xl font-bold capitalize leading-tight">{planLabel}</p>
+          {status && (
+            <Badge
+              variant="outline"
+              className={`rounded-md text-[10px] ${status === "active" ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5" : status === "pending" ? "border-orange-500/40 text-orange-600 bg-orange-500/5" : "border-muted-foreground/30 text-muted-foreground"}`}
+            >
+              {status === "active" ? "✓ Validé" : status === "pending" ? "⏳ En attente" : status === "expired" ? "⚠ Expiré" : status}
+            </Badge>
+          )}
+        </div>
+        <Button variant="outline" size="sm" className="rounded-xl shrink-0 gap-1" onClick={onChange}>
+          <CreditCard className="h-3.5 w-3.5" />Changer
+        </Button>
+      </div>
+
+      {expiresAt && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Temps restant</span>
+            </div>
+            <span className={`font-bold tabular-nums ${tone === "danger" ? "text-red-600" : tone === "warn" ? "text-orange-600" : "text-foreground"}`}>
+              {daysLeft > 0 ? `${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : "Expiré"}
+            </span>
+          </div>
+          <div className="relative h-2.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${gradient} transition-all duration-700 ease-out shadow-sm`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Expire le <span className="font-medium text-foreground">{expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</span>
+          </p>
+        </div>
+      )}
+
+      {status === "active" && !isTrial && (
+        <Button size="sm" variant="ghost" className="rounded-xl w-full mt-3 text-xs hover:bg-primary/5" onClick={onReceipt}>
+          <CreditCard className="h-3 w-3 mr-1.5" />Télécharger le reçu PDF
+        </Button>
+      )}
+    </div>
+  );
+}
+
 

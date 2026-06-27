@@ -46,6 +46,74 @@ const NEG_TEMPLATES = [
   "Commande {brand} en retard de {n} jours, aucune communication",
 ];
 
+// Modèles spécifiques par secteur d'activité — rendent les notifications cohérentes avec le métier
+const SECTOR_TEMPLATES: Record<string, { pos: string[]; neu: string[]; neg: string[] }> = {
+  banque: {
+    pos: ["L'app mobile de {brand} a vraiment changé ma gestion de compte 🏦", "Virement instantané {brand} en {n} secondes, top !", "Conseiller {brand} super pro pour mon crédit immobilier"],
+    neu: ["Les nouveaux frais de {brand} entrent en vigueur ce mois", "Webinaire {brand} sur l'épargne ce jeudi", "{brand} ouvre une nouvelle agence #{n}"],
+    neg: ["Carte bancaire {brand} bloquée sans préavis, scandaleux", "Frais cachés découverts sur mon relevé {brand}", "App {brand} en panne depuis {n}h, impossible de payer"],
+  },
+  télécoms: {
+    pos: ["La 5G {brand} dans mon quartier, débit incroyable 🚀", "Forfait {brand} renouvelé, toujours imbattable", "Couverture {brand} parfaite même en zone rurale"],
+    neu: ["{brand} annonce une nouvelle offre fibre à {n} Mbps", "Maintenance réseau {brand} prévue cette nuit", "Comparatif des forfaits {brand} 2026"],
+    neg: ["Coupure réseau {brand} depuis {n} heures dans ma ville", "SAV {brand} injoignable, ça devient ridicule", "Facture {brand} doublée sans explication"],
+  },
+  "e-commerce": {
+    pos: ["Livraison {brand} en {n}h, emballage soigné 📦", "Retour produit {brand} remboursé en 24h, parfait", "Sélection {brand} toujours au top pour les fêtes"],
+    neu: ["Soldes {brand} démarrent demain à minuit", "{brand} lance sa marketplace cette semaine", "Nouveau partenariat logistique {brand}"],
+    neg: ["Colis {brand} perdu, aucune nouvelle depuis {n} jours", "Article {brand} non conforme à la photo 😤", "Service client {brand} qui ne répond jamais"],
+  },
+  santé: {
+    pos: ["Prise de RDV {brand} simplissime, médecin sous {n} jours 👩‍⚕️", "Téléconsultation {brand} efficace et rapide", "Pharmacie partenaire {brand} très professionnelle"],
+    neu: ["{brand} publie son rapport annuel de santé publique", "Nouvelle campagne de prévention {brand}", "Conférence {brand} sur la santé connectée"],
+    neg: ["Remboursement {brand} qui traîne depuis {n} semaines", "Application {brand} bug lors de la prise de RDV", "Manque de transparence sur les tarifs {brand}"],
+  },
+  éducation: {
+    pos: ["Plateforme {brand} ultra intuitive pour mes cours 📚", "Formation {brand} terminée, certifié en {n} semaines", "Profs {brand} disponibles et bienveillants"],
+    neu: ["{brand} ouvre les inscriptions pour la rentrée", "Nouveau MOOC {brand} sur l'IA disponible", "Partenariat {brand} avec {n} universités"],
+    neg: ["Plateforme {brand} inaccessible pendant l'examen 😡", "Support pédagogique {brand} très en retard", "Tarifs {brand} prohibitifs pour les étudiants"],
+  },
+  restauration: {
+    pos: ["Plat du jour chez {brand} excellent comme toujours 🍽️", "Livraison {brand} en {n} minutes, encore chaud !", "Service {brand} aux petits soins ce soir"],
+    neu: ["{brand} ouvre un nouveau restaurant ce mois", "Nouvelle carte saisonnière chez {brand}", "Chef {brand} interviewé dans le magazine local"],
+    neg: ["Commande {brand} froide à l'arrivée, déçu", "Hygiène douteuse vue chez {brand} hier", "Note salée chez {brand} pour un service moyen"],
+  },
+  immobilier: {
+    pos: ["Agence {brand} a trouvé mon appart en {n} jours 🏡", "Conseils {brand} précieux pour mon prêt", "Visite organisée par {brand} très professionnelle"],
+    neu: ["{brand} publie son baromètre des prix Q{n}", "Salon immobilier avec stand {brand} ce weekend", "Nouveau programme neuf {brand} lancé"],
+    neg: ["Frais d'agence {brand} excessifs sans justification", "Dossier {brand} bloqué depuis {n} mois", "Manque de suivi de l'agent {brand}"],
+  },
+  tech: {
+    pos: ["La nouvelle version de {brand} est ultra fluide ⚡", "API {brand} très bien documentée, intégration en {n}h", "Équipe {brand} réactive sur GitHub"],
+    neu: ["{brand} annonce sa conférence dev de janvier", "Roadmap {brand} mise à jour pour 2026", "{brand} recrute {n} ingénieurs cette année"],
+    neg: ["Bug critique chez {brand} en production 🐛", "Documentation {brand} obsolète, {n}h perdues", "Support technique {brand} insuffisant"],
+  },
+  transport: {
+    pos: ["Trajet {brand} confortable et à l'heure 🚄", "Chauffeur {brand} très pro, arrivé en {n} min", "Tarifs {brand} compétitifs cette saison"],
+    neu: ["{brand} lance une nouvelle ligne ce mois", "Tarification {brand} revue pour les abonnés", "Partenariat {brand} avec la ville annoncé"],
+    neg: ["Retard {brand} de {n} heures sans information", "Annulation {brand} de dernière minute, scandaleux", "Climatisation HS dans le {brand} ce matin"],
+  },
+};
+
+function sectorKey(sector: string): string | null {
+  if (!sector) return null;
+  const s = sector.toLowerCase();
+  for (const k of Object.keys(SECTOR_TEMPLATES)) {
+    if (s.includes(k)) return k;
+  }
+  if (s.includes("bank") || s.includes("finance")) return "banque";
+  if (s.includes("telco") || s.includes("mobile") || s.includes("internet")) return "télécoms";
+  if (s.includes("commerce") || s.includes("retail") || s.includes("boutique") || s.includes("vente")) return "e-commerce";
+  if (s.includes("medical") || s.includes("hôpital") || s.includes("hopital") || s.includes("clinique") || s.includes("pharma")) return "santé";
+  if (s.includes("école") || s.includes("ecole") || s.includes("formation") || s.includes("université") || s.includes("universite")) return "éducation";
+  if (s.includes("restaurant") || s.includes("food") || s.includes("cuisine")) return "restauration";
+  if (s.includes("agence") || s.includes("logement") || s.includes("real estate")) return "immobilier";
+  if (s.includes("startup") || s.includes("logiciel") || s.includes("saas") || s.includes("dev") || s.includes("informatique")) return "tech";
+  if (s.includes("taxi") || s.includes("bus") || s.includes("train") || s.includes("vtc")) return "transport";
+  return null;
+}
+
+
 const EMOTIONS = ["joy","trust","surprise","anticipation","anger","sadness","fear","disgust"];
 const THEMES = ["produit","service-client","prix","qualité","innovation","communication","logistique"];
 const SUFFIXES = ["", " 💡", " #avis", " #expérience", " ⭐", " 🚀", " 😍", " 🤔", " (mise à jour)", " — vu sur la page officielle", " — partagez vos retours", " — qu'en pensez-vous ?"];
@@ -72,16 +140,23 @@ function buildSourceUrl(platform: string, brand: string, author: string) {
   }
 }
 
-function buildMention(opts: { user_id: string; brand: string; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
-  const { user_id, brand, platforms, competitors, baseTime, jitterMs } = opts;
+function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
+  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs } = opts;
   const r = Math.random();
   const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
-  const tplArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
+  const key = sectorKey(sector || "");
+  const sectorPack = key ? SECTOR_TEMPLATES[key] : null;
+  // 70% des mentions utilisent les templates sectoriels quand un secteur est connu
+  const useSector = sectorPack && Math.random() < 0.7;
+  const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
+  const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
+  const tplArr = sectorArr ?? genericArr;
   let target = brand;
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
   const tpl = pick(tplArr);
   const content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
   const source = pick(platforms);
+
   const offset = Math.floor(Math.random() * jitterMs);
   const author = uniqueAuthor();
   return {
@@ -116,6 +191,7 @@ Deno.serve(async (req) => {
     if (!settings?.brand) return new Response(JSON.stringify({ error: "no brand configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const brand = settings.brand as string;
+    const sector = (settings as any).sector as string | null;
     const activePlatforms = settings.platforms && typeof settings.platforms === "object"
       ? Object.entries(settings.platforms as Record<string, boolean>).filter(([_, v]) => v).map(([k]) => k)
       : PLATFORMS;
@@ -130,7 +206,7 @@ Deno.serve(async (req) => {
       // Top-up doux : 3 à 12 mentions par cycle pour rester fluide (cadence pro).
       const count = randInt(3, 12);
       for (let i = 0; i < count; i++) {
-        rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
+        rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
       }
     } else {
       // Seed initial : 30 jours, volume quotidien variable (5..200) — jamais identique entre appels.
@@ -138,7 +214,7 @@ Deno.serve(async (req) => {
         const dayCount = randInt(5, 200);
         const dayBase = now - day * dayMs;
         for (let i = 0; i < dayCount; i++) {
-          rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
+          rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
         }
       }
     }
@@ -147,6 +223,7 @@ Deno.serve(async (req) => {
     for (let i = 0; i < rows.length; i += chunkSize) {
       await sb.from("mentions").insert(rows.slice(i, i + chunkSize));
     }
+
 
     // Alertes fraîches (toujours uniques grâce au timestamp et à un identifiant aléatoire).
     const negCount = rows.filter(r => r.sentiment === "negative").length;
