@@ -36,13 +36,14 @@ type UserDetailExtras = {
   brand: string | null;
   person: string | null;
   country: string | null;
-  city: string | null;
+  sector: string | null;
   platforms: string[];
   mentionsCount: number;
   alertsCount: number;
   ticketsCount: number;
   lastMentionAt: string | null;
 };
+
 
 
 const PLANS = ["starter", "pro", "enterprise"];
@@ -166,21 +167,21 @@ export default function SuperAdmin() {
     }
     const [{ data: roleRow }, { data: ms }, { count: mc }, { count: ac }, { count: tc }, { data: lastM }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", u.id).order("role", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("monitoring_settings").select("brand, person, country, city, platforms").eq("user_id", u.id).maybeSingle(),
+      supabase.from("monitoring_settings").select("brand, person, country, sector, platforms").eq("user_id", u.id).maybeSingle(),
       supabase.from("mentions").select("id", { count: "exact", head: true }).eq("user_id", u.id),
       supabase.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", u.id),
       supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("user_id", u.id),
       supabase.from("mentions").select("created_at").eq("user_id", u.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
-    const platforms = ms?.platforms && typeof ms.platforms === "object"
-      ? Object.entries(ms.platforms as Record<string, any>).filter(([, v]) => v).map(([k]) => k)
+    const platforms = (ms as any)?.platforms && typeof (ms as any).platforms === "object"
+      ? Object.entries((ms as any).platforms as Record<string, any>).filter(([, v]) => v).map(([k]) => k)
       : [];
     setExtras({
       role: (roleRow as any)?.role ?? "user",
       brand: (ms as any)?.brand ?? null,
       person: (ms as any)?.person ?? null,
       country: (ms as any)?.country ?? null,
-      city: (ms as any)?.city ?? null,
+      sector: (ms as any)?.sector ?? null,
       platforms,
       mentionsCount: mc ?? 0,
       alertsCount: ac ?? 0,
@@ -189,6 +190,7 @@ export default function SuperAdmin() {
     });
     setLoadingExtras(false);
   };
+
 
   const downloadReceipt = (u: Row) => {
     if (!u.validated_at) { toast.error("Paiement non validé"); return; }
@@ -399,7 +401,7 @@ export default function SuperAdmin() {
                       <div><strong>Marque :</strong> {extras?.brand || "—"}</div>
                       <div><strong>Personne suivie :</strong> {extras?.person || "—"}</div>
                       <div><strong>Pays :</strong> {extras?.country || "—"}</div>
-                      <div><strong>Ville :</strong> {extras?.city || "—"}</div>
+                      <div><strong>Secteur :</strong> {extras?.sector || "—"}</div>
                       <div className="col-span-2"><strong>Plateformes :</strong> {extras?.platforms?.length ? extras.platforms.join(", ") : "—"}</div>
                     </div>
                   )}
