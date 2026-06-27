@@ -140,16 +140,23 @@ function buildSourceUrl(platform: string, brand: string, author: string) {
   }
 }
 
-function buildMention(opts: { user_id: string; brand: string; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
-  const { user_id, brand, platforms, competitors, baseTime, jitterMs } = opts;
+function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
+  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs } = opts;
   const r = Math.random();
   const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
-  const tplArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
+  const key = sectorKey(sector || "");
+  const sectorPack = key ? SECTOR_TEMPLATES[key] : null;
+  // 70% des mentions utilisent les templates sectoriels quand un secteur est connu
+  const useSector = sectorPack && Math.random() < 0.7;
+  const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
+  const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
+  const tplArr = sectorArr ?? genericArr;
   let target = brand;
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
   const tpl = pick(tplArr);
   const content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
   const source = pick(platforms);
+
   const offset = Math.floor(Math.random() * jitterMs);
   const author = uniqueAuthor();
   return {
@@ -184,6 +191,7 @@ Deno.serve(async (req) => {
     if (!settings?.brand) return new Response(JSON.stringify({ error: "no brand configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const brand = settings.brand as string;
+    const sector = (settings as any).sector as string | null;
     const activePlatforms = settings.platforms && typeof settings.platforms === "object"
       ? Object.entries(settings.platforms as Record<string, boolean>).filter(([_, v]) => v).map(([k]) => k)
       : PLATFORMS;
@@ -198,7 +206,7 @@ Deno.serve(async (req) => {
       // Top-up doux : 3 à 12 mentions par cycle pour rester fluide (cadence pro).
       const count = randInt(3, 12);
       for (let i = 0; i < count; i++) {
-        rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
+        rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
       }
     } else {
       // Seed initial : 30 jours, volume quotidien variable (5..200) — jamais identique entre appels.
@@ -206,7 +214,7 @@ Deno.serve(async (req) => {
         const dayCount = randInt(5, 200);
         const dayBase = now - day * dayMs;
         for (let i = 0; i < dayCount; i++) {
-          rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
+          rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
         }
       }
     }
@@ -215,6 +223,7 @@ Deno.serve(async (req) => {
     for (let i = 0; i < rows.length; i += chunkSize) {
       await sb.from("mentions").insert(rows.slice(i, i + chunkSize));
     }
+
 
     // Alertes fraîches (toujours uniques grâce au timestamp et à un identifiant aléatoire).
     const negCount = rows.filter(r => r.sentiment === "negative").length;
