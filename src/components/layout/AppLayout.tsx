@@ -82,8 +82,10 @@ export function AppLayout() {
           <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")}><Search className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label="Recherche"><Search className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label="Profil"><User className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</Button>
+
           <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
             <Bell className="h-4 w-4" />
             {unread > 0 && <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">{unread}</Badge>}
