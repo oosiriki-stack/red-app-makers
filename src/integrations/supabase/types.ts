@@ -161,8 +161,6 @@ export type Database = {
       monitoring_settings: {
         Row: {
           brand: string
-          city: string | null
-          commune: string | null
           country: string | null
           created_at: string
           id: string
@@ -172,13 +170,12 @@ export type Database = {
           person: string | null
           platforms: Json
           previous_brand: string | null
+          sector: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           brand?: string
-          city?: string | null
-          commune?: string | null
           country?: string | null
           created_at?: string
           id?: string
@@ -188,13 +185,12 @@ export type Database = {
           person?: string | null
           platforms?: Json
           previous_brand?: string | null
+          sector?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           brand?: string
-          city?: string | null
-          commune?: string | null
           country?: string | null
           created_at?: string
           id?: string
@@ -204,6 +200,7 @@ export type Database = {
           person?: string | null
           platforms?: Json
           previous_brand?: string | null
+          sector?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -542,13 +539,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
       is_workspace_member: {
         Args: { _user: string; _workspace: string }
         Returns: boolean
