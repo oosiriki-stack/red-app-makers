@@ -1,8 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { playAlertSound, isSoundEnabled } from "@/lib/sound";
+
+// Cadence professionnelle (Slack/Mention/Brand24) : 1 notification visible / 45s max,
+// avec agrégation silencieuse derrière. Les mentions critiques restent prioritaires.
+const NOTIF_COOLDOWN_MS = 45_000;
 
 /**
  * Active automatiquement les notifications navigateur + toast in-app + son
