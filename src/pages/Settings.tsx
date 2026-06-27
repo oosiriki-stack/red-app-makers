@@ -455,3 +455,83 @@ function LocaleSettingsCard() {
   );
 }
 
+function PlanActiveCard({ subscription, onChange, onReceipt }: { subscription: any; onChange: () => void; onReceipt: () => void; }) {
+  const plan = subscription?.plan || "Aucun";
+  const status = subscription?.status as string | undefined;
+  const isTrial = plan === "trial";
+  const planLabel = isTrial ? "Essai gratuit" : plan;
+
+  // Calcul jours restants + total pour la jauge
+  const expiresAt = subscription?.expires_at ? new Date(subscription.expires_at) : null;
+  const startAt = subscription?.start_date ? new Date(subscription.start_date) : (subscription?.validated_at ? new Date(subscription.validated_at) : null);
+  const now = Date.now();
+  const totalMs = expiresAt && startAt ? Math.max(1, expiresAt.getTime() - startAt.getTime()) : (isTrial ? 7 * 86400000 : 30 * 86400000);
+  const remainMs = expiresAt ? Math.max(0, expiresAt.getTime() - now) : 0;
+  const daysLeft = Math.ceil(remainMs / 86400000);
+  const pct = Math.max(0, Math.min(100, Math.round((remainMs / totalMs) * 100)));
+
+  const tone = status !== "active" ? "muted" : daysLeft <= 3 ? "danger" : daysLeft <= 7 ? "warn" : "ok";
+  const gradient = tone === "danger"
+    ? "from-red-500 to-rose-600"
+    : tone === "warn"
+    ? "from-amber-400 to-orange-500"
+    : tone === "ok"
+    ? "from-emerald-500 to-teal-600"
+    : "from-muted-foreground/40 to-muted-foreground/60";
+
+  return (
+    <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-card via-card to-muted/30 p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Plan actif</p>
+          </div>
+          <p className="text-xl font-bold capitalize leading-tight">{planLabel}</p>
+          {status && (
+            <Badge
+              variant="outline"
+              className={`rounded-md text-[10px] ${status === "active" ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5" : status === "pending" ? "border-orange-500/40 text-orange-600 bg-orange-500/5" : "border-muted-foreground/30 text-muted-foreground"}`}
+            >
+              {status === "active" ? "✓ Validé" : status === "pending" ? "⏳ En attente" : status === "expired" ? "⚠ Expiré" : status}
+            </Badge>
+          )}
+        </div>
+        <Button variant="outline" size="sm" className="rounded-xl shrink-0 gap-1" onClick={onChange}>
+          <CreditCard className="h-3.5 w-3.5" />Changer
+        </Button>
+      </div>
+
+      {expiresAt && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Temps restant</span>
+            </div>
+            <span className={`font-bold tabular-nums ${tone === "danger" ? "text-red-600" : tone === "warn" ? "text-orange-600" : "text-foreground"}`}>
+              {daysLeft > 0 ? `${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : "Expiré"}
+            </span>
+          </div>
+          <div className="relative h-2.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${gradient} transition-all duration-700 ease-out shadow-sm`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Expire le <span className="font-medium text-foreground">{expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</span>
+          </p>
+        </div>
+      )}
+
+      {status === "active" && !isTrial && (
+        <Button size="sm" variant="ghost" className="rounded-xl w-full mt-3 text-xs hover:bg-primary/5" onClick={onReceipt}>
+          <CreditCard className="h-3 w-3 mr-1.5" />Télécharger le reçu PDF
+        </Button>
+      )}
+    </div>
+  );
+}
+
+
