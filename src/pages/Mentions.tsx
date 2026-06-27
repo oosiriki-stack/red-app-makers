@@ -308,10 +308,25 @@ export default function Mentions() {
   };
 
   const openSource = (m: Mention) => {
-    if (m.source_url) { window.open(m.source_url, "_blank"); return; }
-    const q = encodeURIComponent(`"${m.author}" "${m.content.slice(0, 60)}"`);
-    window.open(`https://www.google.com/search?q=${q}`, "_blank");
-    toast.info("Recherche sur Google (URL source non disponible)");
+    const url = m.source_url || "";
+    const isFake = !url || /example\.com/i.test(url);
+    if (!isFake) { window.open(url, "_blank", "noopener,noreferrer"); return; }
+    // Fallback intelligent : recherche réelle sur la plateforme d'origine
+    const q = encodeURIComponent(m.query || m.author || (m.content || "").slice(0, 50));
+    const platformSearch: Record<string, string> = {
+      x: `https://x.com/search?q=${q}&f=live`,
+      facebook: `https://www.facebook.com/search/posts/?q=${q}`,
+      instagram: `https://www.instagram.com/explore/tags/${q}/`,
+      linkedin: `https://www.linkedin.com/search/results/content/?keywords=${q}`,
+      tiktok: `https://www.tiktok.com/search?q=${q}`,
+      youtube: `https://www.youtube.com/results?search_query=${q}`,
+      reddit: `https://www.reddit.com/search/?q=${q}`,
+      google: `https://news.google.com/search?q=${q}&hl=fr`,
+      blog: `https://www.google.com/search?q=${q}+blog+OR+forum`,
+    };
+    const target = platformSearch[m.source] || `https://www.google.com/search?q=${q}`;
+    window.open(target, "_blank", "noopener,noreferrer");
+    toast.info(`Recherche ouverte sur ${m.source}`);
   };
 
   const generateReplyFor = async (target: Mention, tone: "pro" | "commercial" | "humor") => {
