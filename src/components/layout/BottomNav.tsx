@@ -9,16 +9,16 @@ const primary = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Accueil" },
   { to: "/mentions", icon: MessageSquare, label: "Mentions" },
   { to: "/ai-assistant", icon: Bot, label: "GPT", center: true },
-  { to: "/alerts", icon: Bell, label: "Alertes" },
+  { to: "/surveillance", icon: Radar, label: "Veille" },
+  { to: "/quick-chart", icon: PieChart, label: "Graphes" },
 ];
 
 const moreItems = [
+  { to: "/alerts", icon: Bell, label: "Alertes" },
+  { to: "/crisis", icon: AlertTriangle, label: "Gérer crise" },
   { to: "/workspaces", icon: Users, label: "Espaces" },
   { to: "/influencers", icon: TrendingUp, label: "Influenceurs" },
-  { to: "/quick-chart", icon: PieChart, label: "Graphiques" },
   { to: "/social-networks", icon: Share2, label: "Réseaux" },
-  { to: "/surveillance", icon: Radar, label: "Surveillance" },
-  { to: "/crisis", icon: AlertTriangle, label: "Gérer crise" },
   { to: "/competitors", icon: BarChart3, label: "Concurrence" },
   { to: "/reports", icon: FileText, label: "Rapports" },
   { to: "/support", icon: LifeBuoy, label: "Support" },

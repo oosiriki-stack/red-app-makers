@@ -54,29 +54,46 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function uniqueAuthor() { return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${Math.random() < 0.25 ? randInt(1, 99) : ""}`; }
 
+// URL source réelle vers la recherche de la plateforme (toujours cliquable et fonctionnelle)
+function buildSourceUrl(platform: string, brand: string, author: string) {
+  const q = encodeURIComponent(brand);
+  const a = encodeURIComponent(author.split(" ")[0] || "");
+  switch (platform) {
+    case "x":         return `https://x.com/search?q=${q}&src=typed_query&f=live`;
+    case "facebook":  return `https://www.facebook.com/search/posts/?q=${q}`;
+    case "instagram": return `https://www.instagram.com/explore/tags/${q}/`;
+    case "linkedin":  return `https://www.linkedin.com/search/results/content/?keywords=${q}`;
+    case "tiktok":    return `https://www.tiktok.com/search?q=${q}`;
+    case "youtube":   return `https://www.youtube.com/results?search_query=${q}`;
+    case "reddit":    return `https://www.reddit.com/search/?q=${q}`;
+    case "google":    return `https://news.google.com/search?q=${q}&hl=fr`;
+    case "blog":      return `https://www.google.com/search?q=${q}+${a}+blog+OR+forum`;
+    default:          return `https://www.google.com/search?q=${q}`;
+  }
+}
+
 function buildMention(opts: { user_id: string; brand: string; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
   const { user_id, brand, platforms, competitors, baseTime, jitterMs } = opts;
   const r = Math.random();
   const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
   const tplArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
   let target = brand;
-  // 20% chance de mentionner un concurrent (pour alimenter l'analyse concurrentielle)
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
   const tpl = pick(tplArr);
   const content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
   const source = pick(platforms);
   const offset = Math.floor(Math.random() * jitterMs);
-  const uniq = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const author = uniqueAuthor();
   return {
     user_id,
     source,
-    author: uniqueAuthor(),
+    author,
     avatar: "",
     content,
     sentiment,
     engagement: randInt(0, 1200),
     mention_date: new Date(baseTime - offset).toISOString(),
-    source_url: `https://example.com/${source}/${uniq}`,
+    source_url: buildSourceUrl(source, target, author),
     query: brand,
     requester: "seed",
     emotion: pick(EMOTIONS),
@@ -110,10 +127,10 @@ Deno.serve(async (req) => {
     const rows: any[] = [];
 
     if (mode === "topup") {
-      // Top-up : génère un flot frais (10-90 mentions sur la dernière heure) à chaque appel.
-      const count = randInt(10, 90);
+      // Top-up doux : 3 à 12 mentions par cycle pour rester fluide (cadence pro).
+      const count = randInt(3, 12);
       for (let i = 0; i < count; i++) {
-        rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: now, jitterMs: 3600 * 1000 }));
+        rows.push(buildMention({ user_id, brand, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
       }
     } else {
       // Seed initial : 30 jours, volume quotidien variable (5..200) — jamais identique entre appels.
