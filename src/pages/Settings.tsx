@@ -101,6 +101,7 @@ export default function Settings() {
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
         if (Array.isArray((data as any).keywords)) setKeywords((data as any).keywords as string[]);
+        setPaused(Boolean((data as any).paused));
       }
     });
 
