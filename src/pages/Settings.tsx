@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock, Pause, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
