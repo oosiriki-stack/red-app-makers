@@ -98,9 +98,9 @@ export default function QuickChart() {
           </TabsList>
 
           <TabsContent value="timeline">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Évolution des mentions par sentiment</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={timeline}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -116,9 +116,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="sentiment">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Répartition des sentiments</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie data={sentimentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label={(e: any) => `${e.name}: ${e.value}`}>
                     {sentimentData.map((d, i) => <Cell key={i} fill={d.color} />)}
@@ -138,9 +138,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="platforms">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Mentions par plateforme</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={platformData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="source" stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -155,9 +155,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="engagement">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Engagement total par plateforme</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={engagementData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} />
