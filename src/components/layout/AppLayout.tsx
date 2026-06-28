@@ -38,18 +38,19 @@ export function AppLayout() {
   }, [user]);
 
   // Top-up automatique : flot léger toutes les 10 min pour préserver la fluidité.
-  // Inspiré des cadences pro (Mention, Brand24, Talkwalker) : ~6 cycles/heure max.
   useEffect(() => {
     if (!user) return;
-    const tick = () => {
-      // Pause si l'onglet n'est pas visible -> économise CPU et bande passante
+    const tick = async () => {
       if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      // Respecter le mode "Pause" de la surveillance
+      const { data: ms } = await supabase.from("monitoring_settings").select("paused").eq("user_id", user.id).maybeSingle();
+      if ((ms as any)?.paused) return;
       let competitors: string[] = [];
       try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
       supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors } }).catch(() => {});
     };
-    const id = setInterval(tick, 600_000); // 10 min
-    const first = setTimeout(tick, 60_000); // premier appel après 1 min
+    const id = setInterval(tick, 600_000);
+    const first = setTimeout(tick, 60_000);
     return () => { clearInterval(id); clearTimeout(first); };
   }, [user]);
 
