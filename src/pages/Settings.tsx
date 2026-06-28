@@ -149,6 +149,7 @@ export default function Settings() {
       country: country || null,
       platforms: platformStates,
       keywords,
+      paused,
       monitoring_started_at: new Date().toISOString(),
     } as any, { onConflict: "user_id" });
 
