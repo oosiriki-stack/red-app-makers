@@ -308,26 +308,33 @@ export default function Mentions() {
   };
 
   const openSource = (m: Mention) => {
-    const url = m.source_url || "";
-    const isFake = !url || /example\.com/i.test(url);
-    if (!isFake) { window.open(url, "_blank", "noopener,noreferrer"); return; }
-    // Fallback intelligent : recherche réelle sur la plateforme d'origine
-    const q = encodeURIComponent(m.query || m.author || (m.content || "").slice(0, 50));
+    const q = encodeURIComponent(m.query || m.author || (m.content || "").slice(0, 60));
+    // Plateformes qui bloquent fréquemment l'accès direct (ERR_BLOCKED_BY_RESPONSE,
+    // pages de connexion forcées, X-Frame-Options) → fallback Google site:
+    const blockedPlatforms = ["linkedin", "instagram", "facebook", "tiktok"];
     const platformSearch: Record<string, string> = {
       x: `https://x.com/search?q=${q}&f=live`,
-      facebook: `https://www.facebook.com/search/posts/?q=${q}`,
-      instagram: `https://www.instagram.com/explore/tags/${q}/`,
-      linkedin: `https://www.linkedin.com/search/results/content/?keywords=${q}`,
-      tiktok: `https://www.tiktok.com/search?q=${q}`,
+      facebook: `https://www.google.com/search?q=${q}+site%3Afacebook.com`,
+      instagram: `https://www.google.com/search?q=${q}+site%3Ainstagram.com`,
+      linkedin: `https://www.google.com/search?q=${q}+site%3Alinkedin.com`,
+      tiktok: `https://www.google.com/search?q=${q}+site%3Atiktok.com`,
       youtube: `https://www.youtube.com/results?search_query=${q}`,
       reddit: `https://www.reddit.com/search/?q=${q}`,
       google: `https://news.google.com/search?q=${q}&hl=fr`,
-      blog: `https://www.google.com/search?q=${q}+blog+OR+forum`,
+      blog: `https://www.google.com/search?q=${q}+blog+OR+forum+OR+presse`,
     };
-    const target = platformSearch[m.source] || `https://www.google.com/search?q=${q}`;
-    window.open(target, "_blank", "noopener,noreferrer");
-    toast.info(`Recherche ouverte sur ${m.source}`);
+
+    const url = m.source_url || "";
+    const isFake = !url || /example\.com/i.test(url);
+    // Si l'URL d'origine appartient à une plateforme bloquée, on bascule sur Google
+    const isBlocked = blockedPlatforms.includes((m.source || "").toLowerCase());
+
+    const finalUrl = (!isFake && !isBlocked) ? url : (platformSearch[m.source] || `https://www.google.com/search?q=${q}`);
+    const newTab = window.open(finalUrl, "_blank", "noopener,noreferrer");
+    if (!newTab) toast.error("Le navigateur a bloqué la fenêtre. Autorisez les pop-ups.");
+    else if (isBlocked) toast.info(`${m.source} bloque l'accès direct — recherche Google ouverte`);
   };
+
 
   const generateReplyFor = async (target: Mention, tone: "pro" | "commercial" | "humor") => {
     setGenerating(tone);
