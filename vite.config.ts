@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.svg", "favicon.ico"],
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /\.[a-z0-9]+$/i],
+        cleanupOutdatedCaches: true,
       },
       manifest: {
         name: "Focus — Social Listening & e-Réputation IA",
