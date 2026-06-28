@@ -199,6 +199,24 @@ export default function Settings() {
 
   const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
 
+  const togglePause = async () => {
+    if (!user) return;
+    setTogglingPause(true);
+    const newPaused = !paused;
+    const { error } = await supabase
+      .from("monitoring_settings")
+      .upsert({ user_id: user.id, paused: newPaused, brand: brand || "" } as any, { onConflict: "user_id" });
+    setTogglingPause(false);
+    if (error) { toast.error(error.message); return; }
+    setPaused(newPaused);
+    toast.success(newPaused ? "⏸️ Surveillance mise en pause" : "▶️ Surveillance relancée", {
+      description: newPaused
+        ? "Aucune nouvelle mention ne sera collectée tant que vous n'aurez pas repris."
+        : "La collecte automatique des mentions reprend.",
+    });
+  };
+
+
   const handleFontChange = (value: number[]) => {
     const idx = value[0];
     setFontLevel(idx);
