@@ -166,6 +166,7 @@ export type Database = {
           id: string
           keywords: string[]
           monitoring_started_at: string
+          paused: boolean
           paused_at: string | null
           person: string | null
           platforms: Json
@@ -181,6 +182,7 @@ export type Database = {
           id?: string
           keywords?: string[]
           monitoring_started_at?: string
+          paused?: boolean
           paused_at?: string | null
           person?: string | null
           platforms?: Json
@@ -196,6 +198,7 @@ export type Database = {
           id?: string
           keywords?: string[]
           monitoring_started_at?: string
+          paused?: boolean
           paused_at?: string | null
           person?: string | null
           platforms?: Json
