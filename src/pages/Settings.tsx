@@ -57,6 +57,8 @@ export default function Settings() {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [savingMonitoring, setSavingMonitoring] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [togglingPause, setTogglingPause] = useState(false);
 
 
   // Notifications
