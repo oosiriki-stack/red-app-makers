@@ -191,6 +191,7 @@ Deno.serve(async (req) => {
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
     const { data: settings } = await sb.from("monitoring_settings").select("*").eq("user_id", user_id).single();
     if (!settings?.brand) return new Response(JSON.stringify({ error: "no brand configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if ((settings as any).paused) return new Response(JSON.stringify({ ok: true, paused: true, inserted: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const brand = settings.brand as string;
     const sector = (settings as any).sector as string | null;
