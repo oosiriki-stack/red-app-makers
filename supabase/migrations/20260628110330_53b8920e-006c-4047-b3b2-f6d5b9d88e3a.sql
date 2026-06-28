@@ -1,0 +1,1 @@
+ALTER TABLE public.monitoring_settings ADD COLUMN IF NOT EXISTS paused boolean NOT NULL DEFAULT false;

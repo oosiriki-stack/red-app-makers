@@ -38,18 +38,19 @@ export function AppLayout() {
   }, [user]);
 
   // Top-up automatique : flot léger toutes les 10 min pour préserver la fluidité.
-  // Inspiré des cadences pro (Mention, Brand24, Talkwalker) : ~6 cycles/heure max.
   useEffect(() => {
     if (!user) return;
-    const tick = () => {
-      // Pause si l'onglet n'est pas visible -> économise CPU et bande passante
+    const tick = async () => {
       if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      // Respecter le mode "Pause" de la surveillance
+      const { data: ms } = await supabase.from("monitoring_settings").select("paused").eq("user_id", user.id).maybeSingle();
+      if ((ms as any)?.paused) return;
       let competitors: string[] = [];
       try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
       supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors } }).catch(() => {});
     };
-    const id = setInterval(tick, 600_000); // 10 min
-    const first = setTimeout(tick, 60_000); // premier appel après 1 min
+    const id = setInterval(tick, 600_000);
+    const first = setTimeout(tick, 60_000);
     return () => { clearInterval(id); clearTimeout(first); };
   }, [user]);
 
@@ -72,7 +73,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-40 h-14 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border-b border-border/40 glass-header">
         {showBack && (
           <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label="Retour">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
         )}
         <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 min-w-0">
@@ -82,12 +83,12 @@ export function AppLayout() {
           <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label="Recherche"><Search className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label="Profil"><User className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label="Recherche"><Search className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label="Profil"><User className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
 
           <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
-            <Bell className="h-4 w-4" />
+            <Bell className="h-5 w-5" />
             {unread > 0 && <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">{unread}</Badge>}
           </Button>
           <DropdownMenu>

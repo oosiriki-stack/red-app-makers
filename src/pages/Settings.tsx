@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock, Pause, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
@@ -57,6 +57,8 @@ export default function Settings() {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
   const [savingMonitoring, setSavingMonitoring] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [togglingPause, setTogglingPause] = useState(false);
 
 
   // Notifications
@@ -99,6 +101,7 @@ export default function Settings() {
         const saved = (data.platforms as Record<string, boolean>) || {};
         setPlatformStates(Object.values(saved).some(Boolean) ? { ...defaultPlatformStates, ...saved } : defaultPlatformStates);
         if (Array.isArray((data as any).keywords)) setKeywords((data as any).keywords as string[]);
+        setPaused(Boolean((data as any).paused));
       }
     });
 
@@ -146,6 +149,7 @@ export default function Settings() {
       country: country || null,
       platforms: platformStates,
       keywords,
+      paused,
       monitoring_started_at: new Date().toISOString(),
     } as any, { onConflict: "user_id" });
 
@@ -195,6 +199,24 @@ export default function Settings() {
   };
 
   const removeKeyword = (kw: string) => setKeywords(prev => prev.filter(k => k !== kw));
+
+  const togglePause = async () => {
+    if (!user) return;
+    setTogglingPause(true);
+    const newPaused = !paused;
+    const { error } = await supabase
+      .from("monitoring_settings")
+      .upsert({ user_id: user.id, paused: newPaused, brand: brand || "" } as any, { onConflict: "user_id" });
+    setTogglingPause(false);
+    if (error) { toast.error(error.message); return; }
+    setPaused(newPaused);
+    toast.success(newPaused ? "⏸️ Surveillance mise en pause" : "▶️ Surveillance relancée", {
+      description: newPaused
+        ? "Aucune nouvelle mention ne sera collectée tant que vous n'aurez pas repris."
+        : "La collecte automatique des mentions reprend.",
+    });
+  };
+
 
   const handleFontChange = (value: number[]) => {
     const idx = value[0];
@@ -325,6 +347,22 @@ export default function Settings() {
                     </div>
                   )}
                 </div>
+                {brand && (
+                  <div className={`rounded-2xl border p-4 flex items-center justify-between gap-3 ${paused ? "bg-amber-500/10 border-amber-500/30" : "bg-emerald-500/10 border-emerald-500/30"}`}>
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${paused ? "bg-amber-500/20 text-amber-600" : "bg-emerald-500/20 text-emerald-600"}`}>
+                        {paused ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">{paused ? "Surveillance en pause" : "Surveillance active"}</p>
+                        <p className="text-xs text-muted-foreground">{paused ? "Aucune nouvelle mention n'est collectée." : "Collecte automatique en cours sur toutes les plateformes activées."}</p>
+                      </div>
+                    </div>
+                    <Button variant={paused ? "default" : "outline"} size="sm" className="rounded-xl shrink-0" onClick={togglePause} disabled={togglingPause}>
+                      {togglingPause ? <Loader2 className="h-4 w-4 animate-spin" /> : paused ? <><Play className="h-4 w-4 mr-1" />Reprendre</> : <><Pause className="h-4 w-4 mr-1" />Mettre en pause</>}
+                    </Button>
+                  </div>
+                )}
                 <Button onClick={handleSaveMonitoring} className="w-full rounded-xl" disabled={savingMonitoring}>
                   {savingMonitoring ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   {brand ? "Mettre à jour la surveillance" : "Activer la surveillance"}

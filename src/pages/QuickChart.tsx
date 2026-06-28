@@ -67,40 +67,40 @@ export default function QuickChart() {
   }, [mentions]);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto pb-24">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6 p-3 sm:p-6 max-w-6xl mx-auto pb-24">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Graphiques rapides</h1>
-        <p className="text-sm text-muted-foreground mt-1">Vue d'ensemble visuelle de vos mentions sur la période choisie.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Graphiques rapides</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Vue d'ensemble visuelle de vos mentions sur la période choisie.</p>
       </header>
 
-      <Card className="glass-card p-3 flex items-center gap-3">
-        <Filter className="w-4 h-4 text-muted-foreground" />
+      <Card className="glass-card p-2.5 sm:p-3 flex flex-wrap items-center gap-2 sm:gap-3">
+        <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-36 sm:w-44 h-9 text-sm"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="7">7 derniers jours</SelectItem>
             <SelectItem value="30">30 derniers jours</SelectItem>
             <SelectItem value="90">90 derniers jours</SelectItem>
           </SelectContent>
         </Select>
-        <div className="ml-auto text-sm text-muted-foreground">{mentions.length.toLocaleString("fr-FR")} mention{mentions.length > 1 ? "s" : ""}</div>
+        <div className="ml-auto text-xs sm:text-sm text-muted-foreground tabular-nums">{mentions.length.toLocaleString("fr-FR")} mention{mentions.length > 1 ? "s" : ""}</div>
       </Card>
 
       {loading ? (
         <Card className="glass-card p-10 text-center text-muted-foreground">Chargement des données...</Card>
       ) : (
         <Tabs defaultValue="timeline">
-          <TabsList className="glass-card">
-            <TabsTrigger value="timeline" className="gap-2"><TrendingUp className="w-4 h-4" />Évolution</TabsTrigger>
-            <TabsTrigger value="sentiment" className="gap-2"><PieIcon className="w-4 h-4" />Sentiment</TabsTrigger>
-            <TabsTrigger value="platforms" className="gap-2"><BarChart3 className="w-4 h-4" />Plateformes</TabsTrigger>
-            <TabsTrigger value="engagement" className="gap-2"><BarChart3 className="w-4 h-4" />Engagement</TabsTrigger>
+          <TabsList className="glass-card w-full overflow-x-auto flex sm:grid sm:grid-cols-4 gap-1 p-1 h-auto">
+            <TabsTrigger value="timeline" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap flex-1"><TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" /><span className="hidden xs:inline sm:inline">Évolution</span></TabsTrigger>
+            <TabsTrigger value="sentiment" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap flex-1"><PieIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Sentiment</TabsTrigger>
+            <TabsTrigger value="platforms" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap flex-1"><BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Plateformes</TabsTrigger>
+            <TabsTrigger value="engagement" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap flex-1"><BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Engagement</TabsTrigger>
           </TabsList>
 
           <TabsContent value="timeline">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Évolution des mentions par sentiment</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={timeline}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -116,9 +116,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="sentiment">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Répartition des sentiments</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie data={sentimentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label={(e: any) => `${e.name}: ${e.value}`}>
                     {sentimentData.map((d, i) => <Cell key={i} fill={d.color} />)}
@@ -138,9 +138,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="platforms">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Mentions par plateforme</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={platformData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="source" stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -155,9 +155,9 @@ export default function QuickChart() {
           </TabsContent>
 
           <TabsContent value="engagement">
-            <Card className="glass-card p-5">
+            <Card className="glass-card p-3 sm:p-5">
               <h3 className="font-bold mb-4">Engagement total par plateforme</h3>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={engagementData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} />

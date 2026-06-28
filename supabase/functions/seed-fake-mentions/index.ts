@@ -122,20 +122,22 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function uniqueAuthor() { return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${Math.random() < 0.25 ? randInt(1, 99) : ""}`; }
 
-// URL source réelle vers la recherche de la plateforme (toujours cliquable et fonctionnelle)
+// URL source réelle vers la recherche de la plateforme (toujours cliquable et fonctionnelle).
+// LinkedIn / Instagram / Facebook / TikTok exigent une connexion ou renvoient
+// ERR_BLOCKED_BY_RESPONSE en accès direct → on bascule sur Google `site:` pour rester ouvert.
 function buildSourceUrl(platform: string, brand: string, author: string) {
   const q = encodeURIComponent(brand);
   const a = encodeURIComponent(author.split(" ")[0] || "");
   switch (platform) {
     case "x":         return `https://x.com/search?q=${q}&src=typed_query&f=live`;
-    case "facebook":  return `https://www.facebook.com/search/posts/?q=${q}`;
-    case "instagram": return `https://www.instagram.com/explore/tags/${q}/`;
-    case "linkedin":  return `https://www.linkedin.com/search/results/content/?keywords=${q}`;
-    case "tiktok":    return `https://www.tiktok.com/search?q=${q}`;
+    case "facebook":  return `https://www.google.com/search?q=${q}+site%3Afacebook.com`;
+    case "instagram": return `https://www.google.com/search?q=${q}+site%3Ainstagram.com`;
+    case "linkedin":  return `https://www.google.com/search?q=${q}+site%3Alinkedin.com`;
+    case "tiktok":    return `https://www.google.com/search?q=${q}+site%3Atiktok.com`;
     case "youtube":   return `https://www.youtube.com/results?search_query=${q}`;
     case "reddit":    return `https://www.reddit.com/search/?q=${q}`;
     case "google":    return `https://news.google.com/search?q=${q}&hl=fr`;
-    case "blog":      return `https://www.google.com/search?q=${q}+${a}+blog+OR+forum`;
+    case "blog":      return `https://www.google.com/search?q=${q}+${a}+blog+OR+forum+OR+presse`;
     default:          return `https://www.google.com/search?q=${q}`;
   }
 }
@@ -189,6 +191,7 @@ Deno.serve(async (req) => {
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
     const { data: settings } = await sb.from("monitoring_settings").select("*").eq("user_id", user_id).single();
     if (!settings?.brand) return new Response(JSON.stringify({ error: "no brand configured" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if ((settings as any).paused) return new Response(JSON.stringify({ ok: true, paused: true, inserted: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const brand = settings.brand as string;
     const sector = (settings as any).sector as string | null;
