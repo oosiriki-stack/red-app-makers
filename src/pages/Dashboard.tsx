@@ -26,7 +26,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { plan, daysLeft, isTrial, isPaid } = useSubscription();
   const quotaMax = isTrial ? 14 : isPaid ? 30 : 14;
-  const quotaLabel = isTrial ? "jours démo" : isPaid ? "jours actifs" : "jours";
+  const quotaLabel = "jours";
 
 
 
