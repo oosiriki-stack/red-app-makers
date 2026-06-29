@@ -35,11 +35,13 @@ export function useSubscription(): SubInfo {
       .then(({ data }) => { if (!cancelled) { setData(data); setLoading(false); } });
 
     // Realtime refresh : dès qu'un admin active une licence, l'utilisateur la voit immédiatement.
-    const channel = supabase
-      .channel(`sub-${user.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
-        (payload: any) => { if (!cancelled && payload?.new) setData(payload.new); })
-      .subscribe();
+    const channel = supabase.channel(`sub-${user.id}-${Math.random().toString(36).slice(2)}`);
+    channel.on(
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
+      (payload: any) => { if (!cancelled && payload?.new) setData(payload.new); }
+    );
+    channel.subscribe();
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user, tick]);
 
