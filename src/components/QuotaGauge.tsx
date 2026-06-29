@@ -71,10 +71,15 @@ export function QuotaGauge({ value, max, size = 156, label = "jours", title, sub
             style={{ transition: "stroke-dashoffset 900ms cubic-bezier(.22,1,.36,1)" }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <Sparkles className={`w-4 h-4 mb-0.5 ${numberTone}`} />
-          <span className={`text-4xl font-extrabold tracking-tight tabular-nums leading-none ${numberTone}`}>{value}</span>
-          <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mt-1">{label}</span>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-2">
+          <Sparkles className={`w-3.5 h-3.5 mb-0.5 ${numberTone}`} />
+          <span
+            className={`font-extrabold tracking-tight tabular-nums leading-none ${numberTone}`}
+            style={{ fontSize: value >= 1000 ? size * 0.18 : value >= 100 ? size * 0.24 : size * 0.3 }}
+          >
+            {value}
+          </span>
+          <span className="text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-semibold mt-1 truncate max-w-full text-center">{label}</span>
         </div>
       </div>
 
