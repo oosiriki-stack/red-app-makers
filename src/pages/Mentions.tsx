@@ -308,62 +308,31 @@ export default function Mentions() {
   };
 
   const openSource = (m: Mention) => {
-    // Construit une requête PRÉCISE basée sur le contenu réel de la mention
-    // → garantit que la page ouverte est bien en rapport avec la mention.
-    const cleanContent = (m.content || "")
-      .replace(/https?:\/\/\S+/g, "")
-      .replace(/[«»""'']/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
-    // On prend la phrase la plus signifiante (jusqu'au 1er point), max ~12 mots
-    const firstSentence = cleanContent.split(/[.!?]/)[0] || cleanContent;
-    const snippet = firstSentence.split(/\s+/).slice(0, 12).join(" ").trim();
+    // 1) Ouverture INSTANTANÉE d'un onglet (évite le blocage pop-up) avec
+    //    une recherche Google ciblée comme fallback immédiat — toujours consultable.
+    const clean = (m.content || "").replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+    const snippet = (clean.split(/[.!?]/)[0] || clean).split(/\s+/).slice(0, 12).join(" ").trim();
     const brand = (m.query || "").trim();
-    const author = (m.author || "").replace(/^@/, "").trim();
+    const baseQuery = [snippet && `"${snippet}"`, brand && `"${brand}"`].filter(Boolean).join(" ") || (m.author || "actualité");
+    const fallback = `https://www.google.com/search?q=${encodeURIComponent(baseQuery)}`;
+    const tab = window.open(fallback, "_blank", "noopener,noreferrer");
+    if (!tab) { toast.error("Pop-up bloquée — autorisez les fenêtres"); return; }
+    toast.info(`🔎 Résolution de la source…`);
 
-    // Requête Google : "snippet" + marque → résultats hyper-pertinents
-    const parts: string[] = [];
-    if (snippet) parts.push(`"${snippet}"`);
-    if (brand && !snippet.toLowerCase().includes(brand.toLowerCase())) parts.push(`"${brand}"`);
-    const baseQuery = parts.join(" ") || author || brand;
-    const q = encodeURIComponent(baseQuery);
-
-    // Plateformes bloquant l'embed/accès direct → recherche Google site: dédiée
-    const blockedPlatforms = ["linkedin", "instagram", "facebook", "tiktok"];
-    const platformSearch: Record<string, string> = {
-      x: `https://www.google.com/search?q=${q}+site%3Ax.com+OR+site%3Atwitter.com`,
-      facebook: `https://www.google.com/search?q=${q}+site%3Afacebook.com`,
-      instagram: `https://www.google.com/search?q=${q}+site%3Ainstagram.com`,
-      linkedin: `https://www.google.com/search?q=${q}+site%3Alinkedin.com`,
-      tiktok: `https://www.google.com/search?q=${q}+site%3Atiktok.com`,
-      youtube: `https://www.google.com/search?q=${q}+site%3Ayoutube.com`,
-      reddit: `https://www.google.com/search?q=${q}+site%3Areddit.com`,
-      google: `https://news.google.com/search?q=${q}&hl=fr`,
-      blog: `https://www.google.com/search?q=${q}`,
-    };
-
-    const url = (m.source_url || "").trim();
-    const isFake = !url || /example\.com|placeholder|fake/i.test(url) || !/^https?:\/\//i.test(url);
-    const src = (m.source || "").toLowerCase();
-    const isBlocked = blockedPlatforms.includes(src);
-
-    // On préfère TOUJOURS la recherche ciblée (snippet + marque) plutôt
-    // qu'une URL générique : on s'assure ainsi que le lien est en rapport
-    // avec la mention. URL directe conservée uniquement pour news/blog/reddit/youtube
-    // quand elle pointe vers une page d'article (chemin non vide).
-    const directOk = !isFake && !isBlocked && /\/[^/]+/.test(new URL(url, "https://x").pathname || "");
-    const finalUrl = directOk
-      ? url
-      : (platformSearch[src] || `https://www.google.com/search?q=${q}`);
-
-    const newTab = window.open(finalUrl, "_blank", "noopener,noreferrer");
-    if (!newTab) {
-      toast.error("Pop-up bloquée — autorisez les fenêtres pour voir la source");
-      return;
-    }
-    if (!directOk) {
-      toast.info(`🔎 Recherche ouverte sur ${PLATFORM_LABEL[src] || src || "le web"}`);
-    }
+    // 2) En parallèle, le resolver côté serveur teste les meilleures URL candidates
+    //    (embeds alternatifs + site: + moteurs) et renvoie la première consultable.
+    supabase.functions.invoke("resolve-source", {
+      body: {
+        content: m.content,
+        brand,
+        author: m.author,
+        source: m.source,
+        source_url: m.source_url,
+      },
+    }).then(({ data, error }) => {
+      if (error || !data?.url) return;
+      try { tab.location.replace(data.url); } catch { /* tab fermé */ }
+    });
   };
 
 
