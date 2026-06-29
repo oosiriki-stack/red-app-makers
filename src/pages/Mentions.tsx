@@ -308,31 +308,62 @@ export default function Mentions() {
   };
 
   const openSource = (m: Mention) => {
-    const q = encodeURIComponent(m.query || m.author || (m.content || "").slice(0, 60));
-    // Plateformes qui bloquent fréquemment l'accès direct (ERR_BLOCKED_BY_RESPONSE,
-    // pages de connexion forcées, X-Frame-Options) → fallback Google site:
+    // Construit une requête PRÉCISE basée sur le contenu réel de la mention
+    // → garantit que la page ouverte est bien en rapport avec la mention.
+    const cleanContent = (m.content || "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[«»""'']/g, '"')
+      .replace(/\s+/g, " ")
+      .trim();
+    // On prend la phrase la plus signifiante (jusqu'au 1er point), max ~12 mots
+    const firstSentence = cleanContent.split(/[.!?]/)[0] || cleanContent;
+    const snippet = firstSentence.split(/\s+/).slice(0, 12).join(" ").trim();
+    const brand = (m.query || "").trim();
+    const author = (m.author || "").replace(/^@/, "").trim();
+
+    // Requête Google : "snippet" + marque → résultats hyper-pertinents
+    const parts: string[] = [];
+    if (snippet) parts.push(`"${snippet}"`);
+    if (brand && !snippet.toLowerCase().includes(brand.toLowerCase())) parts.push(`"${brand}"`);
+    const baseQuery = parts.join(" ") || author || brand;
+    const q = encodeURIComponent(baseQuery);
+
+    // Plateformes bloquant l'embed/accès direct → recherche Google site: dédiée
     const blockedPlatforms = ["linkedin", "instagram", "facebook", "tiktok"];
     const platformSearch: Record<string, string> = {
-      x: `https://x.com/search?q=${q}&f=live`,
+      x: `https://www.google.com/search?q=${q}+site%3Ax.com+OR+site%3Atwitter.com`,
       facebook: `https://www.google.com/search?q=${q}+site%3Afacebook.com`,
       instagram: `https://www.google.com/search?q=${q}+site%3Ainstagram.com`,
       linkedin: `https://www.google.com/search?q=${q}+site%3Alinkedin.com`,
       tiktok: `https://www.google.com/search?q=${q}+site%3Atiktok.com`,
-      youtube: `https://www.youtube.com/results?search_query=${q}`,
-      reddit: `https://www.reddit.com/search/?q=${q}`,
+      youtube: `https://www.google.com/search?q=${q}+site%3Ayoutube.com`,
+      reddit: `https://www.google.com/search?q=${q}+site%3Areddit.com`,
       google: `https://news.google.com/search?q=${q}&hl=fr`,
-      blog: `https://www.google.com/search?q=${q}+blog+OR+forum+OR+presse`,
+      blog: `https://www.google.com/search?q=${q}`,
     };
 
-    const url = m.source_url || "";
-    const isFake = !url || /example\.com/i.test(url);
-    // Si l'URL d'origine appartient à une plateforme bloquée, on bascule sur Google
-    const isBlocked = blockedPlatforms.includes((m.source || "").toLowerCase());
+    const url = (m.source_url || "").trim();
+    const isFake = !url || /example\.com|placeholder|fake/i.test(url) || !/^https?:\/\//i.test(url);
+    const src = (m.source || "").toLowerCase();
+    const isBlocked = blockedPlatforms.includes(src);
 
-    const finalUrl = (!isFake && !isBlocked) ? url : (platformSearch[m.source] || `https://www.google.com/search?q=${q}`);
+    // On préfère TOUJOURS la recherche ciblée (snippet + marque) plutôt
+    // qu'une URL générique : on s'assure ainsi que le lien est en rapport
+    // avec la mention. URL directe conservée uniquement pour news/blog/reddit/youtube
+    // quand elle pointe vers une page d'article (chemin non vide).
+    const directOk = !isFake && !isBlocked && /\/[^/]+/.test(new URL(url, "https://x").pathname || "");
+    const finalUrl = directOk
+      ? url
+      : (platformSearch[src] || `https://www.google.com/search?q=${q}`);
+
     const newTab = window.open(finalUrl, "_blank", "noopener,noreferrer");
-    if (!newTab) toast.error("Le navigateur a bloqué la fenêtre. Autorisez les pop-ups.");
-    else if (isBlocked) toast.info(`${m.source} bloque l'accès direct — recherche Google ouverte`);
+    if (!newTab) {
+      toast.error("Pop-up bloquée — autorisez les fenêtres pour voir la source");
+      return;
+    }
+    if (!directOk) {
+      toast.info(`🔎 Recherche ouverte sur ${PLATFORM_LABEL[src] || src || "le web"}`);
+    }
   };
 
 
