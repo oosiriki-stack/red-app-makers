@@ -172,21 +172,41 @@ function buildSourceUrl(platform: string, brand: string, author: string) {
   }
 }
 
-function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
-  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs } = opts;
+function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; languages?: string[]; langSettings?: { autoDetect?: boolean; autoTranslateFr?: boolean; keepOriginal?: boolean; sentimentInOriginal?: boolean }; }) {
+  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs, languages, langSettings } = opts;
   const r = Math.random();
   const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
   const key = sectorKey(sector || "");
   const sectorPack = key ? SECTOR_TEMPLATES[key] : null;
-  // 70% des mentions utilisent les templates sectoriels quand un secteur est connu
   const useSector = sectorPack && Math.random() < 0.7;
   const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
   const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
   const tplArr = sectorArr ?? genericArr;
   let target = brand;
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
-  const tpl = pick(tplArr);
-  const content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
+
+  // Choisit une langue locale ~40% du temps si l'utilisateur en a activé
+  const activeLangs = (languages || []).filter((l) => l && l !== "fr" && LANG_PACKS[l]);
+  const useLocal = activeLangs.length > 0 && Math.random() < 0.4;
+  let content: string;
+  let theme = pick(THEMES);
+  if (useLocal) {
+    const code = pick(activeLangs);
+    const pack = LANG_PACKS[code];
+    const nativeTpl = pick(sentiment === "positive" ? pack.pos : sentiment === "neutral" ? pack.neu : pack.neg);
+    const native = nativeTpl.replace(/\{brand\}/g, target);
+    const showOriginal = langSettings?.keepOriginal !== false;
+    const translate = langSettings?.autoTranslateFr !== false;
+    const fr = translate ? pack.tr(sentiment, target) : "";
+    const detect = langSettings?.autoDetect !== false ? `${pack.flag} ${pack.label} · ` : "";
+    if (showOriginal && translate) content = `${detect}« ${native} »  ⇢ FR : ${fr}`;
+    else if (translate) content = `${detect}${fr}`;
+    else content = `${detect}${native}`;
+    theme = `lang:${code}`;
+  } else {
+    const tpl = pick(tplArr);
+    content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
+  }
   const source = pick(platforms);
 
   const offset = Math.floor(Math.random() * jitterMs);
@@ -205,11 +225,12 @@ function buildMention(opts: { user_id: string; brand: string; sector?: string | 
     requester: "seed",
     emotion: pick(EMOTIONS),
     is_sarcastic: Math.random() < 0.05,
-    theme: pick(THEMES),
+    theme,
     impact_score: randInt(10, 95),
     enriched_at: new Date().toISOString(),
   };
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
