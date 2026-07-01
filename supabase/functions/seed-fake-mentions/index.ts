@@ -114,6 +114,35 @@ function sectorKey(sector: string): string | null {
 }
 
 
+// Templates natifs par langue locale (courts, réalistes) — utilisés quand l'utilisateur
+// active des langues dans le module « Gestion des langues locales ».
+type LangPack = { flag: string; label: string; pos: string[]; neu: string[]; neg: string[]; tr: (s: "positive"|"neutral"|"negative", brand: string) => string };
+const LANG_PACKS: Record<string, LangPack> = {
+  dyu:  { flag: "🇨🇮", label: "Dioula",  pos: ["{brand} ka ɲi kosɛbɛ, i ni ce !"], neu: ["I ye {brand} kalan wa ?"], neg: ["{brand} ma ɲɛ bi, ne dusu bɔra."], tr: (s,b)=> s==="positive"?`${b}, excellent service !`:s==="neutral"?`Avez-vous testé ${b} ?`:`Déçu par ${b} aujourd'hui.` },
+  bci:  { flag: "🇨🇮", label: "Baoulé",  pos: ["{brand} yɛ kpa dan !"], neu: ["Wan si {brand} i su ndɛ ?"], neg: ["{brand} nun sa te bo min."], tr: (s,b)=> s==="positive"?`${b} c'est vraiment bien !`:s==="neutral"?`Qui connaît ${b} ?`:`Un souci avec ${b}.` },
+  bet:  { flag: "🇨🇮", label: "Bété",    pos: ["{brand} lɛ zɔ !"], neu: ["Ɔ yi {brand} a ?"], neg: ["{brand} nyɛ tɛ."], tr: (s,b)=> s==="positive"?`${b} au top !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} me déçoit.` },
+  ati:  { flag: "🇨🇮", label: "Attié",   pos: ["{brand} sa mlɔ !"], neu: ["A jɛ {brand} ?"], neg: ["{brand} pa lɛ nyɛ."], tr: (s,b)=> s==="positive"?`Bravo à ${b} !`:s==="neutral"?`Retour sur ${b} ?`:`Souci avec ${b}.` },
+  any:  { flag: "🇨🇮", label: "Agni",    pos: ["{brand} yɛ kpa !"], neu: ["Wan nim {brand} ?"], neg: ["{brand} yɛ kpalɛ."], tr: (s,b)=> s==="positive"?`${b} vraiment top !`:s==="neutral"?`Avis sur ${b} ?`:`${b} pas terrible.` },
+  sef:  { flag: "🇨🇮", label: "Sénoufo", pos: ["{brand} wi tɛ !"], neu: ["Ma yɛ {brand} ?"], neg: ["{brand} ma jɔ."], tr: (s,b)=> s==="positive"?`${b} au top !`:s==="neutral"?`Question sur ${b}.`:`Déçu par ${b}.` },
+  dnj:  { flag: "🇨🇮", label: "Yacouba", pos: ["{brand} ka ɲi !"], neu: ["Wo yi {brand} ?"], neg: ["{brand} nyɛ tɛ bi."], tr: (s,b)=> s==="positive"?`${b} excellent !`:s==="neutral"?`Vous testez ${b} ?`:`${b} me déçoit.` },
+  gxx:  { flag: "🇨🇮", label: "Guéré",   pos: ["{brand} lɛ nyɛ !"], neu: ["Ɔ jɛ {brand} ?"], neg: ["{brand} tɛ nyɛ."], tr: (s,b)=> s==="positive"?`${b} c'est top !`:s==="neutral"?`Testez ${b} ?`:`Souci ${b}.` },
+  abo:  { flag: "🇨🇮", label: "Abbey",   pos: ["{brand} mlɔ dan !"], neu: ["A ji {brand} ?"], neg: ["{brand} pa nyɛ."], tr: (s,b)=> s==="positive"?`Bravo ${b} !`:s==="neutral"?`Avis ${b} ?`:`Déçu ${b}.` },
+  dic:  { flag: "🇨🇮", label: "Dida",    pos: ["{brand} zɔ !"], neu: ["Ɔ yi {brand} ?"], neg: ["{brand} nyɛ tɛ."], tr: (s,b)=> s==="positive"?`${b} top !`:s==="neutral"?`Question ${b}.`:`${b} déçoit.` },
+  bm:   { flag: "🇲🇱", label: "Bambara", pos: ["{brand} ka ɲi kosɛbɛ !"], neu: ["Aw ye {brand} ye wa ?"], neg: ["{brand} ma ɲɛ bi."], tr: (s,b)=> s==="positive"?`${b} c'est excellent !`:s==="neutral"?`Vous avez essayé ${b} ?`:`Déçu par ${b}.` },
+  wo:   { flag: "🇸🇳", label: "Wolof",   pos: ["{brand} rafet na lool !"], neu: ["Ndax jëfandikoo nga {brand} ?"], neg: ["{brand} baaxul dara tey."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas top aujourd'hui.` },
+  sus:  { flag: "🇬🇳", label: "Soussou", pos: ["{brand} fan xa !"], neu: ["I na {brand} raba ?"], neg: ["{brand} mu nɛnɛxi."], tr: (s,b)=> s==="positive"?`${b} vraiment bien !`:s==="neutral"?`Vous testez ${b} ?`:`${b} pas satisfaisant.` },
+  tw:   { flag: "🇬🇭", label: "Twi",     pos: ["{brand} yɛ papa paa!"], neu: ["Wobɛka {brand} ho asɛm?"], neg: ["{brand} nyɛ koraa."], tr: (s,b)=> s==="positive"?`${b} vraiment excellent !`:s==="neutral"?`Un avis sur ${b} ?`:`${b} vraiment pas bien.` },
+  yo:   { flag: "🇳🇬", label: "Yoruba",  pos: ["{brand} dara gan!"], neu: ["Ṣe o lo {brand}?"], neg: ["{brand} kò dára rárá."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Utilisez-vous ${b} ?`:`${b} pas bon du tout.` },
+  ig:   { flag: "🇳🇬", label: "Igbo",    pos: ["{brand} dị mma nke ukwuu!"], neu: ["Ị nwara {brand}?"], neg: ["{brand} adịghị mma."], tr: (s,b)=> s==="positive"?`${b} très bien !`:s==="neutral"?`Avez-vous testé ${b} ?`:`${b} pas bien.` },
+  ha:   { flag: "🇳🇬", label: "Hausa",   pos: ["{brand} yana da kyau sosai!"], neu: ["Ka gwada {brand}?"], neg: ["{brand} bai kai ba."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Avez-vous essayé ${b} ?`:`${b} insuffisant.` },
+  ewo:  { flag: "🇨🇲", label: "Ewondo",  pos: ["{brand} a ne mvaë!"], neu: ["Wa yem {brand}?"], neg: ["{brand} a ne abé."], tr: (s,b)=> s==="positive"?`${b} c'est bien !`:s==="neutral"?`Connaissez-vous ${b} ?`:`${b} pas bien.` },
+  dua:  { flag: "🇨🇲", label: "Duala",   pos: ["{brand} e mbale!"], neu: ["O bola {brand} e?"], neg: ["{brand} a si bwam."], tr: (s,b)=> s==="positive"?`${b} vraiment top !`:s==="neutral"?`Utilisez-vous ${b} ?`:`${b} pas bien.` },
+  ee:   { flag: "🇹🇬", label: "Éwé",     pos: ["{brand} nyo ŋutɔ!"], neu: ["Èzã {brand} kpɔ a?"], neg: ["{brand} menyo o."], tr: (s,b)=> s==="positive"?`${b} très bien !`:s==="neutral"?`Avez-vous testé ${b} ?`:`${b} pas bon.` },
+  fon:  { flag: "🇧🇯", label: "Fon",     pos: ["{brand} nyɔ tawun!"], neu: ["A ka do {brand} a?"], neg: ["{brand} nyɔ ǎ."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas satisfaisant.` },
+  ln:   { flag: "🇨🇩", label: "Lingala", pos: ["{brand} ezali malamu mingi!"], neu: ["Osalelaki {brand}?"], neg: ["{brand} ezali mabe."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas bien.` },
+  sw:   { flag: "🇰🇪", label: "Swahili", pos: ["{brand} ni nzuri sana!"], neu: ["Umejaribu {brand}?"], neg: ["{brand} si nzuri leo."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Avez-vous essayé ${b} ?`:`${b} pas bien aujourd'hui.` },
+};
+
 const EMOTIONS = ["joy","trust","surprise","anticipation","anger","sadness","fear","disgust"];
 const THEMES = ["produit","service-client","prix","qualité","innovation","communication","logistique"];
 const SUFFIXES = ["", " 💡", " #avis", " #expérience", " ⭐", " 🚀", " 😍", " 🤔", " (mise à jour)", " — vu sur la page officielle", " — partagez vos retours", " — qu'en pensez-vous ?"];
@@ -121,6 +150,7 @@ const SUFFIXES = ["", " 💡", " #avis", " #expérience", " ⭐", " 🚀", " �
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function uniqueAuthor() { return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${Math.random() < 0.25 ? randInt(1, 99) : ""}`; }
+
 
 // URL source réelle vers la recherche de la plateforme (toujours cliquable et fonctionnelle).
 // LinkedIn / Instagram / Facebook / TikTok exigent une connexion ou renvoient
