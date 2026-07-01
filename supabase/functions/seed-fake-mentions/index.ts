@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const body = await req.json().catch(() => ({}));
-    const { user_id, mode, competitors: competitorsInput } = body as { user_id?: string; mode?: string; competitors?: string[] };
+    const { user_id, mode, competitors: competitorsInput, languages, lang_settings } = body as { user_id?: string; mode?: string; competitors?: string[]; languages?: string[]; lang_settings?: any };
     if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -251,27 +251,29 @@ Deno.serve(async (req) => {
       : PLATFORMS;
     const platforms = activePlatforms.length ? activePlatforms : PLATFORMS;
     const competitors = Array.isArray(competitorsInput) ? competitorsInput.filter(Boolean).slice(0, 12) : [];
+    const langs = Array.isArray(languages) ? languages.filter((s) => typeof s === "string").slice(0, 30) : [];
+    const langSettings = lang_settings && typeof lang_settings === "object" ? lang_settings : undefined;
 
     const now = Date.now();
     const dayMs = 86400000;
     const rows: any[] = [];
 
+    const common = { user_id, brand, sector, platforms, competitors, languages: langs, langSettings };
     if (mode === "topup") {
-      // Top-up doux : 3 à 12 mentions par cycle pour rester fluide (cadence pro).
       const count = randInt(3, 12);
       for (let i = 0; i < count; i++) {
-        rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
+        rows.push(buildMention({ ...common, baseTime: now, jitterMs: 30 * 60 * 1000 }));
       }
     } else {
-      // Seed initial : 30 jours, volume quotidien variable (5..200) — jamais identique entre appels.
       for (let day = 0; day < 30; day++) {
         const dayCount = randInt(5, 200);
         const dayBase = now - day * dayMs;
         for (let i = 0; i < dayCount; i++) {
-          rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
+          rows.push(buildMention({ ...common, baseTime: dayBase, jitterMs: dayMs }));
         }
       }
     }
+
 
     const chunkSize = 100;
     for (let i = 0; i < rows.length; i += chunkSize) {
