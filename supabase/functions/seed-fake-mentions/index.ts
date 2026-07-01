@@ -114,6 +114,35 @@ function sectorKey(sector: string): string | null {
 }
 
 
+// Templates natifs par langue locale (courts, réalistes) — utilisés quand l'utilisateur
+// active des langues dans le module « Gestion des langues locales ».
+type LangPack = { flag: string; label: string; pos: string[]; neu: string[]; neg: string[]; tr: (s: "positive"|"neutral"|"negative", brand: string) => string };
+const LANG_PACKS: Record<string, LangPack> = {
+  dyu:  { flag: "🇨🇮", label: "Dioula",  pos: ["{brand} ka ɲi kosɛbɛ, i ni ce !"], neu: ["I ye {brand} kalan wa ?"], neg: ["{brand} ma ɲɛ bi, ne dusu bɔra."], tr: (s,b)=> s==="positive"?`${b}, excellent service !`:s==="neutral"?`Avez-vous testé ${b} ?`:`Déçu par ${b} aujourd'hui.` },
+  bci:  { flag: "🇨🇮", label: "Baoulé",  pos: ["{brand} yɛ kpa dan !"], neu: ["Wan si {brand} i su ndɛ ?"], neg: ["{brand} nun sa te bo min."], tr: (s,b)=> s==="positive"?`${b} c'est vraiment bien !`:s==="neutral"?`Qui connaît ${b} ?`:`Un souci avec ${b}.` },
+  bet:  { flag: "🇨🇮", label: "Bété",    pos: ["{brand} lɛ zɔ !"], neu: ["Ɔ yi {brand} a ?"], neg: ["{brand} nyɛ tɛ."], tr: (s,b)=> s==="positive"?`${b} au top !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} me déçoit.` },
+  ati:  { flag: "🇨🇮", label: "Attié",   pos: ["{brand} sa mlɔ !"], neu: ["A jɛ {brand} ?"], neg: ["{brand} pa lɛ nyɛ."], tr: (s,b)=> s==="positive"?`Bravo à ${b} !`:s==="neutral"?`Retour sur ${b} ?`:`Souci avec ${b}.` },
+  any:  { flag: "🇨🇮", label: "Agni",    pos: ["{brand} yɛ kpa !"], neu: ["Wan nim {brand} ?"], neg: ["{brand} yɛ kpalɛ."], tr: (s,b)=> s==="positive"?`${b} vraiment top !`:s==="neutral"?`Avis sur ${b} ?`:`${b} pas terrible.` },
+  sef:  { flag: "🇨🇮", label: "Sénoufo", pos: ["{brand} wi tɛ !"], neu: ["Ma yɛ {brand} ?"], neg: ["{brand} ma jɔ."], tr: (s,b)=> s==="positive"?`${b} au top !`:s==="neutral"?`Question sur ${b}.`:`Déçu par ${b}.` },
+  dnj:  { flag: "🇨🇮", label: "Yacouba", pos: ["{brand} ka ɲi !"], neu: ["Wo yi {brand} ?"], neg: ["{brand} nyɛ tɛ bi."], tr: (s,b)=> s==="positive"?`${b} excellent !`:s==="neutral"?`Vous testez ${b} ?`:`${b} me déçoit.` },
+  gxx:  { flag: "🇨🇮", label: "Guéré",   pos: ["{brand} lɛ nyɛ !"], neu: ["Ɔ jɛ {brand} ?"], neg: ["{brand} tɛ nyɛ."], tr: (s,b)=> s==="positive"?`${b} c'est top !`:s==="neutral"?`Testez ${b} ?`:`Souci ${b}.` },
+  abo:  { flag: "🇨🇮", label: "Abbey",   pos: ["{brand} mlɔ dan !"], neu: ["A ji {brand} ?"], neg: ["{brand} pa nyɛ."], tr: (s,b)=> s==="positive"?`Bravo ${b} !`:s==="neutral"?`Avis ${b} ?`:`Déçu ${b}.` },
+  dic:  { flag: "🇨🇮", label: "Dida",    pos: ["{brand} zɔ !"], neu: ["Ɔ yi {brand} ?"], neg: ["{brand} nyɛ tɛ."], tr: (s,b)=> s==="positive"?`${b} top !`:s==="neutral"?`Question ${b}.`:`${b} déçoit.` },
+  bm:   { flag: "🇲🇱", label: "Bambara", pos: ["{brand} ka ɲi kosɛbɛ !"], neu: ["Aw ye {brand} ye wa ?"], neg: ["{brand} ma ɲɛ bi."], tr: (s,b)=> s==="positive"?`${b} c'est excellent !`:s==="neutral"?`Vous avez essayé ${b} ?`:`Déçu par ${b}.` },
+  wo:   { flag: "🇸🇳", label: "Wolof",   pos: ["{brand} rafet na lool !"], neu: ["Ndax jëfandikoo nga {brand} ?"], neg: ["{brand} baaxul dara tey."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas top aujourd'hui.` },
+  sus:  { flag: "🇬🇳", label: "Soussou", pos: ["{brand} fan xa !"], neu: ["I na {brand} raba ?"], neg: ["{brand} mu nɛnɛxi."], tr: (s,b)=> s==="positive"?`${b} vraiment bien !`:s==="neutral"?`Vous testez ${b} ?`:`${b} pas satisfaisant.` },
+  tw:   { flag: "🇬🇭", label: "Twi",     pos: ["{brand} yɛ papa paa!"], neu: ["Wobɛka {brand} ho asɛm?"], neg: ["{brand} nyɛ koraa."], tr: (s,b)=> s==="positive"?`${b} vraiment excellent !`:s==="neutral"?`Un avis sur ${b} ?`:`${b} vraiment pas bien.` },
+  yo:   { flag: "🇳🇬", label: "Yoruba",  pos: ["{brand} dara gan!"], neu: ["Ṣe o lo {brand}?"], neg: ["{brand} kò dára rárá."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Utilisez-vous ${b} ?`:`${b} pas bon du tout.` },
+  ig:   { flag: "🇳🇬", label: "Igbo",    pos: ["{brand} dị mma nke ukwuu!"], neu: ["Ị nwara {brand}?"], neg: ["{brand} adịghị mma."], tr: (s,b)=> s==="positive"?`${b} très bien !`:s==="neutral"?`Avez-vous testé ${b} ?`:`${b} pas bien.` },
+  ha:   { flag: "🇳🇬", label: "Hausa",   pos: ["{brand} yana da kyau sosai!"], neu: ["Ka gwada {brand}?"], neg: ["{brand} bai kai ba."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Avez-vous essayé ${b} ?`:`${b} insuffisant.` },
+  ewo:  { flag: "🇨🇲", label: "Ewondo",  pos: ["{brand} a ne mvaë!"], neu: ["Wa yem {brand}?"], neg: ["{brand} a ne abé."], tr: (s,b)=> s==="positive"?`${b} c'est bien !`:s==="neutral"?`Connaissez-vous ${b} ?`:`${b} pas bien.` },
+  dua:  { flag: "🇨🇲", label: "Duala",   pos: ["{brand} e mbale!"], neu: ["O bola {brand} e?"], neg: ["{brand} a si bwam."], tr: (s,b)=> s==="positive"?`${b} vraiment top !`:s==="neutral"?`Utilisez-vous ${b} ?`:`${b} pas bien.` },
+  ee:   { flag: "🇹🇬", label: "Éwé",     pos: ["{brand} nyo ŋutɔ!"], neu: ["Èzã {brand} kpɔ a?"], neg: ["{brand} menyo o."], tr: (s,b)=> s==="positive"?`${b} très bien !`:s==="neutral"?`Avez-vous testé ${b} ?`:`${b} pas bon.` },
+  fon:  { flag: "🇧🇯", label: "Fon",     pos: ["{brand} nyɔ tawun!"], neu: ["A ka do {brand} a?"], neg: ["{brand} nyɔ ǎ."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas satisfaisant.` },
+  ln:   { flag: "🇨🇩", label: "Lingala", pos: ["{brand} ezali malamu mingi!"], neu: ["Osalelaki {brand}?"], neg: ["{brand} ezali mabe."], tr: (s,b)=> s==="positive"?`${b} vraiment super !`:s==="neutral"?`Vous utilisez ${b} ?`:`${b} pas bien.` },
+  sw:   { flag: "🇰🇪", label: "Swahili", pos: ["{brand} ni nzuri sana!"], neu: ["Umejaribu {brand}?"], neg: ["{brand} si nzuri leo."], tr: (s,b)=> s==="positive"?`${b} très bon !`:s==="neutral"?`Avez-vous essayé ${b} ?`:`${b} pas bien aujourd'hui.` },
+};
+
 const EMOTIONS = ["joy","trust","surprise","anticipation","anger","sadness","fear","disgust"];
 const THEMES = ["produit","service-client","prix","qualité","innovation","communication","logistique"];
 const SUFFIXES = ["", " 💡", " #avis", " #expérience", " ⭐", " 🚀", " 😍", " 🤔", " (mise à jour)", " — vu sur la page officielle", " — partagez vos retours", " — qu'en pensez-vous ?"];
@@ -121,6 +150,7 @@ const SUFFIXES = ["", " 💡", " #avis", " #expérience", " ⭐", " 🚀", " �
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function uniqueAuthor() { return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}${Math.random() < 0.25 ? randInt(1, 99) : ""}`; }
+
 
 // URL source réelle vers la recherche de la plateforme (toujours cliquable et fonctionnelle).
 // LinkedIn / Instagram / Facebook / TikTok exigent une connexion ou renvoient
@@ -142,21 +172,41 @@ function buildSourceUrl(platform: string, brand: string, author: string) {
   }
 }
 
-function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; }) {
-  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs } = opts;
+function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; languages?: string[]; langSettings?: { autoDetect?: boolean; autoTranslateFr?: boolean; keepOriginal?: boolean; sentimentInOriginal?: boolean }; }) {
+  const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs, languages, langSettings } = opts;
   const r = Math.random();
   const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
   const key = sectorKey(sector || "");
   const sectorPack = key ? SECTOR_TEMPLATES[key] : null;
-  // 70% des mentions utilisent les templates sectoriels quand un secteur est connu
   const useSector = sectorPack && Math.random() < 0.7;
   const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
   const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
   const tplArr = sectorArr ?? genericArr;
   let target = brand;
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
-  const tpl = pick(tplArr);
-  const content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
+
+  // Choisit une langue locale ~40% du temps si l'utilisateur en a activé
+  const activeLangs = (languages || []).filter((l) => l && l !== "fr" && LANG_PACKS[l]);
+  const useLocal = activeLangs.length > 0 && Math.random() < 0.4;
+  let content: string;
+  let theme = pick(THEMES);
+  if (useLocal) {
+    const code = pick(activeLangs);
+    const pack = LANG_PACKS[code];
+    const nativeTpl = pick(sentiment === "positive" ? pack.pos : sentiment === "neutral" ? pack.neu : pack.neg);
+    const native = nativeTpl.replace(/\{brand\}/g, target);
+    const showOriginal = langSettings?.keepOriginal !== false;
+    const translate = langSettings?.autoTranslateFr !== false;
+    const fr = translate ? pack.tr(sentiment, target) : "";
+    const detect = langSettings?.autoDetect !== false ? `${pack.flag} ${pack.label} · ` : "";
+    if (showOriginal && translate) content = `${detect}« ${native} »  ⇢ FR : ${fr}`;
+    else if (translate) content = `${detect}${fr}`;
+    else content = `${detect}${native}`;
+    theme = `lang:${code}`;
+  } else {
+    const tpl = pick(tplArr);
+    content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
+  }
   const source = pick(platforms);
 
   const offset = Math.floor(Math.random() * jitterMs);
@@ -175,17 +225,18 @@ function buildMention(opts: { user_id: string; brand: string; sector?: string | 
     requester: "seed",
     emotion: pick(EMOTIONS),
     is_sarcastic: Math.random() < 0.05,
-    theme: pick(THEMES),
+    theme,
     impact_score: randInt(10, 95),
     enriched_at: new Date().toISOString(),
   };
 }
 
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const body = await req.json().catch(() => ({}));
-    const { user_id, mode, competitors: competitorsInput } = body as { user_id?: string; mode?: string; competitors?: string[] };
+    const { user_id, mode, competitors: competitorsInput, languages, lang_settings } = body as { user_id?: string; mode?: string; competitors?: string[]; languages?: string[]; lang_settings?: any };
     if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -200,27 +251,29 @@ Deno.serve(async (req) => {
       : PLATFORMS;
     const platforms = activePlatforms.length ? activePlatforms : PLATFORMS;
     const competitors = Array.isArray(competitorsInput) ? competitorsInput.filter(Boolean).slice(0, 12) : [];
+    const langs = Array.isArray(languages) ? languages.filter((s) => typeof s === "string").slice(0, 30) : [];
+    const langSettings = lang_settings && typeof lang_settings === "object" ? lang_settings : undefined;
 
     const now = Date.now();
     const dayMs = 86400000;
     const rows: any[] = [];
 
+    const common = { user_id, brand, sector, platforms, competitors, languages: langs, langSettings };
     if (mode === "topup") {
-      // Top-up doux : 3 à 12 mentions par cycle pour rester fluide (cadence pro).
       const count = randInt(3, 12);
       for (let i = 0; i < count; i++) {
-        rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: now, jitterMs: 30 * 60 * 1000 }));
+        rows.push(buildMention({ ...common, baseTime: now, jitterMs: 30 * 60 * 1000 }));
       }
     } else {
-      // Seed initial : 30 jours, volume quotidien variable (5..200) — jamais identique entre appels.
       for (let day = 0; day < 30; day++) {
         const dayCount = randInt(5, 200);
         const dayBase = now - day * dayMs;
         for (let i = 0; i < dayCount; i++) {
-          rows.push(buildMention({ user_id, brand, sector, platforms, competitors, baseTime: dayBase, jitterMs: dayMs }));
+          rows.push(buildMention({ ...common, baseTime: dayBase, jitterMs: dayMs }));
         }
       }
     }
+
 
     const chunkSize = 100;
     for (let i = 0; i < rows.length; i += chunkSize) {
