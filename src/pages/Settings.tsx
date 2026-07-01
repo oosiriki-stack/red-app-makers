@@ -469,24 +469,149 @@ export default function Settings() {
   );
 }
 
+const LANG_STORAGE_KEY = "focus_locale_langs_v1";
+const LANG_SETTINGS_KEY = "focus_locale_settings_v1";
+
+const IVORIAN_LANGS = [
+  { code: "dyu", flag: "🇨🇮", label: "Dioula" },
+  { code: "bci", flag: "🇨🇮", label: "Baoulé" },
+  { code: "bet", flag: "🇨🇮", label: "Bété" },
+  { code: "ati", flag: "🇨🇮", label: "Attié" },
+  { code: "any", flag: "🇨🇮", label: "Agni" },
+  { code: "sef", flag: "🇨🇮", label: "Sénoufo" },
+  { code: "dnj", flag: "🇨🇮", label: "Yacouba (Dan)" },
+  { code: "gxx", flag: "🇨🇮", label: "Guéré" },
+  { code: "abo", flag: "🇨🇮", label: "Abbey" },
+  { code: "dic", flag: "🇨🇮", label: "Dida" },
+];
+
+const AFRICAN_LANGS = [
+  { code: "bm", flag: "🇲🇱", label: "Bambara" },
+  { code: "wo", flag: "🇸🇳", label: "Wolof" },
+  { code: "sus", flag: "🇬🇳", label: "Soussou" },
+  { code: "tw", flag: "🇬🇭", label: "Twi" },
+  { code: "yo", flag: "🇳🇬", label: "Yoruba" },
+  { code: "ig", flag: "🇳🇬", label: "Igbo" },
+  { code: "ha", flag: "🇳🇬", label: "Hausa" },
+  { code: "ewo", flag: "🇨🇲", label: "Ewondo" },
+  { code: "dua", flag: "🇨🇲", label: "Duala" },
+  { code: "ee", flag: "🇹🇬", label: "Éwé" },
+  { code: "fon", flag: "🇧🇯", label: "Fon" },
+  { code: "ln", flag: "🇨🇩", label: "Lingala" },
+  { code: "sw", flag: "🇰🇪", label: "Swahili" },
+];
+
+const DEFAULT_LANG_SETTINGS = {
+  autoDetect: true,
+  autoTranslateFr: true,
+  keepOriginal: true,
+  sentimentInOriginal: true,
+};
+
 function LocaleSettingsCard() {
+  const [selected, setSelected] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(LANG_STORAGE_KEY) || "[\"fr\"]"); } catch { return ["fr"]; }
+  });
+  const [settings, setSettings] = useState(() => {
+    try { return { ...DEFAULT_LANG_SETTINGS, ...JSON.parse(localStorage.getItem(LANG_SETTINGS_KEY) || "{}") }; } catch { return DEFAULT_LANG_SETTINGS; }
+  });
+  const [customLang, setCustomLang] = useState("");
+
+  useEffect(() => { localStorage.setItem(LANG_STORAGE_KEY, JSON.stringify(selected)); }, [selected]);
+  useEffect(() => { localStorage.setItem(LANG_SETTINGS_KEY, JSON.stringify(settings)); }, [settings]);
+
+  const toggle = (code: string) => {
+    if (code === "fr") return;
+    setSelected((s) => s.includes(code) ? s.filter(c => c !== code) : [...s, code]);
+  };
+
+  const addCustom = () => {
+    const v = customLang.trim();
+    if (!v) return;
+    const code = "custom-" + v.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12);
+    if (!selected.includes(code)) setSelected((s) => [...s, code]);
+    setCustomLang("");
+    toast.success(`Langue « ${v} » ajoutée (bêta)`);
+  };
+
+  const renderGroup = (title: string, langs: typeof AFRICAN_LANGS) => (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {langs.map((l) => {
+          const active = selected.includes(l.code);
+          return (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => toggle(l.code)}
+              className={`flex items-center gap-2 p-2.5 rounded-xl border text-sm text-left transition-all ${active ? "border-primary bg-primary/10 shadow-sm" : "border-border/60 hover:border-primary/40 hover:bg-muted/40"}`}
+            >
+              <span className="text-lg leading-none">{l.flag}</span>
+              <span className="flex-1 truncate">{l.label}</span>
+              {active && <Badge variant="secondary" className="h-4 px-1 text-[9px]">ON</Badge>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const SettingRow = ({ k, label, desc }: { k: keyof typeof DEFAULT_LANG_SETTINGS; label: string; desc: string }) => (
+    <div className="flex items-start justify-between gap-3 py-2">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-muted-foreground">{desc}</p>
+      </div>
+      <Switch checked={settings[k]} onCheckedChange={(v) => setSettings((s: any) => ({ ...s, [k]: v }))} />
+    </div>
+  );
+
   return (
     <Card className="glass-card rounded-2xl">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Languages className="h-4 w-4" /> Langue locale
+          <Languages className="h-4 w-4" /> Gestion des langues locales
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Languages className="w-7 h-7 text-primary" />
+      <CardContent className="space-y-6">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/30">
+          <span className="text-xl">🇫🇷</span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">Français</p>
+            <p className="text-xs text-muted-foreground">Langue par défaut (toujours active)</p>
           </div>
-          <p className="text-base font-semibold">🛠️ Module en cours de développement</p>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            La gestion des langues locales (Wolof, Bambara, Lingala, Swahili, Haoussa, Yoruba, Fon…) sera disponible prochainement pour adapter automatiquement vos résumés IA et alertes.
+          <Badge className="rounded-lg">Par défaut</Badge>
+        </div>
+
+        {renderGroup("Langues locales de Côte d'Ivoire", IVORIAN_LANGS)}
+        {renderGroup("Autres langues africaines", AFRICAN_LANGS)}
+
+        <Separator />
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Paramètres</p>
+          <SettingRow k="autoDetect" label="Détecter automatiquement la langue" desc="Identifie la langue de chaque mention détectée." />
+          <SettingRow k="autoTranslateFr" label="Traduire automatiquement en français" desc="Affiche une traduction FR sous le texte original." />
+          <SettingRow k="keepOriginal" label="Conserver le texte original" desc="Le contenu source reste visible en plus de la traduction." />
+          <SettingRow k="sentimentInOriginal" label="Analyser le sentiment dans la langue d'origine" desc="Améliore la précision du score de sentiment." />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ajouter une langue personnalisée (bêta)</p>
+          <div className="flex gap-2">
+            <Input placeholder="ex. Malinké, Toucouleur…" value={customLang} onChange={(e) => setCustomLang(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }} className="rounded-xl" />
+            <Button type="button" onClick={addCustom} className="rounded-xl"><Plus className="h-4 w-4 mr-1" />Ajouter</Button>
+          </div>
+        </div>
+
+        <div className="pt-2 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">{selected.length}</span> langue{selected.length > 1 ? "s" : ""} active{selected.length > 1 ? "s" : ""} pour le scraping et l'analyse.
           </p>
-          <Badge variant="outline" className="rounded-lg text-[11px] uppercase tracking-wider">Bientôt disponible</Badge>
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toast.success("Préférences de langues enregistrées")}>Enregistrer</Button>
         </div>
       </CardContent>
     </Card>
