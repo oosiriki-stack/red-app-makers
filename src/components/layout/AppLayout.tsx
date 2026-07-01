@@ -46,8 +46,13 @@ export function AppLayout() {
       const { data: ms } = await supabase.from("monitoring_settings").select("paused").eq("user_id", user.id).maybeSingle();
       if ((ms as any)?.paused) return;
       let competitors: string[] = [];
+      let languages: string[] = ["fr"];
+      let lang_settings: any = undefined;
       try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
-      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors } }).catch(() => {});
+      try { languages = JSON.parse(localStorage.getItem("focus_locale_langs_v1") || "[\"fr\"]") || ["fr"]; } catch {}
+      try { lang_settings = JSON.parse(localStorage.getItem("focus_locale_settings_v1") || "null"); } catch {}
+      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors, languages, lang_settings } }).catch(() => {});
+
     };
     const id = setInterval(tick, 600_000);
     const first = setTimeout(tick, 60_000);
