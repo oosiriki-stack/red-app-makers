@@ -4,29 +4,29 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
-const primary = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Accueil" },
-  { to: "/mentions", icon: MessageSquare, label: "Mentions" },
-  { to: "/ai-assistant", icon: Bot, label: "GPT", center: true },
-  { to: "/surveillance", icon: Radar, label: "Veille" },
-  { to: "/quick-chart", icon: PieChart, label: "Graphes" },
+const primaryDef = [
+  { to: "/dashboard", icon: LayoutDashboard, key: "nav.home" },
+  { to: "/mentions", icon: MessageSquare, key: "nav.mentions" },
+  { to: "/ai-assistant", icon: Bot, key: "nav.gpt", center: true },
+  { to: "/surveillance", icon: Radar, key: "nav.watch" },
+  { to: "/quick-chart", icon: PieChart, key: "nav.charts" },
 ];
 
-const moreItems = [
-  { to: "/settings?tab=profile", icon: User, label: "Profil" },
-  { to: "/alerts", icon: Bell, label: "Alertes" },
-
-  { to: "/crisis", icon: AlertTriangle, label: "Gérer crise" },
-  { to: "/workspaces", icon: Users, label: "Espaces" },
-  { to: "/influencers", icon: TrendingUp, label: "Influenceurs" },
-  { to: "/social-networks", icon: Share2, label: "Réseaux" },
-  { to: "/competitors", icon: BarChart3, label: "Concurrence" },
-  { to: "/reports", icon: FileText, label: "Rapports" },
-  { to: "/support", icon: LifeBuoy, label: "Support" },
-  { to: "/settings", icon: SettingsIcon, label: "Paramètres" },
-  { to: "/pricing", icon: CreditCard, label: "Tarification" },
-  { to: "/install", icon: Download, label: "Installer" },
+const moreDef = [
+  { to: "/settings?tab=profile", icon: User, key: "nav.profile" },
+  { to: "/alerts", icon: Bell, key: "nav.alerts" },
+  { to: "/crisis", icon: AlertTriangle, key: "nav.crisis" },
+  { to: "/workspaces", icon: Users, key: "nav.workspaces" },
+  { to: "/influencers", icon: TrendingUp, key: "nav.influencers" },
+  { to: "/social-networks", icon: Share2, key: "nav.social" },
+  { to: "/competitors", icon: BarChart3, key: "nav.competitors" },
+  { to: "/reports", icon: FileText, key: "nav.reports" },
+  { to: "/support", icon: LifeBuoy, key: "nav.support" },
+  { to: "/settings", icon: SettingsIcon, key: "nav.settings" },
+  { to: "/pricing", icon: CreditCard, key: "nav.pricing" },
+  { to: "/install", icon: Download, key: "nav.install" },
 ];
 
 export function BottomNav() {
