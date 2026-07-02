@@ -79,7 +79,7 @@ export function AppLayout() {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-40 h-14 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border-b border-border/40 glass-header">
         {showBack && (
-          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label="Retour">
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label={t("header.back")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
         )}
@@ -90,8 +90,8 @@ export function AppLayout() {
           <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label="Recherche"><Search className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label="Profil"><User className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
 
           <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
@@ -105,11 +105,12 @@ export function AppLayout() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="glass-card">
-              <DropdownMenuItem onClick={() => navigate("/settings")}>Mon profil</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/support")}>Support</DropdownMenuItem>
-              <DropdownMenuItem onClick={async () => { await logout(); navigate("/login"); }}>Se déconnecter</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>{t("header.myProfile")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/support")}>{t("header.support")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => { await logout(); navigate("/login"); }}>{t("header.logout")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
         </div>
       </header>
 
