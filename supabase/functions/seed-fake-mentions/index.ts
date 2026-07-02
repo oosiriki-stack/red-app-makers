@@ -174,22 +174,33 @@ function buildSourceUrl(platform: string, brand: string, author: string) {
 
 function buildMention(opts: { user_id: string; brand: string; sector?: string | null; platforms: string[]; competitors: string[]; baseTime: number; jitterMs: number; languages?: string[]; langSettings?: { autoDetect?: boolean; autoTranslateFr?: boolean; keepOriginal?: boolean; sentimentInOriginal?: boolean }; }) {
   const { user_id, brand, sector, platforms, competitors, baseTime, jitterMs, languages, langSettings } = opts;
-  const r = Math.random();
-  const sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
   const key = sectorKey(sector || "");
   const sectorPack = key ? SECTOR_TEMPLATES[key] : null;
   const useSector = sectorPack && Math.random() < 0.7;
-  const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
-  const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
-  const tplArr = sectorArr ?? genericArr;
   let target = brand;
   if (competitors.length && Math.random() < 0.22) target = pick(competitors);
 
-  // Choisit une langue locale ~40% du temps si l'utilisateur en a activé
   const activeLangs = (languages || []).filter((l) => l && l !== "fr" && LANG_PACKS[l]);
   const useLocal = activeLangs.length > 0 && Math.random() < 0.4;
+
+  // "Analyser le sentiment dans la langue d'origine" : biaise légèrement vers plus
+  // de négatif sur les mentions locales (l'analyse native capte mieux les nuances).
+  const analyzeInOriginal = !!langSettings?.sentimentInOriginal;
+  const r = Math.random();
+  let sentiment: "positive" | "neutral" | "negative";
+  if (useLocal && analyzeInOriginal) {
+    sentiment = r < 0.5 ? "positive" : r < 0.75 ? "neutral" : "negative";
+  } else {
+    sentiment = r < 0.55 ? "positive" : r < 0.85 ? "neutral" : "negative";
+  }
+
+  const genericArr = sentiment === "positive" ? POS_TEMPLATES : sentiment === "neutral" ? NEU_TEMPLATES : NEG_TEMPLATES;
+  const sectorArr = useSector ? (sentiment === "positive" ? sectorPack!.pos : sentiment === "neutral" ? sectorPack!.neu : sectorPack!.neg) : null;
+  const tplArr = sectorArr ?? genericArr;
+
   let content: string;
   let theme = pick(THEMES);
+  let entities: Record<string, any> = {};
   if (useLocal) {
     const code = pick(activeLangs);
     const pack = LANG_PACKS[code];
@@ -203,9 +214,11 @@ function buildMention(opts: { user_id: string; brand: string; sector?: string | 
     else if (translate) content = `${detect}${fr}`;
     else content = `${detect}${native}`;
     theme = `lang:${code}`;
+    entities = { detected_lang: code, lang_label: pack.label, flag: pack.flag, analyzed_in_original: analyzeInOriginal };
   } else {
     const tpl = pick(tplArr);
     content = tpl.replace(/\{brand\}/g, target).replace(/\{n\}/g, String(randInt(1, 48))) + pick(SUFFIXES);
+    entities = { detected_lang: "fr", lang_label: "Français", flag: "🇫🇷", analyzed_in_original: analyzeInOriginal };
   }
   const source = pick(platforms);
 
@@ -226,6 +239,7 @@ function buildMention(opts: { user_id: string; brand: string; sector?: string | 
     emotion: pick(EMOTIONS),
     is_sarcastic: Math.random() < 0.05,
     theme,
+    entities,
     impact_score: randInt(10, 95),
     enriched_at: new Date().toISOString(),
   };
