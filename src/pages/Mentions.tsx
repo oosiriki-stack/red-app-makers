@@ -502,11 +502,21 @@ export default function Mentions() {
                     <div className="flex items-center gap-1.5 flex-wrap text-xs">
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
-                      <Badge className={`text-[10px] border-0 rounded-md py-0 ${sc.className}`}>{sc.label}</Badge>
+                      <Badge
+                        className={`text-[10px] border-0 rounded-md py-0 ${sc.className}`}
+                        title={m.entities?.analyzed_in_original && m.entities?.lang_label ? `Sentiment analysé en ${m.entities.lang_label} (langue d'origine)` : "Sentiment analysé en français"}
+                      >
+                        {m.entities?.analyzed_in_original && m.entities?.flag ? `${m.entities.flag} ` : ""}{sc.label}
+                      </Badge>
+                      {m.entities?.detected_lang && m.entities.detected_lang !== "fr" && (
+                        <Badge variant="outline" className="text-[10px] rounded-md py-0" title={`Langue détectée : ${m.entities.lang_label}`}>
+                          {m.entities.flag} {m.entities.lang_label}
+                        </Badge>
+                      )}
                       {m.emotion && m.emotion !== "neutre" && EMOTION_LABEL[m.emotion] && (
                         <Badge className={`text-[10px] border-0 rounded-md py-0 ${EMOTION_LABEL[m.emotion].cls}`}>{EMOTION_LABEL[m.emotion].label}</Badge>
                       )}
-                      {m.theme && m.theme !== "autre" && THEME_LABEL[m.theme] && (
+                      {m.theme && m.theme !== "autre" && !m.theme.startsWith("lang:") && THEME_LABEL[m.theme] && (
                         <Badge variant="outline" className="text-[10px] rounded-md py-0">{THEME_LABEL[m.theme]}</Badge>
                       )}
                       {m.is_sarcastic && (
