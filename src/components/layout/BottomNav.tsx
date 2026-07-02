@@ -33,9 +33,12 @@ export function BottomNav() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const { isSuperAdmin } = useUserRole();
+  const { t } = useT();
 
+  const primary = primaryDef.map((i) => ({ ...i, label: t(i.key) }));
+  const moreItems = moreDef.map((i) => ({ ...i, label: t(i.key) }));
   const fullMore = isSuperAdmin
-    ? [{ to: "/super-admin", icon: ShieldCheck, label: "Super Admin" }, ...moreItems]
+    ? [{ to: "/super-admin", icon: ShieldCheck, label: t("nav.superadmin") }, ...moreItems]
     : moreItems;
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
@@ -73,13 +76,13 @@ export function BottomNav() {
               <SheetTrigger asChild>
                 <button className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
                   <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-[9px] font-medium text-muted-foreground leading-tight">Plus</span>
+                  <span className="text-[9px] font-medium text-muted-foreground leading-tight">{t("nav.more")}</span>
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="glass-card rounded-t-3xl border-t border-border/60">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" /> Menu Focus
+                    <Target className="w-5 h-5 text-primary" /> {t("nav.menu")}
                   </SheetTitle>
                 </SheetHeader>
                 <div className="grid grid-cols-3 gap-3 py-4">
@@ -110,3 +113,4 @@ export function BottomNav() {
     </nav>
   );
 }
+
