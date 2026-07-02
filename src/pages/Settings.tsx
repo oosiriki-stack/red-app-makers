@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
-// LOCALES / useLocale temporairement retirés : module Langue locale en cours de développement
+import { UI_LOCALES, useT } from "@/lib/i18n";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -508,6 +508,33 @@ const DEFAULT_LANG_SETTINGS = {
   sentimentInOriginal: true,
 };
 
+function UILanguagePicker() {
+  const { locale, setLocale, t } = useT();
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.uiLanguage")}</p>
+      <p className="text-xs text-muted-foreground">{t("settings.uiLanguageDesc")}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+        {UI_LOCALES.map((l) => {
+          const active = locale === l.code;
+          return (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => setLocale(l.code)}
+              className={`flex items-center gap-2 p-2.5 rounded-xl border text-sm text-left transition-all ${active ? "border-primary bg-primary/10 shadow-sm" : "border-border/60 hover:border-primary/40 hover:bg-muted/40"}`}
+            >
+              <span className="text-lg leading-none">{l.flag}</span>
+              <span className="flex-1 truncate">{l.label}</span>
+              {active && <Badge variant="secondary" className="h-4 px-1 text-[9px]">ON</Badge>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function LocaleSettingsCard() {
   const [selected, setSelected] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem(LANG_STORAGE_KEY) || "[\"fr\"]"); } catch { return ["fr"]; }
@@ -575,6 +602,10 @@ function LocaleSettingsCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <UILanguagePicker />
+
+        <Separator />
+
         <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/30">
           <span className="text-xl">🇫🇷</span>
           <div className="flex-1">
@@ -583,6 +614,7 @@ function LocaleSettingsCard() {
           </div>
           <Badge className="rounded-lg">Par défaut</Badge>
         </div>
+
 
         {renderGroup("Langues locales de Côte d'Ivoire", IVORIAN_LANGS)}
         {renderGroup("Autres langues africaines", AFRICAN_LANGS)}
