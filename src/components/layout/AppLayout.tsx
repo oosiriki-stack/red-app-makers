@@ -13,12 +13,14 @@ import { MarketingOnboarding } from "@/components/MarketingOnboarding";
 import { useNotifications } from "@/hooks/useNotifications";
 import { TrialBanner } from "@/components/TrialBanner";
 import { TrialLockGuard } from "@/components/TrialLockGuard";
+import { useT } from "@/lib/i18n";
 
 export function AppLayout() {
   useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useT();
   const [dark, setDark] = useState(() => localStorage.getItem("arobase_dark") === "true");
   const [initials, setInitials] = useState("U");
   const [unread, setUnread] = useState(0);
