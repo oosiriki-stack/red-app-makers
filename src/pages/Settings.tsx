@@ -418,27 +418,8 @@ export default function Settings() {
                   </Button>
                 </div>
                 <Separator />
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Canaux multi-plateformes</p>
-                  <p className="text-xs text-muted-foreground">Recevez vos alertes critiques sur le canal de votre choix.</p>
-                  {[
-                    { key: "sms", label: "SMS", desc: "Via GatewayAPI — pour notifications instantanées", icon: "📱" },
-                    { key: "whatsapp", label: "WhatsApp", desc: "Via Meta Business Cloud API", icon: "💬" },
-                    { key: "slack", label: "Slack", desc: "Webhook entrant vers votre workspace", icon: "💼" },
-                    { key: "teams", label: "Microsoft Teams", desc: "Webhook entrant vers votre canal", icon: "👥" },
-                  ].map((c) => (
-                    <div key={c.key} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{c.icon}</span>
-                        <div>
-                          <p className="text-sm font-medium">{c.label}</p>
-                          <p className="text-xs text-muted-foreground">{c.desc}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md font-semibold">En cours</span>
-                    </div>
-                  ))}
-                </div>
+                <ChannelsCard />
+
               </CardContent>
             </Card>
           </TabsContent>
