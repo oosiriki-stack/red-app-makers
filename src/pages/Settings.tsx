@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
 import { UI_LOCALES, useT } from "@/lib/i18n";
+import { ChannelsCard } from "@/components/ChannelsCard";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
@@ -40,6 +41,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const defaultTab = searchParams.get("tab") || "profile";
   const { user } = useAuth();
+  const { t } = useT();
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -234,19 +236,20 @@ export default function Settings() {
     <AnimatedPage>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Paramètres</h1>
-          <p className="text-muted-foreground">Gérez votre profil, surveillance et préférences</p>
+          <h1 className="text-3xl font-light tracking-tight">{t("settings.title")}</h1>
+          <p className="text-muted-foreground">{t("settings.subtitle")}</p>
         </div>
 
         <Tabs defaultValue={defaultTab}>
           <TabsList className="w-full rounded-xl flex-wrap h-auto">
-            <TabsTrigger value="profile" className="flex-1 rounded-lg">Profil</TabsTrigger>
-            <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
-            <TabsTrigger value="rss" className="flex-1 rounded-lg">RSS Watch</TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
-            <TabsTrigger value="langue" className="flex-1 rounded-lg">Langue locale</TabsTrigger>
-            <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1 rounded-lg">{t("settings.tab.profile")}</TabsTrigger>
+            <TabsTrigger value="surveillance" className="flex-1 rounded-lg">{t("settings.tab.surveillance")}</TabsTrigger>
+            <TabsTrigger value="rss" className="flex-1 rounded-lg">{t("settings.tab.rss")}</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex-1 rounded-lg">{t("settings.tab.notifications")}</TabsTrigger>
+            <TabsTrigger value="langue" className="flex-1 rounded-lg">{t("settings.tab.langue")}</TabsTrigger>
+            <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">{t("settings.tab.accessibilite")}</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="rss">
             <DemoGate feature="RSS Watch" description="L'ingestion d'alertes Google et de flux RSS personnalisés nécessite une licence active.">
@@ -415,27 +418,8 @@ export default function Settings() {
                   </Button>
                 </div>
                 <Separator />
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Canaux multi-plateformes</p>
-                  <p className="text-xs text-muted-foreground">Recevez vos alertes critiques sur le canal de votre choix.</p>
-                  {[
-                    { key: "sms", label: "SMS", desc: "Via GatewayAPI — pour notifications instantanées", icon: "📱" },
-                    { key: "whatsapp", label: "WhatsApp", desc: "Via Meta Business Cloud API", icon: "💬" },
-                    { key: "slack", label: "Slack", desc: "Webhook entrant vers votre workspace", icon: "💼" },
-                    { key: "teams", label: "Microsoft Teams", desc: "Webhook entrant vers votre canal", icon: "👥" },
-                  ].map((c) => (
-                    <div key={c.key} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{c.icon}</span>
-                        <div>
-                          <p className="text-sm font-medium">{c.label}</p>
-                          <p className="text-xs text-muted-foreground">{c.desc}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md font-semibold">En cours</span>
-                    </div>
-                  ))}
-                </div>
+                <ChannelsCard />
+
               </CardContent>
             </Card>
           </TabsContent>
