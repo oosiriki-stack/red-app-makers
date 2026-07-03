@@ -236,19 +236,20 @@ export default function Settings() {
     <AnimatedPage>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Paramètres</h1>
-          <p className="text-muted-foreground">Gérez votre profil, surveillance et préférences</p>
+          <h1 className="text-3xl font-light tracking-tight">{t("settings.title")}</h1>
+          <p className="text-muted-foreground">{t("settings.subtitle")}</p>
         </div>
 
         <Tabs defaultValue={defaultTab}>
           <TabsList className="w-full rounded-xl flex-wrap h-auto">
-            <TabsTrigger value="profile" className="flex-1 rounded-lg">Profil</TabsTrigger>
-            <TabsTrigger value="surveillance" className="flex-1 rounded-lg">Surveillance</TabsTrigger>
-            <TabsTrigger value="rss" className="flex-1 rounded-lg">RSS Watch</TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 rounded-lg">Notifications</TabsTrigger>
-            <TabsTrigger value="langue" className="flex-1 rounded-lg">Langue locale</TabsTrigger>
-            <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">Accessibilité</TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1 rounded-lg">{t("settings.tab.profile")}</TabsTrigger>
+            <TabsTrigger value="surveillance" className="flex-1 rounded-lg">{t("settings.tab.surveillance")}</TabsTrigger>
+            <TabsTrigger value="rss" className="flex-1 rounded-lg">{t("settings.tab.rss")}</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex-1 rounded-lg">{t("settings.tab.notifications")}</TabsTrigger>
+            <TabsTrigger value="langue" className="flex-1 rounded-lg">{t("settings.tab.langue")}</TabsTrigger>
+            <TabsTrigger value="accessibilite" className="flex-1 rounded-lg">{t("settings.tab.accessibilite")}</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="rss">
             <DemoGate feature="RSS Watch" description="L'ingestion d'alertes Google et de flux RSS personnalisés nécessite une licence active.">
