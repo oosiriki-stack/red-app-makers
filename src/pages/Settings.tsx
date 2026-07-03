@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
 import { DemoGate } from "@/components/DemoGate";
 import { UI_LOCALES, useT } from "@/lib/i18n";
+import { ChannelsCard } from "@/components/ChannelsCard";
 
 const platforms = [
   { key: "x", label: "X (Twitter)", color: "bg-foreground" },
