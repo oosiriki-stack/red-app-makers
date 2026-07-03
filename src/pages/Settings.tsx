@@ -41,6 +41,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const defaultTab = searchParams.get("tab") || "profile";
   const { user } = useAuth();
+  const { t } = useT();
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
