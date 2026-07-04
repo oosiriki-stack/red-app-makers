@@ -9,6 +9,7 @@ import { QuotaGauge } from "@/components/QuotaGauge";
 import { RecentMentions } from "@/components/RecentMentions";
 import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
+import { MentionsByLanguageCard } from "@/components/MentionsByLanguageCard";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -193,6 +194,11 @@ export default function Dashboard() {
         </Card>
 
 
+        <div className="grid gap-3 lg:grid-cols-2">
+          <MentionsByLanguageCard />
+          <RecentMentions />
+        </div>
+
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
@@ -229,7 +235,7 @@ export default function Dashboard() {
             </Card>
           </div>
           <div className="lg:col-span-2">
-            <RecentMentions />
+            <RiskScoreCard />
           </div>
         </div>
 
