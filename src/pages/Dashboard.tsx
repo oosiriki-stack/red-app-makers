@@ -194,10 +194,7 @@ export default function Dashboard() {
         </Card>
 
 
-        <div className="grid gap-3 lg:grid-cols-2">
-          <MentionsByLanguageCard />
-          <RecentMentions />
-        </div>
+        <MentionsByLanguageCard />
 
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
@@ -209,7 +206,6 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
-                {/* Mobile: gauge à gauche, infos à droite. Desktop: centré */}
                 <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2">
                   <div className="shrink-0 md:hidden">
                     <QuotaGauge value={daysLeft} max={quotaMax} size={92} label={quotaLabel} />
@@ -235,7 +231,7 @@ export default function Dashboard() {
             </Card>
           </div>
           <div className="lg:col-span-2">
-            <RiskScoreCard />
+            <RecentMentions />
           </div>
         </div>
 
