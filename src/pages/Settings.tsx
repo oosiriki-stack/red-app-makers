@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import RssWatchManager from "@/components/RssWatchManager";
 import { toast } from "sonner";
-import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock, Pause, Play } from "lucide-react";
+import { X, Plus, CreditCard, Type, Loader2, Volume2, Zap, Languages, Sparkles, Clock, Pause, Play, Sparkle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isSoundEnabled, setSoundEnabled, playAlertSound } from "@/lib/sound";
@@ -292,9 +292,30 @@ export default function Settings() {
             <DemoGate feature="Configuration de la surveillance" description="La création et la modification de la surveillance (marque, plateformes, mots-clés) nécessitent une licence active.">
             <Card className="glass-card rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-base flex items-center justify-between">
-                  Marque surveillée
-                  {brand && <Badge variant="outline" className="text-xs font-normal">{activePlatformCount} plateforme{activePlatformCount > 1 ? "s" : ""}</Badge>}
+                <CardTitle className="text-base flex items-center justify-between flex-wrap gap-2">
+                  <span>Marque surveillée</span>
+                  <div className="flex items-center gap-2">
+                    {brand && <Badge variant="outline" className="text-xs font-normal">{activePlatformCount} plateforme{activePlatformCount > 1 ? "s" : ""}</Badge>}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg text-xs"
+                      onClick={() => {
+                        if (brand && !window.confirm(t("surveillance.newConfirm"))) return;
+                        setBrand("");
+                        setSector("");
+                        setPerson("");
+                        setCountry("");
+                        setKeywords([]);
+                        setNewKeyword("");
+                        setPlatformStates(defaultPlatformStates);
+                        toast.success(t("surveillance.newReady"));
+                      }}
+                    >
+                      <Sparkle className="h-3.5 w-3.5 mr-1" />
+                      {t("surveillance.new")}
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">

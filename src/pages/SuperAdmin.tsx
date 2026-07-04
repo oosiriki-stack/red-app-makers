@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedPage } from "@/components/AnimatedPage";
@@ -246,6 +247,7 @@ export default function SuperAdmin() {
             <TabsTrigger value="pending" className="rounded-lg">Paiements en attente ({stats.pending})</TabsTrigger>
             <TabsTrigger value="users" className="rounded-lg">Tous utilisateurs ({stats.users})</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-lg">Tickets ({tickets.length})</TabsTrigger>
+            <TabsTrigger value="activity" className="rounded-lg">Journal d'activité</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
@@ -363,7 +365,12 @@ export default function SuperAdmin() {
               ))}
             </div>
           </TabsContent>
+
+          <TabsContent value="activity">
+            <AdminActivityLog />
+          </TabsContent>
         </Tabs>
+
 
         <Dialog open={!!detail} onOpenChange={() => { setDetail(null); setProofUrl(null); setExtras(null); }}>
           <DialogContent className="glass-card rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
