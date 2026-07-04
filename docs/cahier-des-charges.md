@@ -22,7 +22,10 @@ Plateforme africaine de veille e-réputation propulsée par l'IA, mobile-first, 
 | 11 | Paiement & Abonnements (Wave, FCFA) | ✅ | Promo 21 jours full-access en cours |
 | 12 | Super Admin (carte utilisateurs Afrique, activation licences) | ✅ | Realtime push aux clients |
 | 13 | PWA installable (Android + iOS) | ✅ | navigateFallback configuré |
-| 14 | Langues locales | 🛠️ En cours | Placeholder affiché |
+| 14 | Langues locales & i18n UI (FR/EN/Wolof/Bambara/Lingala + langues CI) | ✅ | Sélecteur instantané, dictionnaires `src/lib/i18n.ts` |
+| 15 | Canaux multi-plateformes (SMS, WhatsApp, Slack, Teams, Email) | ✅ | Table `notification_channels`, edge `send-channel-test` |
+| 16 | Wave Webhook → validation auto des paiements | ✅ | Edge `wave-webhook`, HMAC SHA-256, activation licence |
+| 17 | Apify LinkedIn (remplacement du seed) | ✅ | Actor `apimaestro~linkedin-posts-search-scraper-no-cookies` |
 
 ## 3. Résolveur de source (nouveau)
 Edge function `resolve-source` : pour chaque mention, génère une liste ordonnée d'URL candidates et probe en parallèle (timeout 1.5 s) :
