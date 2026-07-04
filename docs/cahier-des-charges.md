@@ -49,9 +49,7 @@ Le client ouvre instantanément un onglet sur la requête Google ciblée (anti p
 - Pas de social-login sans provider configuré côté Supabase.
 - Dépendances majeures upgradées (zéro vulnérabilité high/medium au dernier scan).
 
-## 6. Roadmap restante
-- Finaliser l'i18n (FR / EN / Wolof / Bambara / Lingala).
-- Connecter Wave Webhook → validation auto des paiements.
-- Brancher Apify Actor LinkedIn (en remplacement progressif du seed).
+## 6. Roadmap
+✅ **Toutes les phases du cahier des charges sont livrées.** Prochaines évolutions au fil des retours utilisateurs (nouveaux connecteurs, modèles IA, langues additionnelles).
 
 — Document de référence projet.
