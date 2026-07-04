@@ -93,5 +93,15 @@ Deno.serve(async (req) => {
     description: `Votre licence ${sub.plan} est activée automatiquement (tx ${tx}).`,
   });
 
+  // Journal d'activité super admin
+  await admin.from("admin_activity_log").insert({
+    user_id: sub.user_id,
+    actor_email: null,
+    action: "wave.webhook.validated",
+    target: String(tx),
+    status: "success",
+    metadata: { plan: sub.plan, amount, subscription_id: sub.id, event_type: type },
+  });
+
   return json({ received: true, activated: true, subscription_id: sub.id });
 });

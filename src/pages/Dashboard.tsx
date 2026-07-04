@@ -9,6 +9,7 @@ import { QuotaGauge } from "@/components/QuotaGauge";
 import { RecentMentions } from "@/components/RecentMentions";
 import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
+import { MentionsByLanguageCard } from "@/components/MentionsByLanguageCard";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -193,6 +194,8 @@ export default function Dashboard() {
         </Card>
 
 
+        <MentionsByLanguageCard />
+
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
@@ -203,7 +206,6 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
-                {/* Mobile: gauge à gauche, infos à droite. Desktop: centré */}
                 <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2">
                   <div className="shrink-0 md:hidden">
                     <QuotaGauge value={daysLeft} max={quotaMax} size={92} label={quotaLabel} />

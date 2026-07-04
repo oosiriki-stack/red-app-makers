@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLog";
 
 type ChannelKey = "sms" | "whatsapp" | "slack" | "teams" | "email";
 type Row = { id?: string; channel: ChannelKey; target: string; enabled: boolean; verified: boolean; last_test_at?: string | null };
@@ -21,6 +22,21 @@ const DEFS: { key: ChannelKey; icon: string; targetKey: "phone" | "webhook" | "e
   { key: "email", icon: "✉️", targetKey: "email" },
 ];
 
+function validateTarget(channel: ChannelKey, target: string, t: (k: string) => string): string | null {
+  const v = target.trim();
+  if (!v) return t("channels.missingTarget");
+  if (channel === "sms" || channel === "whatsapp") {
+    if (!/^\+?[0-9\s\-()]{6,}$/.test(v)) return t("channels.invalidPhone");
+  } else if (channel === "email") {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return t("channels.invalidEmail");
+  } else if (channel === "slack") {
+    if (!/^https:\/\/hooks\.slack\.com\//i.test(v)) return t("channels.invalidWebhook");
+  } else if (channel === "teams") {
+    if (!/^https:\/\/[^ ]+\.(webhook\.office\.com|logic\.azure\.com)\//i.test(v)) return t("channels.invalidWebhook");
+  }
+  return null;
+}
+
 export function ChannelsCard() {
   const { user } = useAuth();
   const { t } = useT();
@@ -31,6 +47,7 @@ export function ChannelsCard() {
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState<ChannelKey | null>(null);
   const [saving, setSaving] = useState<ChannelKey | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<ChannelKey, string>>>({});
 
   const userEmail = user?.email || "";
 
@@ -63,12 +80,20 @@ export function ChannelsCard() {
     })();
   }, [user, userEmail]);
 
-  const update = (k: ChannelKey, patch: Partial<Row>) =>
+  const update = (k: ChannelKey, patch: Partial<Row>) => {
     setRows((prev) => ({ ...prev, [k]: { ...prev[k], ...patch } }));
+    if (patch.target !== undefined) setErrors((e) => ({ ...e, [k]: undefined }));
+  };
 
   const save = async (k: ChannelKey) => {
     if (!user) return;
     const r = rows[k];
+    const err = r.enabled ? validateTarget(k, r.target, t) : null;
+    if (err) {
+      setErrors((e) => ({ ...e, [k]: err }));
+      toast.error(err);
+      return;
+    }
     setSaving(k);
     const payload = { user_id: user.id, channel: k, target: r.target?.trim() || null, enabled: r.enabled };
     const { data, error } = await supabase
@@ -77,21 +102,34 @@ export function ChannelsCard() {
       .select()
       .single();
     setSaving(null);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      logActivity({ action: "channel.save", target: k, status: "error", metadata: { error: error.message } });
+      return;
+    }
     update(k, { id: (data as any).id });
-    toast.success(t("channels.saved"));
+    toast.success(t("channels.saved"), {
+      description: r.enabled ? t("channels.enabledOn") : t("channels.disabled"),
+    });
+    logActivity({ action: "channel.save", target: k, status: "success", metadata: { enabled: r.enabled } });
   };
 
   const test = async (k: ChannelKey) => {
     const r = rows[k];
-    if (!r.target?.trim()) return toast.error(t("channels.missingTarget"));
+    const err = validateTarget(k, r.target, t);
+    if (err) {
+      setErrors((e) => ({ ...e, [k]: err }));
+      toast.error(err);
+      return;
+    }
     setTesting(k);
     try {
       const { data, error } = await supabase.functions.invoke("send-channel-test", {
         body: { channel: k, target: r.target.trim() },
       });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message || "failed");
-      toast.success(t("channels.tested"));
+      if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message || t("channels.networkError"));
+      const simulated = (data as any)?.simulated;
+      toast.success(simulated ? t("channels.simulatedOk") : t("channels.tested"));
       update(k, { verified: true, last_test_at: new Date().toISOString() });
       if (user) {
         await supabase.from("notification_channels").upsert(
@@ -99,8 +137,11 @@ export function ChannelsCard() {
           { onConflict: "user_id,channel" }
         );
       }
+      logActivity({ action: "channel.test", target: k, status: "success", metadata: { simulated: !!simulated } });
     } catch (e: any) {
-      toast.error(`${t("channels.testFail")}: ${e.message ?? e}`);
+      const msg = e?.message ?? String(e);
+      toast.error(`${t("channels.testFail")}: ${msg}`);
+      logActivity({ action: "channel.test", target: k, status: "error", metadata: { error: msg } });
     } finally {
       setTesting(null);
     }
@@ -126,14 +167,20 @@ export function ChannelsCard() {
           DEFS.map((d) => {
             const r = rows[d.key];
             const targetLabel = t(`channels.target.${d.targetKey}`);
+            const err = errors[d.key];
             return (
-              <div key={d.key} className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <div key={d.key} className={`rounded-xl border p-3 space-y-2 transition-colors ${err ? "border-red-500/40 bg-red-500/5" : "border-border bg-muted/30"}`}>
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{d.icon}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium flex items-center gap-2">
                       {t(`channels.${d.key}`)}
-                      {r.verified && <Badge variant="secondary" className="text-[10px]">✓</Badge>}
+                      {r.verified && (
+                        <Badge variant="secondary" className="text-[10px] gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          {r.last_test_at ? new Date(r.last_test_at).toLocaleDateString("fr-FR") : "✓"}
+                        </Badge>
+                      )}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">{t(`channels.${d.key}Desc`)}</p>
                   </div>
@@ -144,17 +191,19 @@ export function ChannelsCard() {
                     value={r.target}
                     placeholder={targetLabel}
                     onChange={(e) => update(d.key, { target: e.target.value })}
-                    className="rounded-lg"
+                    className={`rounded-lg ${err ? "border-red-500/60" : ""}`}
+                    aria-invalid={!!err}
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="rounded-lg" disabled={testing === d.key} onClick={() => test(d.key)}>
+                    <Button size="sm" variant="outline" className="rounded-lg" disabled={testing === d.key || saving === d.key} onClick={() => test(d.key)}>
                       {testing === d.key ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     </Button>
-                    <Button size="sm" className="rounded-lg" disabled={saving === d.key} onClick={() => save(d.key)}>
-                      {saving === d.key ? <Loader2 className="h-4 w-4 animate-spin" /> : t("channels.save")}
+                    <Button size="sm" className="rounded-lg" disabled={saving === d.key || testing === d.key} onClick={() => save(d.key)}>
+                      {saving === d.key ? <><Loader2 className="h-4 w-4 animate-spin mr-1" />{t("channels.saving")}</> : t("channels.save")}
                     </Button>
                   </div>
                 </div>
+                {err && <p className="text-[11px] text-red-600 dark:text-red-400">{err}</p>}
               </div>
             );
           })
