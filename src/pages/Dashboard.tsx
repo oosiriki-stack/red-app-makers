@@ -7,6 +7,7 @@ import { AnimatedPage, StaggerContainer, staggerItem } from "@/components/Animat
 import { ReputationGauge } from "@/components/ReputationGauge";
 import { QuotaGauge } from "@/components/QuotaGauge";
 import { RecentMentions } from "@/components/RecentMentions";
+import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { InviteCollaboratorDialog } from "@/components/InviteCollaboratorDialog";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
 import { MentionsByLanguageCard } from "@/components/MentionsByLanguageCard";
