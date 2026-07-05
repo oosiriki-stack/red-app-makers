@@ -13,6 +13,10 @@ import { useAppUpdate } from "@/hooks/useAppUpdate";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import { CookieConsent } from "@/components/CookieConsent";
+const Privacy = lazy(() => import("@/pages/legal/Privacy"));
+const Terms = lazy(() => import("@/pages/legal/Terms"));
+const CookiesPage = lazy(() => import("@/pages/legal/Cookies"));
 
 // Lazy-loaded routes — réduit le bundle initial et fluidifie la navigation
 const Mentions = lazy(() => import("@/pages/Mentions"));
@@ -65,6 +69,9 @@ const App = () => {
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<CookiesPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -94,6 +101,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <CookieConsent />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
