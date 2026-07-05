@@ -125,6 +125,8 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <OnboardingTutorial />
+
         <StaggerContainer className="grid gap-2.5 md:gap-3 grid-cols-2 lg:grid-cols-4">
           <motion.div variants={staggerItem} className="col-span-2 lg:col-span-1">
             <Card className="glass-card hover-3d h-full rounded-2xl">
