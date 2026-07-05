@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
-import { Bell, Moon, Sun, Search, Target, ArrowLeft, User } from "lucide-react";
+import { Bell, Moon, Sun, Search, Target, ArrowLeft, User, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -90,6 +90,7 @@ export function AppLayout() {
           <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/")} aria-label="Retour à la page d'accueil"><Home className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>

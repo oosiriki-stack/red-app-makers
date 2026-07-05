@@ -332,9 +332,12 @@ export default function Landing() {
             <span className="font-semibold" style={{ fontFamily: "'Space Grotesk'" }}>Focus</span>
           </div>
           <p className="text-xs text-muted-foreground">© 2026 Focus — Plateforme IA de social listening</p>
-          <div className="flex gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <Link to="/login" className="hover:text-foreground transition-colors">Connexion</Link>
             <Link to="/register" className="hover:text-foreground transition-colors">Inscription</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Confidentialité</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">CGU</Link>
+            <Link to="/cookies" className="hover:text-foreground transition-colors">Cookies</Link>
           </div>
         </div>
       </footer>
