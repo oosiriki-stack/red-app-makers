@@ -197,7 +197,16 @@ const DICTS: Record<UILocaleCode, Dict> = {
     "admin.log.title": "Activity log",
     "admin.log.empty": "No activity recorded.",
     "admin.log.search": "Search (action, email, target…)",
+    "cookie.title": "Privacy & cookies",
+    "cookie.body": "We only use cookies strictly required to run Focus. Analytics cookies remain optional and require your explicit consent (GDPR, CCPA, Ivory Coast law 2013-450).",
+    "cookie.learn": "Learn more",
+    "cookie.accept": "Accept all",
+    "cookie.reject": "Reject all",
+    "cookie.essential": "Essential only",
+    "cookie.close": "Close",
+    "cookie.saved": "Preferences saved",
   },
+
   wo: {
     "nav.home": "Kër",
     "nav.mentions": "Wax yi",
