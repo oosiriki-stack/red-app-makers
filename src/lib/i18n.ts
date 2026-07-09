@@ -103,7 +103,16 @@ const DICTS: Record<UILocaleCode, Dict> = {
     "admin.log.title": "Journal d'activité",
     "admin.log.empty": "Aucune activité enregistrée.",
     "admin.log.search": "Rechercher (action, email, cible…)",
+    "cookie.title": "Confidentialité & cookies",
+    "cookie.body": "Nous utilisons uniquement des cookies essentiels au fonctionnement de Focus. Les cookies d'analyse restent optionnels et nécessitent votre consentement explicite (RGPD, CCPA, loi ivoirienne 2013-450).",
+    "cookie.learn": "En savoir plus",
+    "cookie.accept": "Tout accepter",
+    "cookie.reject": "Tout refuser",
+    "cookie.essential": "Essentiels uniquement",
+    "cookie.close": "Fermer",
+    "cookie.saved": "Préférences enregistrées",
   },
+
   en: {
     "nav.home": "Home",
     "nav.mentions": "Mentions",
