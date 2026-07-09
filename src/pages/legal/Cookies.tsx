@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 export default function Cookies() {
   const reset = () => {
     localStorage.removeItem("focus_cookie_consent_v1");
-    location.reload();
+    window.dispatchEvent(new Event("focus:cookie-consent:open"));
   };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/40 glass-header sticky top-0 z-30">
