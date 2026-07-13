@@ -69,6 +69,7 @@ export default function Settings() {
   const [notifInfluencer, setNotifInfluencer] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [tracking, setTracking] = useState(false);
+  const [importingGoogle, setImportingGoogle] = useState(false);
 
   const runTracker = async () => {
     setTracking(true);
@@ -76,6 +77,17 @@ export default function Settings() {
     setTracking(false);
     if (error) { toast.error("Erreur tracker: " + error.message); return; }
     toast.success(`Tracker exécuté · ${data?.count ?? 0} mention(s)`, { description: `Sources gratuites: ${(data?.sources_used || []).join(", ") || "flux publics"}` });
+  };
+
+  const importGoogleReviews = async () => {
+    if (!brand) { toast.error("Renseignez d'abord une marque à surveiller"); return; }
+    setImportingGoogle(true);
+    const { data, error } = await supabase.functions.invoke("google-reviews-scan");
+    setImportingGoogle(false);
+    if (error) { toast.error("Erreur avis Google: " + error.message); return; }
+    if ((data as any)?.error) { toast.error((data as any).error); return; }
+    const { imported = 0, skipped = 0 } = (data as any) || {};
+    toast.success(`⭐ ${imported} avis Google importé(s)`, { description: skipped ? `${skipped} déjà présents` : "Consultez l'onglet Mentions" });
   };
 
   // Font
