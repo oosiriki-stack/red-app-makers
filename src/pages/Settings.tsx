@@ -399,6 +399,21 @@ export default function Settings() {
                     </Button>
                   </div>
                 )}
+                {brand && platformStates.google && (
+                  <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center shrink-0">⭐</div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">Import avis Google (Apify)</p>
+                        <p className="text-xs text-muted-foreground">Récupère jusqu'à 50 avis Google Maps pour « {brand} ».</p>
+                      </div>
+                    </div>
+                    <Button onClick={importGoogleReviews} disabled={importingGoogle} size="sm" variant="outline" className="rounded-xl w-full">
+                      {importingGoogle ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                      {importingGoogle ? "Import en cours…" : "Importer les avis Google"}
+                    </Button>
+                  </div>
+                )}
                 <Button onClick={handleSaveMonitoring} className="w-full rounded-xl" disabled={savingMonitoring}>
                   {savingMonitoring ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   {brand ? "Mettre à jour la surveillance" : "Activer la surveillance"}
