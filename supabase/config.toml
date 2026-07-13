@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.scheduled-scan]
 verify_jwt = false
+
+[functions.apify-probe]
+verify_jwt = false
