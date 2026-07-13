@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.apify-probe]
 verify_jwt = false
+
+[functions.google-reviews-scan]
+verify_jwt = true
