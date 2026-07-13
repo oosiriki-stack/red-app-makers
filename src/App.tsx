@@ -38,6 +38,7 @@ const SocialNetworks = lazy(() => import("@/pages/SocialNetworks"));
 const Influencers = lazy(() => import("@/pages/Influencers"));
 const QuickChart = lazy(() => import("@/pages/QuickChart"));
 const Pipeline = lazy(() => import("@/pages/Pipeline"));
+const Analytics = lazy(() => import("@/pages/Analytics"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -96,6 +97,7 @@ const App = () => {
                   <Route path="/influencers" element={<DemoGate feature="Influenceurs" description="Identifiez les voix qui parlent de votre marque. Disponible dès le plan Starter." redirect><PlanGate feature="influencers" title="Influenceurs — Plan Starter requis"><Influencers /></PlanGate></DemoGate>} />
                   <Route path="/quick-chart" element={<DemoGate feature="Graphiques rapides" description="Visualisez vos mentions en un coup d'œil. Disponible dès le plan Starter." redirect><PlanGate feature="quick_chart" title="Graphiques rapides — Plan Starter requis"><QuickChart /></PlanGate></DemoGate>} />
                   <Route path="/pipeline" element={<Pipeline />} />
+                  <Route path="/analytics" element={<DemoGate feature="Analytics avancé" description="Cohortes, rétention et benchmarks sectoriels. Disponible dès le plan Starter." redirect><PlanGate feature="reports" title="Analytics — Plan Starter requis"><Analytics /></PlanGate></DemoGate>} />
                 </Route>
               </Route>
               <Route path="*" element={<NotFound />} />

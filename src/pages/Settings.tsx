@@ -69,6 +69,7 @@ export default function Settings() {
   const [notifInfluencer, setNotifInfluencer] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [tracking, setTracking] = useState(false);
+  const [importingGoogle, setImportingGoogle] = useState(false);
 
   const runTracker = async () => {
     setTracking(true);
@@ -76,6 +77,17 @@ export default function Settings() {
     setTracking(false);
     if (error) { toast.error("Erreur tracker: " + error.message); return; }
     toast.success(`Tracker exécuté · ${data?.count ?? 0} mention(s)`, { description: `Sources gratuites: ${(data?.sources_used || []).join(", ") || "flux publics"}` });
+  };
+
+  const importGoogleReviews = async () => {
+    if (!brand) { toast.error("Renseignez d'abord une marque à surveiller"); return; }
+    setImportingGoogle(true);
+    const { data, error } = await supabase.functions.invoke("google-reviews-scan");
+    setImportingGoogle(false);
+    if (error) { toast.error("Erreur avis Google: " + error.message); return; }
+    if ((data as any)?.error) { toast.error((data as any).error); return; }
+    const { imported = 0, skipped = 0 } = (data as any) || {};
+    toast.success(`⭐ ${imported} avis Google importé(s)`, { description: skipped ? `${skipped} déjà présents` : "Consultez l'onglet Mentions" });
   };
 
   // Font
@@ -384,6 +396,21 @@ export default function Settings() {
                     </div>
                     <Button variant={paused ? "default" : "outline"} size="sm" className="rounded-xl shrink-0" onClick={togglePause} disabled={togglingPause}>
                       {togglingPause ? <Loader2 className="h-4 w-4 animate-spin" /> : paused ? <><Play className="h-4 w-4 mr-1" />Reprendre</> : <><Pause className="h-4 w-4 mr-1" />Mettre en pause</>}
+                    </Button>
+                  </div>
+                )}
+                {brand && platformStates.google && (
+                  <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center shrink-0">⭐</div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">Import avis Google (Apify)</p>
+                        <p className="text-xs text-muted-foreground">Récupère jusqu'à 50 avis Google Maps pour « {brand} ».</p>
+                      </div>
+                    </div>
+                    <Button onClick={importGoogleReviews} disabled={importingGoogle} size="sm" variant="outline" className="rounded-xl w-full">
+                      {importingGoogle ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                      {importingGoogle ? "Import en cours…" : "Importer les avis Google"}
                     </Button>
                   </div>
                 )}

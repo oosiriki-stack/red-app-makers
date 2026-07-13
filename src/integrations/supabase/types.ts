@@ -618,6 +618,17 @@ export type Database = {
         Args: { _user: string; _workspace: string }
         Returns: boolean
       }
+      sector_benchmarks: {
+        Args: { _sector: string }
+        Returns: {
+          avg_per_user: number
+          negative_pct: number
+          neutral_pct: number
+          positive_pct: number
+          total: number
+          user_count: number
+        }[]
+      }
       workspace_role_of: {
         Args: { _user: string; _workspace: string }
         Returns: Database["public"]["Enums"]["workspace_role"]

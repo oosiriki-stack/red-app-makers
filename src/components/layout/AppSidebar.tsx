@@ -42,6 +42,7 @@ const mainNav: Array<{ title: string; url: string; icon: any; feature?: FeatureK
   { title: "Graphiques", url: "/quick-chart", icon: PieChart, feature: "quick_chart" },
   { title: "FOCUS GPT", url: "/ai-assistant", icon: Bot, feature: "ai_assistant" },
   { title: "Rapports", url: "/reports", icon: FileText, feature: "reports" },
+  { title: "Analytics", url: "/analytics", icon: BarChart3, feature: "reports" },
 ];
 
 const secondaryNav: Array<{ title: string; url: string; icon: any; feature?: FeatureKey }> = [
