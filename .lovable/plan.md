@@ -1,70 +1,57 @@
-# Plan d'exécution
+## Livraison en parallèle des deux chantiers
 
-Votre demande couvre ~25 sujets distincts. Pour livrer du code qui marche réellement (et non un patchwork), je propose de découper en **6 vagues**. Chaque vague est livrée et testable avant de passer à la suivante.
+### 1. Google Reviews (Apify)
 
----
+**Edge function `google-reviews-scan`** (nouvelle)
+- Actor Apify `compass~google-maps-reviews-scraper` (le plus fiable pour reviews historiques).
+- Input : nom de marque + pays (depuis `monitoring_settings`).
+- Récupère max 50 avis / run, normalise et insère dans `mentions` :
+  - `source = 'google'`, `content = review.text`, `author = review.name`, `sentiment` déduit du `stars` (≥4 positive, =3 neutral, ≤2 negative), `mention_date = review.publishedAtDate`, `url = review.reviewUrl`, `entities.stars`, `entities.place_name`.
+- Dédoublonnage par `url` (unique déjà en place ? sinon check `content + author`).
+- Réutilise `APIFY_TOKEN` déjà configuré. Config `verify_jwt = true`.
 
-## Vague 1 — Correctifs critiques + CSS badge (immédiat)
+**Front — bouton manuel**
+- Dans `Settings.tsx` (onglet surveillance) : bouton « Importer les avis Google » qui invoque `google-reviews-scan` et affiche un toast avec le nombre d'avis importés.
+- `Mentions.tsx` filtre `google` déjà géré via `platforms.ts` (source existante).
 
-1. **CSS global** : masquer `#lovable-badge` dans `src/index.css`.
-2. **Bug sentiments Dashboard** : les compteurs positif/neutre/négatif n'affichent rien → corriger la requête / mapping sur `mentions.sentiment`.
-3. **OAuth Google / Apple 404 sur mobile** : vérifier `redirect_uri`, configurer le provider Apple côté Lovable Cloud, et ajouter la gestion correcte de `lovable.auth.signInWithOAuth` avec retour mobile.
-4. **Renommer "requête" → "surveillance"** partout dans Alertes & Mentions.
+### 2. Analytics avancé — `/analytics`
 
-## Vague 2 — Lot 3 : Sources africaines & scraping
+**Nouvelle page `src/pages/Analytics.tsx`** protégée par `PlanGate("reports")` (Starter+).
+- Route ajoutée dans `App.tsx` (lazy).
+- Lien dans `AppSidebar` + `BottomNav` (icône `BarChart3`).
 
-- Seed RSS feeds africains (Abidjan.net, Senego, Koaci, Jeune Afrique, Financial Afrik, etc.) dans table `rss_feeds`.
-- Edge function `fetch-rss` (cron 30 min) qui pousse dans `mentions`.
-- Scrapers Facebook Groups / TikTok comments / WhatsApp Business via **Apify** (token déjà présent) — actors publics dédiés.
-- Page Settings → onglet **Sources** pour activer/désactiver chaque source.
+**3 onglets (Tabs shadcn) :**
 
-## Vague 3 — Lot 4 : Notifications multi-canal
+1. **Cohortes** — matrice heatmap :
+   - Cohorte = semaine ISO de la 1re mention par plateforme.
+   - Affiche volume de mentions par cohorte / semaine relative (W0..W8).
+   - Requête SQL agrégée client-side sur `mentions` de l'utilisateur.
 
-- **SMS** via GatewayAPI (connector).
-- **Slack** via webhook URL (champ utilisateur).
-- **MS Teams** via webhook.
-- **WhatsApp** via Meta Cloud API (nécessite `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_ID`).
-- **Email** via Resend (déjà disponible).
-- Table `notification_channels` + UI Settings → Notifications avec toggle par canal + test d'envoi.
+2. **Rétention sentiment** — ligne Recharts :
+   - Pour chaque semaine, % de mentions restant `positive` vs `negative` sur les 4 semaines suivantes.
+   - Metric = « stabilité positive » et « dégradation ».
 
-## Vague 4 — Lot 5 : Sécurité (RBAC, MFA, audit, chiffrement)
+3. **Benchmarks sectoriels** — bars comparatives :
+   - Utilise `monitoring_settings.sector` de l'utilisateur.
+   - Compare mes 30 derniers jours (volume, % positif, % négatif) vs moyennes agrégées de tous les utilisateurs du même secteur (RPC sécurisée `sector_benchmarks(sector text)` retournant uniquement des agrégats, jamais de données brutes).
+   - Fallback : si <3 utilisateurs dans le secteur → afficher « Données insuffisantes ».
 
-- MFA TOTP (`supabase.auth.mfa`).
-- HIBP password check (activable via `configure_auth`).
-- Table `audit_logs` + triggers sur tables sensibles + page `SuperAdmin → Journal`.
-- RBAC déjà en place via `user_roles` → étendre aux rôles workspace (`owner`, `admin`, `analyst`, `viewer`).
-- Bannière sécurité : "Données chiffrées AES-256 au repos, TLS 1.3 en transit" (Lovable Cloud le fournit nativement, à documenter).
-- Auth sociale **LinkedIn** + **Facebook** : non supportés nativement Lovable Cloud → je vous expliquerai la limite et proposerai une alternative (Supabase direct provider config requise).
+**Migration DB :**
+- Fonction `public.sector_benchmarks(_sector text)` SECURITY DEFINER SQL stable, retourne `TABLE(total bigint, positive_pct numeric, negative_pct numeric, avg_per_user numeric, user_count bigint)`.
+- GRANT EXECUTE TO authenticated.
 
-## Vague 5 — Gating par formule (Starter / Business / Premium / Entreprise)
+### Fichiers touchés
+- `supabase/functions/google-reviews-scan/index.ts` (nouveau)
+- `supabase/config.toml` (bloc verify_jwt)
+- `src/pages/Settings.tsx` (bouton import)
+- Migration SQL (fonction benchmark)
+- `src/pages/Analytics.tsx` (nouveau, ~350 lignes)
+- `src/App.tsx` (route lazy)
+- `src/components/layout/AppSidebar.tsx` + `BottomNav.tsx` (lien)
+- `src/lib/i18n.ts` (clés `nav.analytics`, `analytics.*`)
 
-- Mettre à jour `subscriptions.plan` enum : `trial | starter | business | premium | enterprise`.
-- Créer `plan_limits` (marques max, users max, mentions/mois, features booléennes : alertes IA, analyse concurrentielle, API, langues africaines, crise, support prioritaire).
-- Hook `usePlanAccess()` qui lit le plan actif et expose `canAddBrand()`, `hasFeature('competitive')`, etc.
-- Bloquer UI + enforcement DB (RLS sur création de `monitoring_settings`).
-- Wave : 4 liens (mensuel + annuel × 4 plans) → mise à jour `Pricing.tsx`.
-
-## Vague 6 — Mises à jour produit (textes, modules, comportements)
-
-- **Dashboard** : refonte hero (score global + volume + barres pic).
-- **Centre d'alertes** : alerte structurée auto (contexte + analyse IA + recommandations) avec objectif <15 min — afficher TTR.
-- **Explorateur de mentions** : score d'impact propriétaire = `f(audience, engagement, |sentiment|)`.
-- **Analyse comparative** : nouveau module `/competitors` avec benchmarking thématique.
-- **Rapports auto** : edge function `generate-report` → PDF + PPTX (sectoriels gratuits aussi).
-- **Pause auto surveillance précédente** : trigger DB + notif SuperAdmin + dossier "Archivées" visible côté user.
-- **Pipeline FOCUS** : page `/pipeline` qui illustre les 8 étapes + 4 piliers (Surveiller / Comprendre / Anticiper / Décider).
-- **Alertes intelligentes** : règles configurables (mots-clés + sentiment + seuil volume) + détection ML (déjà en place avec `detect-anomalies`).
-- **FOCUS GPT** : intégrer une option "ChatGPT gratuit" — note : OpenAI n'expose pas d'API gratuite ; je vais utiliser **Lovable AI Gateway gratuit** (Gemini Flash) et l'étiqueter "FOCUS GPT" dans l'UI. Si vous voulez vraiment ChatGPT, il faudra une clé OpenAI payante.
-
----
-
-## Points qui nécessitent votre décision avant de coder
-
-1. **Apple Sign-In** : avez-vous un compte Apple Developer (99 $/an) ? Sans ça, impossible techniquement.
-2. **LinkedIn / Facebook auth** : Lovable Cloud ne les supporte pas en managé. Voulez-vous (a) qu'on les retire, (b) qu'on bascule vers Supabase externe ?
-3. **WhatsApp notifs** : OK pour créer compte Meta Business + me fournir `WHATSAPP_TOKEN` ?
-4. **SMS GatewayAPI** : OK pour connecter le connecteur (vous aurez à coller la clé) ?
-5. **"FOCUS GPT gratuit"** : OK pour utiliser Lovable AI Gateway (Gemini, gratuit pour vous) badgé "FOCUS GPT" ?
-6. **Ordre** : on attaque dans l'ordre Vague 1 → 6, ou vous voulez prioriser autrement (ex : gating formules d'abord) ?
-
-Répondez simplement « OK plan, vague 1 » (ou « tout en séquence ») et je démarre.
+### Ordre d'exécution
+1. Migration `sector_benchmarks` (async, attend approbation).
+2. En parallèle : écrire la function Google Reviews + la page Analytics + la config.
+3. Test edge function via `curl_edge_functions`.
+4. Vérif build.
