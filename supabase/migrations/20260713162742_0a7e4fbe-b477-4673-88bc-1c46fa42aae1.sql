@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sector_benchmarks(text) FROM PUBLIC, anon;
