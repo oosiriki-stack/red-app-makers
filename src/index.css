@@ -362,7 +362,7 @@
 }
 
 .landing-theme .gold-text {
-  background: linear-gradient(100deg, hsl(43 74% 78%), hsl(44 54% 54%) 55%, hsl(43 74% 80%));
+  background: linear-gradient(100deg, hsl(36 95% 42%), hsl(40 100% 45%) 55%, hsl(30 90% 50%));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
