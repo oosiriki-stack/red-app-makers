@@ -219,7 +219,7 @@ export default function Landing() {
           {/* Live dashboard mockup */}
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2} className="lg:col-span-5 relative w-full">
             <div className="relative z-10 rounded-lg overflow-hidden border border-border bg-card shadow-[0_40px_120px_-40px_hsl(44_54%_54%_/_0.25)]">
-              <div className="bg-[hsl(0_0%_7%)] px-5 py-3.5 flex items-center justify-between border-b border-border/70">
+              <div className="bg-card px-5 py-3.5 flex items-center justify-between border-b border-border/70">
                 <div className="flex gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/40" />
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/40" />
@@ -271,7 +271,7 @@ export default function Landing() {
       </header>
 
       {/* ================= Stats band ================= */}
-      <section aria-label="Chiffres clés" className="border-y border-border/70 bg-[hsl(0_0%_8%)]">
+      <section aria-label="Chiffres clés" className="border-y border-border/70 bg-muted/50">
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-12 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border/60">
           {stats.map((s, i) => (
             <motion.div key={s.label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className="px-4 py-4 md:py-0 text-center">
@@ -350,7 +350,7 @@ export default function Landing() {
       </section>
 
       {/* ================= Sécurité ================= */}
-      <section id="securite" className="py-20 md:py-28 px-5 md:px-8 bg-[hsl(0_0%_8%)] border-y border-border/70">
+      <section id="securite" className="py-20 md:py-28 px-5 md:px-8 bg-muted/50 border-y border-border/70">
         <div className="max-w-7xl mx-auto">
           <SectionHead
             kicker="Sécurité de niveau entreprise"
@@ -395,7 +395,7 @@ export default function Landing() {
       </section>
 
       {/* ================= Tarifs ================= */}
-      <section id="tarifs" className="py-20 md:py-28 px-5 md:px-8 bg-[hsl(0_0%_8%)] border-y border-border/70">
+      <section id="tarifs" className="py-20 md:py-28 px-5 md:px-8 bg-muted/50 border-y border-border/70">
         <div className="max-w-5xl mx-auto">
           <SectionHead
             kicker="Tarifs"
@@ -460,7 +460,7 @@ export default function Landing() {
       </section>
 
       {/* ================= FAQ ================= */}
-      <section id="faq" className="py-20 md:py-28 px-5 md:px-8 bg-[hsl(0_0%_8%)] border-y border-border/70">
+      <section id="faq" className="py-20 md:py-28 px-5 md:px-8 bg-muted/50 border-y border-border/70">
         <div className="max-w-3xl mx-auto">
           <SectionHead kicker="FAQ" title="Questions fréquentes" align="center" />
           <div className="mt-12 border-t border-border/60">
@@ -503,7 +503,7 @@ export default function Landing() {
       </section>
 
       {/* ================= Footer ================= */}
-      <footer className="border-t border-border/70 bg-[hsl(0_0%_7%)]">
+      <footer className="border-t border-border/70 bg-card">
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-14 grid md:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-3 mb-5">

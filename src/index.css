@@ -303,40 +303,40 @@
 }
 
 /* ============================================================
-   Editorial prestige theme — scoped to the public Landing page
-   Palette: Noir (#0d0d0d / #1a1a1a) & Or (#c9a84c / #f0d78c)
+   Landing page theme — scoped to the public Landing page
+   Palette: couleurs initiales Focus (clair & or #E5A100)
    Type: Sora (titres) × Manrope (texte)
    ============================================================ */
 .landing-theme {
-  --background: 0 0% 5%;
-  --foreground: 42 30% 96%;
+  --background: 40 33% 98%;
+  --foreground: 220 10% 10%;
 
-  --card: 0 0% 10%;
-  --card-foreground: 42 30% 96%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 10% 10%;
 
-  --popover: 0 0% 10%;
-  --popover-foreground: 42 30% 96%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 10% 10%;
 
-  --primary: 44 54% 54%;
-  --primary-foreground: 0 0% 5%;
+  --primary: 40 100% 45%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 0 0% 13%;
-  --secondary-foreground: 42 20% 90%;
+  --secondary: 40 10% 94%;
+  --secondary-foreground: 220 10% 15%;
 
-  --muted: 0 0% 13%;
-  --muted-foreground: 42 8% 66%;
+  --muted: 40 10% 94%;
+  --muted-foreground: 220 5% 45%;
 
-  --accent: 44 40% 14%;
-  --accent-foreground: 44 60% 72%;
+  --accent: 40 100% 94%;
+  --accent-foreground: 36 90% 38%;
 
-  --border: 44 12% 20%;
-  --input: 44 12% 22%;
-  --ring: 44 54% 54%;
+  --border: 40 10% 88%;
+  --input: 40 10% 86%;
+  --ring: 40 100% 45%;
 
-  --radius: 0.375rem;
+  --radius: 0.75rem;
 
-  --gold-soft: 43 74% 74%;
-  --editorial-rule: linear-gradient(90deg, hsl(44 54% 54% / 0.9), hsl(44 54% 54% / 0));
+  --gold-soft: 43 74% 60%;
+  --editorial-rule: linear-gradient(90deg, hsl(40 100% 45% / 0.9), hsl(40 100% 45% / 0));
 
   font-family: 'Manrope', system-ui, sans-serif;
   background-color: hsl(var(--background));
@@ -362,7 +362,7 @@
 }
 
 .landing-theme .gold-text {
-  background: linear-gradient(100deg, hsl(43 74% 78%), hsl(44 54% 54%) 55%, hsl(43 74% 80%));
+  background: linear-gradient(100deg, hsl(36 95% 42%), hsl(40 100% 45%) 55%, hsl(30 90% 50%));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
