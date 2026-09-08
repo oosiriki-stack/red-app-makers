@@ -353,7 +353,12 @@
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: hsl(var(--primary));
+  /* Contraste AA sur fond clair (l'or pur est trop clair) */
+  color: hsl(32 92% 30%);
+}
+
+.dark .landing-theme .kicker {
+  color: hsl(40 95% 62%);
 }
 
 .landing-theme .gold-rule {
