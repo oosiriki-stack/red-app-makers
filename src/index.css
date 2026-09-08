@@ -318,7 +318,7 @@
   --popover-foreground: 220 10% 10%;
 
   --primary: 40 100% 45%;
-  --primary-foreground: 0 0% 100%;
+  --primary-foreground: 0 0% 12%;
 
   --secondary: 40 10% 94%;
   --secondary-foreground: 220 10% 15%;
@@ -384,3 +384,20 @@
 }
 
 
+
+/* Accessibilité : l'or de marque est trop clair pour du texte sur fond clair (WCAG AA) */
+.landing-theme .text-primary {
+  color: hsl(32 92% 30%);
+}
+
+.dark .landing-theme .text-primary {
+  color: hsl(40 95% 62%);
+}
+
+.text-primary-readable {
+  color: hsl(25 95% 33%);
+}
+
+.dark .text-primary-readable {
+  color: hsl(35 100% 62%);
+}

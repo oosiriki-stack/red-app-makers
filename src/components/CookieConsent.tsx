@@ -74,7 +74,7 @@ export function CookieConsent() {
                 <p className="text-sm font-semibold mb-1">{t("cookie.title")}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {t("cookie.body")}{" "}
-                  <Link to="/cookies" className="underline text-primary">{t("cookie.learn")}</Link>.
+                  <Link to="/cookies" className="underline text-primary-readable">{t("cookie.learn")}</Link>.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Button size="sm" className="rounded-xl font-semibold" onClick={() => decide("all")}>
