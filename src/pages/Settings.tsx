@@ -370,7 +370,7 @@ export default function Settings() {
                   <Label className="mb-2 block">Mots-clés supplémentaires</Label>
                   <div className="flex gap-2">
                     <Input placeholder="Ajouter un mot-clé..." value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())} className="rounded-xl" />
-                    <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={addKeyword}><Plus className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" aria-label="Ajouter un mot-clé" className="rounded-xl shrink-0" onClick={addKeyword}><Plus className="h-4 w-4" /></Button>
                   </div>
                   {keywords.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">

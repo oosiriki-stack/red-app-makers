@@ -108,7 +108,7 @@ export default function RssWatchManager() {
                 </a>
                 {f.last_fetched_at && <div className="text-[10px] text-muted-foreground">Dernier scan : {new Date(f.last_fetched_at).toLocaleString("fr-FR")}</div>}
               </div>
-              <Button size="icon" variant="ghost" onClick={() => remove(f.id)} className="text-destructive">
+              <Button size="icon" variant="ghost" aria-label="Supprimer ce flux" onClick={() => remove(f.id)} className="text-destructive">
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>

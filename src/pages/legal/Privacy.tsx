@@ -7,7 +7,7 @@ export default function Privacy() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/40 glass-header sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link to="/"><Button variant="ghost" size="icon" className="rounded-xl"><ArrowLeft className="h-5 w-5" /></Button></Link>
+          <Link to="/"><Button variant="ghost" size="icon" aria-label="Retour à l’accueil" className="rounded-xl"><ArrowLeft className="h-5 w-5" /></Button></Link>
           <ShieldCheck className="h-5 w-5 text-primary" />
           <h1 className="font-semibold">Politique de confidentialité</h1>
         </div>

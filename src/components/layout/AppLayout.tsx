@@ -93,15 +93,15 @@ export function AppLayout() {
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/")} aria-label="Retour à la page d'accueil"><Home className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
+          <Button variant="ghost" size="icon" className="rounded-xl" aria-label={dark ? "Passer en mode clair" : "Passer en mode sombre"} onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
 
-          <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
+          <Button variant="ghost" size="icon" aria-label="Voir les alertes" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
             <Bell className="h-5 w-5" />
             {unread > 0 && <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">{unread}</Badge>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-xl">
+              <Button variant="ghost" size="icon" aria-label="Mon compte" className="rounded-xl">
                 <Avatar className="h-7 w-7 ring-2 ring-primary/20"><AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback></Avatar>
               </Button>
             </DropdownMenuTrigger>

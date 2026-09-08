@@ -205,7 +205,7 @@ export default function Workspaces() {
                               <SelectItem value="viewer">Lecteur</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Button size="icon" variant="ghost" onClick={() => removeMember(m.id, m.user_id)}><UserMinus className="w-4 h-4 text-destructive" /></Button>
+                          <Button size="icon" variant="ghost" aria-label="Retirer ce membre" onClick={() => removeMember(m.id, m.user_id)}><UserMinus className="w-4 h-4 text-destructive" /></Button>
                         </>
                       )}
                     </div>
@@ -227,8 +227,8 @@ export default function Workspaces() {
                         <div className="text-[11px] text-muted-foreground">Expire {new Date(inv.expires_at).toLocaleDateString("fr-FR")}</div>
                       </div>
                       {roleBadge(inv.role)}
-                      <Button size="icon" variant="ghost" onClick={() => copyInviteLink(inv.token)} title="Copier le lien"><Copy className="w-4 h-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => revokeInvitation(inv.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      <Button size="icon" variant="ghost" aria-label="Copier le lien d’invitation" onClick={() => copyInviteLink(inv.token)} title="Copier le lien"><Copy className="w-4 h-4" /></Button>
+                      <Button size="icon" variant="ghost" aria-label="Révoquer l’invitation" onClick={() => revokeInvitation(inv.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   ))}
                 </div>
