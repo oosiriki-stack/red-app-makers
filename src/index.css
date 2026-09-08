@@ -22,7 +22,7 @@
     --secondary-foreground: 220 10% 15%;
 
     --muted: 40 10% 94%;
-    --muted-foreground: 220 5% 45%;
+    --muted-foreground: 220 6% 38%;
 
     --accent: 25 100% 95%;
     --accent-foreground: 25 90% 40%;
@@ -318,13 +318,13 @@
   --popover-foreground: 220 10% 10%;
 
   --primary: 40 100% 45%;
-  --primary-foreground: 0 0% 100%;
+  --primary-foreground: 0 0% 12%;
 
   --secondary: 40 10% 94%;
   --secondary-foreground: 220 10% 15%;
 
   --muted: 40 10% 94%;
-  --muted-foreground: 220 5% 45%;
+  --muted-foreground: 220 6% 38%;
 
   --accent: 40 100% 94%;
   --accent-foreground: 36 90% 38%;
@@ -353,7 +353,12 @@
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: hsl(var(--primary));
+  /* Contraste AA sur fond clair (l'or pur est trop clair) */
+  color: hsl(32 92% 30%);
+}
+
+.dark .landing-theme .kicker {
+  color: hsl(40 95% 62%);
 }
 
 .landing-theme .gold-rule {
@@ -379,3 +384,35 @@
 }
 
 
+
+/* Accessibilité : l'or de marque est trop clair pour du texte sur fond clair (WCAG AA) */
+.landing-theme .text-primary {
+  color: hsl(32 92% 30%);
+}
+
+.dark .landing-theme .text-primary {
+  color: hsl(40 95% 62%);
+}
+
+.text-primary-readable {
+  color: hsl(25 95% 33%);
+}
+
+.dark .text-primary-readable {
+  color: hsl(35 100% 62%);
+}
+
+/* Texte accent lisible partout (WCAG AA) sans changer la couleur des fonds de marque */
+.text-primary {
+  color: hsl(25 95% 33%);
+}
+
+.dark .text-primary {
+  color: hsl(35 100% 64%);
+}
+
+/* Le bandeau cookies doit rester opaque pour garantir le contraste du texte */
+.cookie-banner {
+  background-color: hsl(var(--card));
+  backdrop-filter: none;
+}

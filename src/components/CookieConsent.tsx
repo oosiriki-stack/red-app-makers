@@ -65,7 +65,7 @@ export function CookieConsent() {
           aria-live="polite"
           aria-label={t("cookie.title")}
         >
-          <div className="glass-card rounded-2xl p-4 shadow-2xl border border-primary/20">
+          <div className="cookie-banner glass-card rounded-2xl p-4 shadow-2xl border border-primary/20">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Cookie className="h-4 w-4 text-primary" aria-hidden />
@@ -74,7 +74,7 @@ export function CookieConsent() {
                 <p className="text-sm font-semibold mb-1">{t("cookie.title")}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {t("cookie.body")}{" "}
-                  <Link to="/cookies" className="underline text-primary">{t("cookie.learn")}</Link>.
+                  <Link to="/cookies" className="underline text-primary-readable">{t("cookie.learn")}</Link>.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Button size="sm" className="rounded-xl font-semibold" onClick={() => decide("all")}>

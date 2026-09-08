@@ -183,7 +183,7 @@ export default function Pricing() {
                   <p className="text-sm font-medium">Carte bancaire à utiliser</p>
                   <div className="flex items-center gap-2">
                     <code className="text-base font-mono bg-background px-3 py-2 rounded-lg flex-1">{CARD_NUMBER}</code>
-                    <Button size="icon" variant="outline" className="rounded-xl shrink-0" onClick={() => copy(CARD_NUMBER.replace(/\s/g, ""))}><Copy className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" aria-label="Copier le numéro de carte" className="rounded-xl shrink-0" onClick={() => copy(CARD_NUMBER.replace(/\s/g, ""))}><Copy className="h-4 w-4" /></Button>
                   </div>
                   <p className="text-xs text-muted-foreground">Effectuez le paiement sur cette carte, puis renseignez les 4 derniers chiffres de votre carte et l'ID de transaction.</p>
                 </div>

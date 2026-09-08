@@ -118,7 +118,7 @@ export default function Influencers() {
                     </div>
                   </div>
                   {r.lastUrl && (
-                    <Button asChild variant="ghost" size="icon"><a href={r.lastUrl} target="_blank" rel="noopener"><ExternalLink className="w-4 h-4" /></a></Button>
+                    <Button asChild variant="ghost" size="icon"><a href={r.lastUrl} target="_blank" rel="noopener" aria-label="Ouvrir la publication"><ExternalLink className="w-4 h-4" /></a></Button>
                   )}
                 </Card>
               </motion.div>

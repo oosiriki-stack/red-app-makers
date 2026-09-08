@@ -115,7 +115,7 @@ export default function SocialNetworks() {
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   )}
-                  <Button size="icon" variant="ghost" onClick={() => remove(h.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button size="icon" variant="ghost" aria-label="Supprimer ce mot-clé" onClick={() => remove(h.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </Card>
               </motion.div>
             );

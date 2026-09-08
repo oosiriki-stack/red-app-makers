@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { saveOffline, loadOffline } from "@/lib/offlineCache";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -98,6 +99,13 @@ export default function Mentions() {
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
+    // Hors-ligne : on affiche immédiatement les dernières mentions enregistrées
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const cached = loadOffline<Mention[]>(`mentions:${user.id}`);
+      setMentions(cached?.data ?? []);
+      setLoading(false);
+      return;
+    }
     let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(5000);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
@@ -111,8 +119,15 @@ export default function Mentions() {
     }
     if (nameFilter) query = query.ilike("author", `%${nameFilter}%`);
     const { data, error } = await query;
-    if (error) toast.error(error.message);
-    else setMentions((data || []) as Mention[]);
+    if (error) {
+      const cached = loadOffline<Mention[]>(`mentions:${user.id}`);
+      if (cached) setMentions(cached.data);
+      else toast.error(error.message);
+    } else {
+      const rows = (data || []) as Mention[];
+      setMentions(rows);
+      saveOffline(`mentions:${user.id}`, rows.slice(0, 300));
+    }
     setLoading(false);
   };
 
@@ -498,7 +513,7 @@ export default function Mentions() {
               <Card key={m.id} className="glass-card rounded-2xl card-hover relative overflow-hidden">
                 <CardContent className={`p-4 flex items-start gap-3 ${isLocked ? "blur-md select-none pointer-events-none" : ""}`}>
                   <Avatar className="h-9 w-9"><AvatarFallback className="bg-muted text-xs">{avatarText}</AvatarFallback></Avatar>
-                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { if (isLocked) return; setSelected(m); setReply({}); }}>
+                  <div role="button" tabIndex={isLocked ? -1 : 0} aria-label={`Ouvrir la mention de ${m.author}`} className="flex-1 min-w-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => { if (isLocked) return; setSelected(m); setReply({}); }} onKeyDown={(e) => { if (isLocked) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(m); setReply({}); } }}>
                     <div className="flex items-center gap-1.5 flex-wrap text-xs">
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>

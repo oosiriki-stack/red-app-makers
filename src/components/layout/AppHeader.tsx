@@ -79,16 +79,16 @@ export function AppHeader() {
         </div>
       </form>
 
-      <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setSearchOpen(!searchOpen)}>
+      <Button variant="ghost" size="icon" aria-label="Ouvrir la recherche" className="sm:hidden" onClick={() => setSearchOpen(!searchOpen)}>
         <Search className="h-4 w-4" />
       </Button>
 
       <div className="flex items-center gap-2 ml-auto">
-        <Button variant="ghost" size="icon" onClick={toggleDark} className="rounded-xl">
+        <Button variant="ghost" size="icon" aria-label="Changer de thème" onClick={toggleDark} className="rounded-xl">
           {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
-        <Button variant="ghost" size="icon" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
+        <Button variant="ghost" size="icon" aria-label="Voir les alertes" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] notification-pulse">
@@ -99,7 +99,7 @@ export function AppHeader() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-xl">
+            <Button variant="ghost" size="icon" aria-label="Mon compte" className="rounded-xl">
               <Avatar className="h-7 w-7 ring-2 ring-primary/20">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
               </Avatar>
