@@ -498,7 +498,7 @@ export default function Mentions() {
               <Card key={m.id} className="glass-card rounded-2xl card-hover relative overflow-hidden">
                 <CardContent className={`p-4 flex items-start gap-3 ${isLocked ? "blur-md select-none pointer-events-none" : ""}`}>
                   <Avatar className="h-9 w-9"><AvatarFallback className="bg-muted text-xs">{avatarText}</AvatarFallback></Avatar>
-                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { if (isLocked) return; setSelected(m); setReply({}); }}>
+                  <div role="button" tabIndex={isLocked ? -1 : 0} aria-label={`Ouvrir la mention de ${m.author}`} className="flex-1 min-w-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => { if (isLocked) return; setSelected(m); setReply({}); }} onKeyDown={(e) => { if (isLocked) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(m); setReply({}); } }}>
                     <div className="flex items-center gap-1.5 flex-wrap text-xs">
                       <span className="font-medium text-sm">{m.author}</span>
                       <Badge variant="outline" className="text-[10px] rounded-md py-0">{PLATFORM_LABEL[m.source] || m.source}</Badge>
