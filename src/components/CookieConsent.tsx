@@ -65,7 +65,7 @@ export function CookieConsent() {
           aria-live="polite"
           aria-label={t("cookie.title")}
         >
-          <div className="glass-card rounded-2xl p-4 shadow-2xl border border-primary/20">
+          <div className="cookie-banner glass-card rounded-2xl p-4 shadow-2xl border border-primary/20">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Cookie className="h-4 w-4 text-primary" aria-hidden />
