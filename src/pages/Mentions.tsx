@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { saveOffline, loadOffline } from "@/lib/offlineCache";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -98,6 +99,13 @@ export default function Mentions() {
   const fetchMentions = async () => {
     if (!user) return;
     setLoading(true);
+    // Hors-ligne : on affiche immédiatement les dernières mentions enregistrées
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const cached = loadOffline<Mention[]>(`mentions:${user.id}`);
+      setMentions(cached?.data ?? []);
+      setLoading(false);
+      return;
+    }
     let query = supabase.from("mentions").select("*").eq("user_id", user.id).order("mention_date", { ascending: false }).limit(5000);
     if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
     if (sentimentFilter !== "all") query = query.eq("sentiment", sentimentFilter);
@@ -111,8 +119,15 @@ export default function Mentions() {
     }
     if (nameFilter) query = query.ilike("author", `%${nameFilter}%`);
     const { data, error } = await query;
-    if (error) toast.error(error.message);
-    else setMentions((data || []) as Mention[]);
+    if (error) {
+      const cached = loadOffline<Mention[]>(`mentions:${user.id}`);
+      if (cached) setMentions(cached.data);
+      else toast.error(error.message);
+    } else {
+      const rows = (data || []) as Mention[];
+      setMentions(rows);
+      saveOffline(`mentions:${user.id}`, rows.slice(0, 300));
+    }
     setLoading(false);
   };
 

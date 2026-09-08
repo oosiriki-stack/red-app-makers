@@ -14,6 +14,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { TrialBanner } from "@/components/TrialBanner";
 import { TrialLockGuard } from "@/components/TrialLockGuard";
 import { useT } from "@/lib/i18n";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 export function AppLayout() {
   useNotifications();
@@ -115,6 +116,7 @@ export function AppLayout() {
         </div>
       </header>
 
+      <OfflineBanner />
       <TrialBanner />
 
       <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 md:pt-6 pb-28 md:pb-32 overflow-auto">
