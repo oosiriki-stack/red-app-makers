@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      strategies: "generateSW",
       registerType: "autoUpdate",
       injectRegister: null,
       devOptions: { enabled: false },
@@ -53,18 +54,6 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "focus-images",
               expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-          {
-            // Lectures de données (REST) : réseau d'abord, cache en secours hors-ligne
-            urlPattern: ({ url, request }: any) =>
-              request.method === "GET" && /\/rest\/v1\//.test(url.pathname),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "focus-api",
-              networkTimeoutSeconds: 6,
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

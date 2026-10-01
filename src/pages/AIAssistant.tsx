@@ -137,7 +137,7 @@ export default function AIAssistant() {
   const printMsg = (text: string) => {
     const w = window.open("", "_blank", "width=700,height=900");
     if (!w) return;
-    w.document.write(`<html><head><title>FocusGPT</title><style>body{font-family:system-ui;padding:24px;line-height:1.6;color:#222}h1{color:#E5A100}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><h1>FocusGPT</h1><pre>${text.replace(/</g, "&lt;")}</pre><p style="color:#888;font-size:12px;margin-top:24px">Imprimé le ${new Date().toLocaleString("fr-FR")}</p></body></html>`);
+    w.document.write(`<html><head><title>FocusGPT</title><style>body{font-family:system-ui;padding:24px;line-height:1.6;color:#222}h1{color:#FF7900}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><h1>FocusGPT</h1><pre>${text.replace(/</g, "&lt;")}</pre><p style="color:#888;font-size:12px;margin-top:24px">Imprimé le ${new Date().toLocaleString("fr-FR")}</p></body></html>`);
     w.document.close(); w.focus(); w.print();
   };
 
