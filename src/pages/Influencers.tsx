@@ -95,7 +95,7 @@ export default function Influencers() {
               <motion.div key={`${r.source}-${r.author}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(i * 0.03, 0.5) }}>
                 <Card className="glass-card p-4 flex items-center gap-4">
                   <div className="relative">
-                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${i === 0 ? "from-amber-400 to-amber-600" : i < 3 ? "from-primary to-orange-600" : "from-muted to-muted-foreground/30"} flex items-center justify-center text-white font-bold`}>
+                    <div className={`w-12 h-12 rounded-full ${i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"} flex items-center justify-center font-bold`}>
                       #{i + 1}
                     </div>
                     {i === 0 && <Crown className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />}

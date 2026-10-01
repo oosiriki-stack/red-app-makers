@@ -61,7 +61,7 @@ export default function AcceptInvitation() {
           </>
         ) : (
           <>
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold mb-1">{workspace?.name}</h1>

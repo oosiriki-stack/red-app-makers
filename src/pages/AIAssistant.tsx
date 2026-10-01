@@ -137,7 +137,7 @@ export default function AIAssistant() {
   const printMsg = (text: string) => {
     const w = window.open("", "_blank", "width=700,height=900");
     if (!w) return;
-    w.document.write(`<html><head><title>FocusGPT</title><style>body{font-family:system-ui;padding:24px;line-height:1.6;color:#222}h1{color:#E5A100}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><h1>FocusGPT</h1><pre>${text.replace(/</g, "&lt;")}</pre><p style="color:#888;font-size:12px;margin-top:24px">Imprimé le ${new Date().toLocaleString("fr-FR")}</p></body></html>`);
+    w.document.write(`<html><head><title>FocusGPT</title><style>body{font-family:system-ui;padding:24px;line-height:1.6;color:#222}h1{color:#FF7900}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><h1>FocusGPT</h1><pre>${text.replace(/</g, "&lt;")}</pre><p style="color:#888;font-size:12px;margin-top:24px">Imprimé le ${new Date().toLocaleString("fr-FR")}</p></body></html>`);
     w.document.close(); w.focus(); w.print();
   };
 
@@ -145,7 +145,7 @@ export default function AIAssistant() {
     <AnimatedPage>
       <div className="space-y-3 max-w-4xl mx-auto flex flex-col h-[calc(100vh-10rem)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-lg shadow-primary/30">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
             <Bot className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>

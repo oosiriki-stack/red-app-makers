@@ -158,7 +158,7 @@ export function UsageMap() {
               {points.map((p) => {
                 const size = Math.round(18 + (p.count / maxCount) * 26);
                 return (
-                  <Marker key={p.key} width={size} anchor={[p.lat, p.lng]} color="#E5A100" onClick={() => setActive(p)} />
+                  <Marker key={p.key} width={size} anchor={[p.lat, p.lng]} color="#FF7900" onClick={() => setActive(p)} />
                 );
               })}
               {active && (

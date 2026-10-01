@@ -120,7 +120,7 @@ export function FakeUsersAdminMap() {
           <PigeonMap defaultCenter={[7.54, -5.55]} defaultZoom={4}>
             {grouped.map((g) => {
               const size = Math.round(16 + (g.users.length / maxCount) * 28);
-              return <Marker key={`${g.lat}_${g.lng}`} width={size} anchor={[g.lat, g.lng]} color="#E5A100" onClick={() => setActive(g.users[0])} />;
+              return <Marker key={`${g.lat}_${g.lng}`} width={size} anchor={[g.lat, g.lng]} color="#FF7900" onClick={() => setActive(g.users[0])} />;
             })}
             {active && (
               <Overlay anchor={[active.lat, active.lng]} offset={[120, 30]}>

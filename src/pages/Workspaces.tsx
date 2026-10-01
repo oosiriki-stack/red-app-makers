@@ -140,7 +140,7 @@ export default function Workspaces() {
             {workspaces.map((w) => (
               <button key={w.id} onClick={() => setActive(w)} className={`w-full text-left p-3 rounded-xl transition-all ${active?.id === w.id ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/50"}`}>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center text-white text-sm font-bold">{w.name.charAt(0).toUpperCase()}</div>
+                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">{w.name.charAt(0).toUpperCase()}</div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm truncate">{w.name}</div>
                     <div className="text-[10px] text-muted-foreground">{w.owner_id === user?.id ? "Propriétaire" : "Membre"}</div>

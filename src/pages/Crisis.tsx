@@ -84,7 +84,7 @@ export default function Crisis() {
   const print = () => {
     const w = window.open("", "_blank", "width=800,height=1000");
     if (!w) return;
-    w.document.write(`<html><head><title>Focus — ${TITLES[mode]}</title><style>body{font-family:system-ui;padding:32px;line-height:1.6;color:#222;max-width:780px;margin:auto}h1{color:#E5A100;border-bottom:2px solid #E5A100;padding-bottom:8px}pre{white-space:pre-wrap;font-family:inherit;font-size:14px}.foot{color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:8px}</style></head><body><h1>Focus — ${TITLES[mode]}</h1><p><strong>Marque:</strong> ${brand}<br/><strong>Situation:</strong> ${situation}</p><pre>${output.replace(/</g, "&lt;")}</pre><div class="foot">Généré par Focus · ${new Date().toLocaleString("fr-FR")}</div></body></html>`);
+    w.document.write(`<html><head><title>Focus — ${TITLES[mode]}</title><style>body{font-family:system-ui;padding:32px;line-height:1.6;color:#222;max-width:780px;margin:auto}h1{color:#FF7900;border-bottom:2px solid #FF7900;padding-bottom:8px}pre{white-space:pre-wrap;font-family:inherit;font-size:14px}.foot{color:#888;font-size:11px;margin-top:32px;border-top:1px solid #eee;padding-top:8px}</style></head><body><h1>Focus — ${TITLES[mode]}</h1><p><strong>Marque:</strong> ${brand}<br/><strong>Situation:</strong> ${situation}</p><pre>${output.replace(/</g, "&lt;")}</pre><div class="foot">Généré par Focus · ${new Date().toLocaleString("fr-FR")}</div></body></html>`);
     w.document.close(); w.focus(); w.print();
   };
 

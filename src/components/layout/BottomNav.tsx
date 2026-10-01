@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 
 const primaryDef = [
   { to: "/dashboard", icon: LayoutDashboard, key: "nav.home" },
@@ -55,7 +56,7 @@ export function BottomNav() {
                 return (
                   <NavLink key={item.to} to={item.to} className="relative -mt-5 flex flex-col items-center gap-0.5">
                     <div className={cn(
-                      "w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary to-orange-600 flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-background transition-transform",
+                      "w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-background transition-transform",
                       active && "scale-110"
                     )}>
                       <Icon className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
@@ -74,10 +75,10 @@ export function BottomNav() {
 
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                <Button variant="ghost" className="h-auto flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg" aria-label={t("nav.more")}>
                   <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                   <span className="text-[9px] font-medium text-muted-foreground leading-tight">{t("nav.more")}</span>
-                </button>
+                </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="glass-card rounded-t-3xl border-t border-border/60">
                 <SheetHeader>

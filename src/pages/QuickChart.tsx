@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const SENT_COLORS = { positive: "hsl(142, 71%, 45%)", neutral: "hsl(45, 93%, 47%)", negative: "hsl(0, 84%, 60%)" };
-const PLATFORM_COLORS = ["#E5A100", "#FF7900", "#3B82F6", "#10B981", "#EF4444", "#8B5CF6", "#EC4899"];
+const PLATFORM_COLORS = ["#FF7900", "#3B82F6", "#10B981", "#EF4444", "#8B5CF6", "#EC4899", "#0891B2"];
 
 export default function QuickChart() {
   const { user } = useAuth();

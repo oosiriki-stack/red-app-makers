@@ -16,7 +16,10 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      strategies: "generateSW",
       registerType: "autoUpdate",
+      injectRegister: null,
+      devOptions: { enabled: false },
       includeAssets: ["favicon.svg", "favicon.ico"],
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -24,6 +27,16 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /\.[a-z0-9]+$/i],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            // Pages : réseau prioritaire pour éviter une interface périmée
+            urlPattern: ({ request }: any) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "focus-pages",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
           {
             // Polices Google : cache longue durée
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
@@ -41,18 +54,6 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "focus-images",
               expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-          {
-            // Lectures de données (REST) : réseau d'abord, cache en secours hors-ligne
-            urlPattern: ({ url, request }: any) =>
-              request.method === "GET" && /\/rest\/v1\//.test(url.pathname),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "focus-api",
-              networkTimeoutSeconds: 6,
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],
