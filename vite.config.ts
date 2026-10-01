@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
+      devOptions: { enabled: false },
       includeAssets: ["favicon.svg", "favicon.ico"],
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -24,6 +26,16 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /\.[a-z0-9]+$/i],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            // Pages : réseau prioritaire pour éviter une interface périmée
+            urlPattern: ({ request }: any) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "focus-pages",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
           {
             // Polices Google : cache longue durée
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

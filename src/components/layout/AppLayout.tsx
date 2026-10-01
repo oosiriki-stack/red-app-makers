@@ -85,13 +85,16 @@ export function AppLayout() {
           </Button>
         )}
         <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-md shadow-primary/30 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30 shrink-0">
             <Target className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
           </div>
           <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
         </button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/")} aria-label="Retour à la page d'accueil"><Home className="h-5 w-5" /></Button>
+          <Button variant="outline" size="sm" className="h-9 rounded-xl gap-2 px-2 sm:px-3" onClick={() => navigate("/")} aria-label="Voir la page d'accueil">
+            <Home className="h-4 w-4" />
+            <span className="hidden sm:inline">Accueil</span>
+          </Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
           <Button variant="ghost" size="icon" className="rounded-xl" aria-label={dark ? "Passer en mode clair" : "Passer en mode sombre"} onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>

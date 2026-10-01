@@ -145,7 +145,7 @@ export default function AIAssistant() {
     <AnimatedPage>
       <div className="space-y-3 max-w-4xl mx-auto flex flex-col h-[calc(100vh-10rem)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-lg shadow-primary/30">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
             <Bot className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>

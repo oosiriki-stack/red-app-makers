@@ -46,16 +46,12 @@ export function useAppUpdate(intervalMs: number = 60_000) {
             description: "L'application va se mettre à jour automatiquement.",
             duration: 5000,
           });
-          // Vide les caches du service worker s'il y en a, puis recharge
+          // Demande au service worker de récupérer la nouvelle version, puis recharge
           setTimeout(async () => {
             try {
-              if ("caches" in window) {
-                const keys = await caches.keys();
-                await Promise.all(keys.map((k) => caches.delete(k)));
-              }
               if ("serviceWorker" in navigator) {
                 const regs = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(regs.map((r) => r.update()));
+                await Promise.all(regs.filter((r) => r.active?.scriptURL.endsWith("/sw.js")).map((r) => r.update()));
               }
             } catch {
               /* ignore */
