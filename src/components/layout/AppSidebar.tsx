@@ -85,7 +85,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="glass-sidebar border-r border-border/40">
+    <Sidebar collapsible="icon" className="glass-sidebar border-r border-border/70">
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -129,7 +129,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3">
         {!collapsed ? (
-          <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-primary/[0.06] to-transparent p-3 space-y-2">
+          <div className="space-y-2 rounded-xl border border-border/60 bg-accent/50 p-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />

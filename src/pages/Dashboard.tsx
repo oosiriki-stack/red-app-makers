@@ -98,11 +98,12 @@ export default function Dashboard() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-4 md:space-y-5">
-        <div className="flex items-start justify-between flex-wrap gap-2">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl md:text-3xl font-light tracking-tight truncate">{greeting}</h1>
-            <p className="text-[11px] md:text-sm text-muted-foreground mt-0.5">
+            <p className="mb-1 text-[11px] font-bold uppercase text-primary">Tableau de bord</p>
+            <h1 className="truncate text-2xl font-bold md:text-3xl">{greeting}</h1>
+            <p className="mt-1 text-xs text-muted-foreground md:text-sm">
               {stats.brand ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Activity className="h-3 w-3 text-green-500 animate-pulse shrink-0" />
@@ -113,13 +114,13 @@ export default function Dashboard() {
               )}
             </p>
           </div>
-          <div className="flex gap-1.5 shrink-0">
+          <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
             <InviteCollaboratorDialog />
-            <Button variant="outline" size="sm" className="rounded-xl font-semibold px-2 md:px-3" onClick={audioToday}>
+            <Button variant="outline" size="sm" className="h-10 flex-1 rounded-xl px-3 font-semibold sm:flex-none" onClick={audioToday}>
               <Volume2 className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">Écouter</span>
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl px-2 md:px-3" onClick={handleRefresh} disabled={refreshing}>
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-xl" onClick={handleRefresh} disabled={refreshing} aria-label="Actualiser les données">
               {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             </Button>
           </div>
@@ -127,13 +128,13 @@ export default function Dashboard() {
 
         <OnboardingTutorial />
 
-        <StaggerContainer className="grid gap-2.5 md:gap-3 grid-cols-2 lg:grid-cols-4">
-          <motion.div variants={staggerItem} className="col-span-2 lg:col-span-1">
-            <Card className="glass-card hover-3d h-full rounded-2xl">
-              <CardHeader className="pb-2"><CardTitle className="text-xs font-medium text-muted-foreground">Score e-Réputation</CardTitle></CardHeader>
+        <StaggerContainer className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <motion.div variants={staggerItem} className="col-span-2 lg:col-span-1 lg:row-span-2">
+            <Card className="h-full overflow-hidden rounded-xl border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/15">
+              <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold text-primary-foreground/80">Score e-Réputation</CardTitle></CardHeader>
               <CardContent className="flex flex-col items-center pb-4">
                 <ReputationGauge score={reputationScore} size={110} />
-                {!stats.configured && <p className="text-[10px] text-muted-foreground mt-2 text-center">Configurez la surveillance pour activer</p>}
+                {!stats.configured && <p className="mt-2 text-center text-[10px] text-primary-foreground/75">Configurez la surveillance pour activer</p>}
               </CardContent>
             </Card>
           </motion.div>
@@ -141,15 +142,15 @@ export default function Dashboard() {
             const Icon = stat.icon;
             return (
               <motion.div key={stat.key} variants={staggerItem}>
-                <Card className="glass-card hover-3d h-full rounded-2xl cursor-pointer" onClick={() => navigate(stat.link)}>
-                  <CardHeader className="pb-2">
+                <Card className="dashboard-card h-full cursor-pointer" onClick={() => navigate(stat.link)}>
+                  <CardHeader className="p-3 pb-1 sm:p-5 sm:pb-2">
                     <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-xl bg-primary/10 flex items-center justify-center"><Icon className="h-3.5 w-3.5 text-primary" /></div>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent"><Icon className="h-4 w-4 text-primary" /></div>
                       {stat.label}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-xl md:text-2xl font-bold">{stat.value}</div>
+                  <CardContent className="p-3 pt-1 sm:p-5 sm:pt-1">
+                    <div className="text-2xl font-bold md:text-3xl">{stat.value}</div>
                     <p className="text-[11px] md:text-xs text-muted-foreground">{stat.sub}</p>
                   </CardContent>
                 </Card>
@@ -160,7 +161,7 @@ export default function Dashboard() {
         </StaggerContainer>
 
         {/* Répartition des sentiments */}
-        <Card className="glass-card rounded-2xl">
+        <Card className="dashboard-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
               <Heart className="h-3.5 w-3.5 text-primary" />
@@ -172,7 +173,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground text-center py-4">Aucune mention collectée pour le moment.</p>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-2 md:gap-3 mb-3">
+                <div className="mb-4 grid grid-cols-3 gap-2 md:gap-3">
                   <div className="text-center">
                     <div className="text-lg md:text-2xl font-bold text-green-500">{stats.positive}</div>
                     <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-wider">Positif · {stats.positivePercent}%</p>
@@ -199,9 +200,9 @@ export default function Dashboard() {
 
         <MentionsByLanguageCard />
 
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid items-stretch gap-3 lg:grid-cols-3">
           <div className="lg:col-span-1">
-            <Card className="glass-card hover-3d h-full rounded-2xl">
+            <Card className="dashboard-card h-full">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
                   <div className="w-7 h-7 rounded-xl bg-primary/10 flex items-center justify-center"><Clock className="h-3.5 w-3.5 text-primary" /></div>
@@ -209,21 +210,21 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
-                <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2">
-                  <div className="shrink-0 md:hidden">
+                <div className="flex items-center gap-4 lg:flex-col lg:gap-2">
+                  <div className="shrink-0 lg:hidden">
                     <QuotaGauge value={daysLeft} max={quotaMax} size={92} label={quotaLabel} />
                   </div>
-                  <div className="hidden md:block">
+                  <div className="hidden lg:block">
                     <QuotaGauge value={daysLeft} max={quotaMax} size={130} label={quotaLabel} />
                   </div>
-                  <div className="flex-1 min-w-0 md:w-full">
-                    <p className="md:hidden text-[11px] text-muted-foreground font-medium mb-2 leading-tight">
+                  <div className="min-w-0 flex-1 lg:w-full">
+                    <p className="mb-2 text-[11px] font-medium leading-tight text-muted-foreground lg:hidden">
                       {isTrial ? "Période démo en cours" : "Abonnement actif"}
                     </p>
                     <Button
                       size="sm"
                       variant={isTrial ? "default" : "outline"}
-                      className="rounded-xl md:mt-3 font-semibold w-full md:w-auto text-xs md:text-sm"
+                       className="w-full rounded-xl text-xs font-semibold lg:mt-3 lg:w-auto lg:text-sm"
                       onClick={() => navigate("/pricing")}
                     >
                       {isTrial ? "Activer une licence" : "Gérer mon abonnement"}
@@ -239,7 +240,7 @@ export default function Dashboard() {
         </div>
 
         {!stats.configured && (
-          <Card className="glass-card rounded-2xl p-6 text-center">
+          <Card className="dashboard-card p-6 text-center">
             <p className="text-sm text-muted-foreground mb-3 font-medium">Configurez votre surveillance pour activer le score et collecter des mentions.</p>
             <Button className="rounded-xl font-semibold" onClick={() => navigate("/settings?tab=surveillance")}>Configurer maintenant</Button>
           </Card>
@@ -247,7 +248,7 @@ export default function Dashboard() {
       </div>
 
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-        <DialogContent className="glass-card rounded-2xl">
+        <DialogContent className="rounded-xl border-border/70 bg-card">
           <DialogHeader><DialogTitle>Bienvenue sur Focus 👋</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Pour activer votre score de réputation et commencer à surveiller, configurez le nom de votre marque ou de la personne à suivre.</p>
