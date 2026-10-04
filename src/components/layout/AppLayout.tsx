@@ -77,36 +77,37 @@ export function AppLayout() {
   const showBack = !["/", "/dashboard"].includes(location.pathname);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-40 h-14 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border-b border-border/40 glass-header">
+    <div className="app-surface flex min-h-screen flex-col">
+      <header className="glass-header sticky top-0 z-40 min-h-16 border-b px-3 pt-[env(safe-area-inset-top)] sm:px-5">
+        <div className="app-shell flex h-16 items-center gap-2 sm:gap-3">
         {showBack && (
-          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)} aria-label={t("header.back")}>
+          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-xl" onClick={() => navigate(-1)} aria-label={t("header.back")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
         )}
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30 shrink-0">
+        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="h-11 min-w-0 gap-2 rounded-xl px-1.5 sm:px-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary shadow-sm">
             <Target className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
           </div>
-          <span className="font-bold tracking-tight text-gradient-red hidden sm:inline truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Focus</span>
-        </button>
+          <span className="hidden truncate font-bold text-gradient-red sm:inline">Focus</span>
+        </Button>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          <Button variant="outline" size="sm" className="h-9 rounded-xl gap-2 px-2 sm:px-3" onClick={() => navigate("/")} aria-label="Voir la page d'accueil">
+          <Button variant="outline" size="sm" className="hidden h-10 gap-2 rounded-xl px-3 md:flex" onClick={() => navigate("/")} aria-label="Voir la page d'accueil">
             <Home className="h-4 w-4" />
-            <span className="hidden sm:inline">Accueil</span>
+            <span>Accueil</span>
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
-          <Button variant="ghost" size="icon" className="rounded-xl" aria-label={dark ? "Passer en mode clair" : "Passer en mode sombre"} onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={() => navigate("/mentions")} aria-label={t("header.search")}><Search className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="hidden h-10 w-10 rounded-xl sm:inline-flex" onClick={() => navigate("/settings?tab=profile")} aria-label={t("header.profile")}><User className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" className="hidden h-10 w-10 rounded-xl sm:inline-flex" aria-label={dark ? "Passer en mode clair" : "Passer en mode sombre"} onClick={toggleDark}>{dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</Button>
 
-          <Button variant="ghost" size="icon" aria-label="Voir les alertes" className="relative rounded-xl" onClick={() => navigate("/alerts")}>
+          <Button variant="ghost" size="icon" aria-label="Voir les alertes" className="relative h-10 w-10 rounded-xl" onClick={() => navigate("/alerts")}>
             <Bell className="h-5 w-5" />
             {unread > 0 && <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">{unread}</Badge>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Mon compte" className="rounded-xl">
-                <Avatar className="h-7 w-7 ring-2 ring-primary/20"><AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback></Avatar>
+              <Button variant="ghost" size="icon" aria-label="Mon compte" className="h-10 w-10 rounded-xl">
+                <Avatar className="h-8 w-8 ring-2 ring-primary/20"><AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback></Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="glass-card">
@@ -117,13 +118,14 @@ export function AppLayout() {
           </DropdownMenu>
 
         </div>
+        </div>
       </header>
 
       <OfflineBanner />
       <TrialBanner />
 
-      <main className="flex-1 px-3 sm:px-4 md:px-6 pt-3 md:pt-6 pb-28 md:pb-32 overflow-auto">
-        <div className="max-w-6xl mx-auto w-full">
+      <main className="flex-1 overflow-x-hidden px-3 pb-28 pt-4 sm:px-5 md:pb-24 md:pt-6 lg:px-8">
+        <div className="app-shell">
           <TrialLockGuard>
             <Outlet />
           </TrialLockGuard>

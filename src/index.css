@@ -32,7 +32,7 @@
     --input: 40 5% 88%;
     --ring: 25 100% 50%;
 
-    --radius: 1.25rem;
+    --radius: 0.75rem;
 
     --sentiment-positive: 142 71% 45%;
     --sentiment-neutral: 38 92% 50%;
@@ -99,20 +99,20 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
     font-weight: 500;
-    letter-spacing: -0.011em;
+    letter-spacing: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', -apple-system, 'SF Pro Display', sans-serif;
+    font-family: 'Sora', -apple-system, 'SF Pro Display', sans-serif;
     font-weight: 700;
-    letter-spacing: -0.022em;
+    letter-spacing: 0;
   }
-  h1 { font-weight: 800; letter-spacing: -0.028em; }
-  h2 { font-weight: 700; letter-spacing: -0.024em; }
+  h1 { font-weight: 800; letter-spacing: 0; }
+  h2 { font-weight: 700; letter-spacing: 0; }
   h3 { font-weight: 700; }
   /* Apple-style: bump muted/small text weight for readability */
   .text-muted-foreground { font-weight: 500; }
@@ -136,7 +136,7 @@
   }
 
   .glass-card {
-    @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-xl shadow-black/5;
+    @apply bg-card/95 backdrop-blur-xl border border-border/70 shadow-sm;
   }
 
   .glass-sidebar {
@@ -175,7 +175,7 @@
   }
 
   .glass-header {
-    @apply bg-white/70 dark:bg-black/30 backdrop-blur-xl border-b border-white/20;
+    @apply bg-background/90 backdrop-blur-xl border-b border-border/70;
   }
 
   .glow-gold, .glow-red {
@@ -200,6 +200,47 @@
   }
   .card-hover:hover {
     @apply shadow-2xl shadow-black/10 -translate-y-1;
+  }
+}
+
+@layer components {
+  .app-surface {
+    @apply min-h-screen bg-muted/30 text-foreground;
+  }
+
+  .app-shell {
+    @apply mx-auto w-full max-w-7xl;
+  }
+
+  .dashboard-card {
+    @apply rounded-xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] duration-200;
+  }
+
+  @media (hover: hover) {
+    .dashboard-card:hover {
+      @apply border-primary/25 shadow-md;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .hover-3d:hover,
+  .card-hover:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
