@@ -27,18 +27,13 @@ export function QuotaGauge({ value, max, size = 156, label = "jours", title, sub
     status === "warn" ? "url(#qg-grad-warn)" :
     "url(#qg-grad-danger)";
 
-  const glow =
-    status === "ok" ? "shadow-[0_0_40px_-12px_rgba(16,185,129,0.55)]" :
-    status === "warn" ? "shadow-[0_0_40px_-12px_rgba(245,158,11,0.55)]" :
-    "shadow-[0_0_40px_-12px_rgba(244,63,94,0.55)]";
-
   const numberTone =
     status === "ok" ? "text-emerald-600 dark:text-emerald-400" :
     status === "warn" ? "text-amber-600 dark:text-amber-400" :
     "text-rose-600 dark:text-rose-400";
 
   return (
-    <div className={`relative inline-flex flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-card via-card to-muted/40 p-4 ${glow} border border-border/40`}>
+    <div className="relative inline-flex flex-col items-center justify-center rounded-xl bg-muted/35 p-2">
       <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <defs>
@@ -75,7 +70,7 @@ export function QuotaGauge({ value, max, size = 156, label = "jours", title, sub
           <Sparkles className={`w-3.5 h-3.5 mb-0.5 ${numberTone}`} />
           <span
             className={`font-extrabold tracking-tight tabular-nums leading-none ${numberTone}`}
-            style={{ fontSize: value >= 1000 ? size * 0.18 : value >= 100 ? size * 0.24 : size * 0.3 }}
+            style={{ fontSize: value >= 1000 ? size * 0.16 : value >= 100 ? size * 0.22 : size * 0.28 }}
           >
             {value}
           </span>

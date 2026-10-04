@@ -45,48 +45,48 @@ export function BottomNav() {
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto max-w-md px-2 pb-2">
-        <div className="relative glass-card rounded-2xl border border-border/60 shadow-xl shadow-primary/10 backdrop-blur-2xl">
-          <div className="flex items-end justify-around px-1 py-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/70 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:left-1/2 md:bottom-4 md:max-w-2xl md:-translate-x-1/2 md:rounded-2xl md:border md:shadow-lg">
+      <div className="mx-auto w-full px-1.5">
+        <div className="relative">
+          <div className="flex min-h-16 items-center justify-around gap-0.5">
             {primary.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.to);
               if (item.center) {
                 return (
-                  <NavLink key={item.to} to={item.to} className="relative -mt-5 flex flex-col items-center gap-0.5">
+                  <NavLink key={item.to} to={item.to} className="relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-1.5">
                     <div className={cn(
-                      "w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-background transition-transform",
-                      active && "scale-110"
+                      "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+                      active ? "bg-primary text-primary-foreground shadow-sm" : "bg-primary/10 text-primary"
                     )}>
-                      <Icon className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+                      <Icon className="h-5 w-5" strokeWidth={2.5} />
                     </div>
-                    <span className="text-[9px] font-semibold text-primary leading-tight">{item.label}</span>
+                    <span className="max-w-full truncate text-[10px] font-semibold leading-none text-primary">{item.label}</span>
                   </NavLink>
                 );
               }
               return (
-                <NavLink key={item.to} to={item.to} className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
-                  <Icon className={cn("w-4 h-4", active ? "text-primary" : "text-muted-foreground")} strokeWidth={active ? 2.5 : 2} />
-                  <span className={cn("text-[9px] font-medium leading-tight", active ? "text-primary" : "text-muted-foreground")}>{item.label}</span>
+                <NavLink key={item.to} to={item.to} className={cn("flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-2 transition-colors", active && "bg-accent")}>
+                  <Icon className={cn("h-5 w-5", active ? "text-primary" : "text-muted-foreground")} strokeWidth={active ? 2.5 : 2} />
+                  <span className={cn("max-w-full truncate text-[10px] font-medium leading-none", active ? "text-primary" : "text-muted-foreground")}>{item.label}</span>
                 </NavLink>
               );
             })}
 
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" className="h-auto flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg" aria-label={t("nav.more")}>
-                  <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-[9px] font-medium text-muted-foreground leading-tight">{t("nav.more")}</span>
+                <Button variant="ghost" className="h-auto min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2" aria-label={t("nav.more")}>
+                  <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+                  <span className="max-w-full truncate text-[10px] font-medium leading-none text-muted-foreground">{t("nav.more")}</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="glass-card rounded-t-3xl border-t border-border/60">
+              <SheetContent side="bottom" className="max-h-[82dvh] overflow-y-auto rounded-t-2xl border-t border-border/70 bg-card">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-primary" /> {t("nav.menu")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="grid grid-cols-3 gap-3 py-4">
+                <div className="grid grid-cols-3 gap-2 py-4 sm:grid-cols-4">
                   {fullMore.map((m) => {
                     const Icon = m.icon;
                     const active = isActive(m.to);
@@ -96,7 +96,7 @@ export function BottomNav() {
                         to={m.to}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all",
+                          "flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-3 transition-colors",
                           active ? "bg-primary/10 border-primary/40 text-primary" : "border-border/50 hover:bg-muted/50"
                         )}
                       >

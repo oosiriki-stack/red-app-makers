@@ -66,7 +66,7 @@ export function RecentMentions() {
 
   if (recent.length === 0) {
     return (
-      <Card className="glass-card rounded-2xl">
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2 font-bold">
             <MessageSquare className="h-4 w-4 text-primary" /> Mentions récentes
@@ -80,7 +80,7 @@ export function RecentMentions() {
   }
 
   return (
-    <Card className="glass-card rounded-2xl">
+    <Card className="dashboard-card h-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base flex items-center gap-2 font-bold">
           <MessageSquare className="h-4 w-4 text-primary" /> Mentions récentes
@@ -89,9 +89,9 @@ export function RecentMentions() {
           Tout voir
         </Button>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-1 px-3 pb-3 sm:px-6 sm:pb-6">
         {recent.map((m) => (
-          <div key={m.id} className="group flex items-start gap-2.5 md:gap-3 p-2 md:p-2.5 rounded-xl hover:bg-muted/50 transition-colors">
+          <div key={m.id} className="group flex items-start gap-3 rounded-xl border border-transparent p-2.5 transition-colors hover:border-border/60 hover:bg-muted/40">
             <Avatar className="h-8 w-8 md:h-9 md:w-9 shrink-0">
               <AvatarFallback className="text-[10px] md:text-xs bg-muted font-bold">
                 {m.avatar || m.author.slice(0, 2).toUpperCase()}
@@ -121,7 +121,7 @@ export function RecentMentions() {
                     size="sm"
                     variant="ghost"
                     className="rounded-lg h-6 px-2 text-[10px] md:text-[11px] gap-1 font-semibold"
-                    onClick={() => window.open(m.source_url!, "_blank")}
+                    onClick={() => { if (m.source_url) window.open(m.source_url, "_blank", "noopener,noreferrer"); }}
                   >
                     <ExternalLink className="h-3 w-3" />Voir
                   </Button>
