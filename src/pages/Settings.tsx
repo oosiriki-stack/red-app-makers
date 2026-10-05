@@ -181,18 +181,7 @@ export default function Settings() {
         supabase.functions.invoke("track-mentions").catch(() => {});
       }, delay);
     });
-    // Après 30s : pré-remplir le fil avec des mentions simulées sur 30 jours
-    setTimeout(() => {
-      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id } })
-        .then(({ data }: any) => {
-          if (data?.ok) {
-            toast.success(`📡 ${data.inserted} mentions chargées`, {
-              description: `Fil d'actualité enrichi sur ${data.platforms?.length || 0} plateformes (30 derniers jours)`,
-            });
-          }
-        })
-        .catch(() => {});
-    }, 30_000);
+    // Données réelles uniquement : plus de mentions simulées.
     // Marqueur pour que la page Mentions sache qu'on est en fenêtre prioritaire
     try {
       localStorage.setItem("arobase_priority_until", String(Date.now() + 130_000));

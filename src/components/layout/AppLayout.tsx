@@ -54,7 +54,9 @@ export function AppLayout() {
       try { competitors = JSON.parse(localStorage.getItem("focus_competitors_v1") || "[]") || []; } catch {}
       try { languages = JSON.parse(localStorage.getItem("focus_locale_langs_v1") || "[\"fr\"]") || ["fr"]; } catch {}
       try { lang_settings = JSON.parse(localStorage.getItem("focus_locale_settings_v1") || "null"); } catch {}
-      supabase.functions.invoke("seed-fake-mentions", { body: { user_id: user.id, mode: "topup", competitors, languages, lang_settings } }).catch(() => {});
+      void competitors; void languages; void lang_settings;
+      // Données réelles uniquement : collecte via le tracker (presse, blogs, réseaux).
+      supabase.functions.invoke("track-mentions").catch(() => {});
 
     };
     const id = setInterval(tick, 600_000);
