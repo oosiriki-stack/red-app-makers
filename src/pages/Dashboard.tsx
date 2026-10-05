@@ -130,11 +130,11 @@ export default function Dashboard() {
 
         <StaggerContainer className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <motion.div variants={staggerItem} className="col-span-2 lg:col-span-1 lg:row-span-2">
-            <Card className="h-full overflow-hidden rounded-xl border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/15">
-              <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold text-primary-foreground/80">Score e-Réputation</CardTitle></CardHeader>
+            <Card className="dashboard-card h-full overflow-hidden bg-card text-card-foreground">
+              <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold text-muted-foreground">Score e-Réputation</CardTitle></CardHeader>
               <CardContent className="flex flex-col items-center pb-4">
                 <ReputationGauge score={reputationScore} size={110} />
-                {!stats.configured && <p className="mt-2 text-center text-[10px] text-primary-foreground/75">Configurez la surveillance pour activer</p>}
+                {!stats.configured && <p className="mt-2 text-center text-[10px] text-muted-foreground">Configurez la surveillance pour activer</p>}
               </CardContent>
             </Card>
           </motion.div>
