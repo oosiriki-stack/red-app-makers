@@ -41,11 +41,14 @@ export function MarketingOnboarding() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const seen = localStorage.getItem(STORAGE_KEY);
-    if (!seen) {
-      const t = setTimeout(() => setOpen(true), 600);
-      return () => clearTimeout(t);
-    }
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const show = () => { t = setTimeout(() => setOpen(true), 600); };
+    // Attendre le choix cookies (RGPD) avant d'afficher la présentation
+    if (localStorage.getItem("focus_cookie_consent_v1")) { show(); }
+    const onConsent = () => show();
+    window.addEventListener("focus:cookie-consent", onConsent, { once: true });
+    return () => { if (t) clearTimeout(t); window.removeEventListener("focus:cookie-consent", onConsent); };
   }, []);
 
   const close = () => {
